@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/resident",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Resident\\": "",
+            "Modules\\Resident\\Database\\Factories\\": "database/factories/",
+            "Modules\\Resident\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\Resident\\Tests\\": "tests/"
+        }
+    }
+}

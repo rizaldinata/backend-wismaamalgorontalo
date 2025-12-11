@@ -1,0 +1,6 @@
+{
+    "Room": true,
+    "Resident": true,
+    "Finance": true,
+    "Maintenance": true
+}
