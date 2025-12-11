@@ -1,0 +1,11 @@
+{
+    "name": "Resident",
+    "alias": "resident",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Resident\\Providers\\ResidentServiceProvider"
+    ],
+    "files": []
+}
