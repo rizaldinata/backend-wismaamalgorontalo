@@ -11,7 +11,14 @@ class Lease extends Model
 {
     use HasFactory;
 
-    protected $fillable = [];
+    protected $fillable = [
+        'resident_id',
+        'room_id',
+        'start_date',
+        'end_date',
+        'status',
+        'total_price',
+    ];
 
     protected $casts = [
         'start_date' => 'date',
@@ -21,6 +28,11 @@ class Lease extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function resident()
+    {
+        return $this->belongsTo(Resident::class);
     }
 
     public function room()
