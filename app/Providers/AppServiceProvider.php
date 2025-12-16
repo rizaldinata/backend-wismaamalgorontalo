@@ -2,9 +2,10 @@
 
 namespace App\Providers;
 
+use Dedoc\Scramble\Scramble;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
-use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
 
@@ -17,6 +18,10 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if ($this->app->environment('production') || $this->app->environment('staging')) {
+            URL::forceScheme('https');
+        }
+
         Gate::before(function ($user, $ability) {
             return $user->hasROle('super-amdin') ? true : null;
         });
