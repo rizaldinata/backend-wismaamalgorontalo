@@ -16,15 +16,9 @@ class LeaseController extends Controller
 {
     public function store(Request $request)
     {
-        $request->validate([
-            'room_id' => 'required|exists:rooms,id',
-            'start_date' => 'required|date|after_or_equal:today',
-            'duration_months' => 'required|integer|min:1|max:12'
-        ]);
-
         $user = Auth::user();
-
         $resident = Resident::where('user_id', $user->id)->first();
+
         if (!$resident) {
             return response()->json([
                 'status' => false,
@@ -33,6 +27,7 @@ class LeaseController extends Controller
         }
 
         $room = Room::find($request->room_id);
+
         if (!$room->status !== 'available') {
             return response()->json([
                 'status' => false,
@@ -41,37 +36,35 @@ class LeaseController extends Controller
         }
 
         try {
-            DB::beginTransaction();
+            $lease = DB::transaction(function () use ($request, $resident, $room) {
+                $endDate = \Carbon\Carbon::parse($request->start_date)
+                    ->addMonths($request->duration_months);
 
-            $endDate = Carbon::parse($request->start_date)
-                ->addMonts($request->duration_months)
-                ->format('Y-m-d');
+                $totalPrice = $room->price * $request->duration_months;
 
-            $totalPrice = $room->price * $request->duration_months;
+                $newLease = Lease::create([
+                    'resident_id' => $resident->id,
+                    'room_id'     => $room->id,
+                    'start_date'  => $request->start_date,
+                    'end_date'    => $endDate,
+                    'status'      => 'active',
+                    'total_price' => $totalPrice,
+                ]);
 
-            $lease = Lease::creare([
-                'resident_id' => $resident->id,
-                'room_id' => $room->id,
-                'start_date' => $request->start_date,
-                'end_date' => $endDate,
-                'status' => 'active',
-                'total_price' => $totalPrice,
-            ]);
+                $room->update(['status' => 'occupied']);
 
-            $room->update(['status' => 'occupied']);
-
-            DB::commit();
+                return $newLease;
+            });
 
             return response()->json([
                 'status' => true,
-                'message' => 'Sewa kamar berhasil dibuat',
+                'message' => 'Sewa kamar berhasil dibuat.',
                 'data' => $lease
             ], 201);
-        } catch (Exception $e) {
-            DB::rollback();
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => false,
-                'message' => 'Terjadi kesalahan ' . $e->getMessage()
+                'message' => 'Gagal memproses sewa: ' . $e->getMessage()
             ], 500);
         }
     }
