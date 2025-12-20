@@ -13,12 +13,13 @@ class Lease extends Model
     use HasFactory;
 
     protected $fillable = [
-        'resident_id',
+        'user_id',
         'room_id',
         'start_date',
         'end_date',
         'status',
         'total_price',
+        'price_per_month',
         'payment_proof',
     ];
 

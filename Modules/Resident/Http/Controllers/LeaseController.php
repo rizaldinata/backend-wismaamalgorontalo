@@ -20,16 +20,15 @@ class LeaseController extends Controller
     public function store(StoreLeaseRequest $request)
     {
         $user = Auth::user();
-        $resident = Resident::where('user_id', $user->id)->first();
 
-        if (!$resident) {
+        if (!$user->resident) {
             return response()->json([
                 'status' => false,
                 'message' => 'Anda harus melengkapi biodata penghuni terlebih dahulu.',
             ], 403);
         }
 
-        $room = Room::find($request->room_id);
+        $room = Room::findOrFail($request->room_id);
 
         if ($room->status !== RoomStatus::AVAILABLE) {
             return response()->json([
@@ -39,19 +38,20 @@ class LeaseController extends Controller
         }
 
         try {
-            $lease = DB::transaction(function () use ($request, $resident, $room) {
+            $lease = DB::transaction(function () use ($request, $user, $room) {
                 $endDate = Carbon::parse($request->start_date)
                     ->addMonths($request->duration_months);
 
                 $totalPrice = $room->price * $request->duration_months;
 
                 $newLease = Lease::create([
-                    'resident_id' => $resident->id,
+                    'user_id' => $user->id,
                     'room_id'     => $room->id,
                     'start_date'  => $request->start_date,
                     'end_date'    => $endDate,
                     'status'      => LeaseStatus::PENDING,
                     'total_price' => $totalPrice,
+                    'price_per_month' => $room->price,
                 ]);
 
                 $room->update(['status' => RoomStatus::OCCUPIED]);

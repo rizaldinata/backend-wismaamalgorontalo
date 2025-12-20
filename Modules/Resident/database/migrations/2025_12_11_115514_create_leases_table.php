@@ -20,7 +20,7 @@ return new class extends Migration
             $table->date('start_date');
             $table->date('end_date')->nullable();
             $table->decimal('price_per_month', 12, 2);
-            $table->enum('status', ['active', 'finished', 'cancelled']);
+            $table->enum('status', ['active', 'finished', 'cancelled', 'pending', 'rejected']);
 
             $table->timestamps();
 
