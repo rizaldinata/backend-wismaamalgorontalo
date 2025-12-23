@@ -13,7 +13,7 @@ trait ApiResponse
             'status' => true,
             'message' => $message,
             'data' => $data,
-        ], $data);
+        ], $code);
     }
 
     protected function apiError(string $message, int $code = 400, $errors = null): JsonResponse

@@ -26,7 +26,7 @@ class LeaseService
                 'end_date' => $endDate,
                 'status' => LeaseStatus::PENDING,
                 'total_price' => $totalPrice,
-                'price_per_months' => $room->price,
+                'price_per_month' => $room->price,
             ]);
 
             $room->update(['status' => RoomStatus::OCCUPIED]);

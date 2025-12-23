@@ -46,7 +46,7 @@ class RoomController extends Controller
         }
 
         $validated = $request->validate([
-            'number' => 'required|unique:room,number,' . $id,
+            'number' => 'required|unique:rooms,number,' . $id,
             'type' => 'required|string',
             'price' => 'required|numeric',
             'status' => 'required|in:available,occupied,maintenance',

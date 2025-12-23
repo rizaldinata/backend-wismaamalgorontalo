@@ -31,8 +31,8 @@ class LeaseController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user->residenpt) {
-            return $this->apiError('Anda harus melengkapi biodaya penghuni terlebih dahulu', 403);
+        if (!$user->resident) {
+            return $this->apiError('Anda harus melengkapi biodata penghuni terlebih dahulu', 403);
         }
 
         $room = Room::findOrFail($request->room_id);

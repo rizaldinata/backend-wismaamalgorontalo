@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Gate::before(function ($user, $ability) {
-            return $user->hasROle('super-amdin') ? true : null;
+            return $user->hasROle('super-admin') ? true : null;
         });
 
         Scramble::configure()
