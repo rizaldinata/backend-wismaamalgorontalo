@@ -6,9 +6,14 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use App\Traits\ApiResponse;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
+    use ApiResponse;
+
     public function register(Request $request)
     {
         $request->validate([
@@ -27,15 +32,11 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Registrasi berhasil',
-            'data' => [
-                'user' => $user,
-                'token' => $token,
-                'role' => $user->getRoleNames()->first()
-            ]
-        ], 201);
+        return $this->apiSuccess([
+            'user' => $user,
+            'token' => $token,
+            'role' => $user->getRoleNames()->first()
+        ], 'Registrasi berhasil', 201);
     }
 
     public function login(Request $request)
@@ -48,41 +49,45 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Email atau password salah.',
-            ], 401);
+            return $this->apiError('Email atau password salah.', 401);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Login berhasil',
-            'data' => [
-                'user' => $user,
-                'token' => $token,
-                'role' => $user->getRoleNames()->first()
-            ]
-        ], 200);
+        return $this->apiSuccess([
+            'user' => $user,
+            'token' => $token,
+            'role' => $user->getRoleNames()->first()
+        ], 'Login berhasil');
     }
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Logout berhasil'
-        ], 200);
+        $accessToken = $user->currentAccessToken();
+
+        if ($accessToken instanceof PersonalAccessToken) {
+            $accessToken->delete();
+        }
+
+        return $this->apiSuccess(null, 'Logout berhasil');
     }
 
     public function me(Request $request)
     {
-        return response()->json([
-            'status' => true,
-            'message' => 'Profile User',
-            'data' => $request->user()
-        ], 200);
+        return $this->apiSuccess(Auth::user(), 'Profile User');
+    }
+
+
+    public function myPermissions()
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        $permissions = $user->getAllPermissions()->pluck('name');
+
+        return $this->apiSuccess($permissions, 'User permissions retrieved successfully');
     }
 }

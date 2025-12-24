@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 trait ApiResponse
 {
-    protected function apiSucces($data = null, string $message = 'Success', int $code = 200): JsonResponse
+    protected function apiSuccess($data = null, string $message = 'Success', int $code = 200): JsonResponse
     {
         return response()->json([
             'status' => true,

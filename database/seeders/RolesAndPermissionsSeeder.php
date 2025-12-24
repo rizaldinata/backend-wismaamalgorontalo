@@ -5,48 +5,73 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
-        // Reset cached roles and permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        // 1. Reset Cached Roles & Permissions
+        // Penting agar tidak ada cache permission lama yang tertinggal
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // 1. Buat Permissions (Hak Akses Spesifik)
-        // Contoh untuk Module Room
-        Permission::create(['name' => 'view rooms']);
-        Permission::create(['name' => 'create rooms']);
-        Permission::create(['name' => 'edit rooms']);
-        Permission::create(['name' => 'delete rooms']);
+        // 2. Buat Permission (Atomic / Granular)
+        // Kita definisikan permission sekecil mungkin agar fleksibel
+        $permissions = [
+            // --- Access Control (Kunci Redirect Logic) ---
+            'access_admin_panel',   // Jika punya ini -> Redirect ke Admin Dashboard
+            'access_resident_area', // Jika punya ini -> Redirect ke Landing Page User
 
-        // Contoh untuk Module Finance
-        Permission::create(['name' => 'view finance']);
-        Permission::create(['name' => 'approve payment']);
+            // --- Room Features ---
+            'view_rooms',
+            'manage_rooms',         // Create, Update, Delete Rooms
 
-        // 2. Buat Roles & Assign Permissions
+            // --- Lease/Transaction Features ---
+            'apply_lease',          // Mengajukan sewa
+            'pay_lease_bill',       // Bayar tagihan
+            'manage_leases',        // Approve/Reject sewa (Admin)
+        ];
 
-        // A. USER BIASA (GUEST)
-        // User yang baru register lewat Flutter, belum sewa kamar.
-        // Biasanya minim akses, atau tidak perlu role khusus (hanya auth user).
-        $roleGuest = Role::create(['name' => 'guest']);
-        $roleGuest->givePermissionTo('view rooms');
+        foreach ($permissions as $permission) {
+            Permission::create(['name' => $permission]);
+        }
 
-        // B. PENGHUNI (RESIDENT)
-        // User yang sah sedang menyewa kamar.
-        $roleResident = Role::create(['name' => 'resident']);
-        $roleResident->givePermissionTo(['view rooms']);
-        // Nanti ditambah: 'create maintenance ticket', 'view own invoice'
+        // 3. Buat Role & Assign Permission (Bundling)
 
-        // C. STAFF (CUSTOM ADMIN)
-        // Contoh: Staff Kebersihan / Maintenance
-        $roleMaintenance = Role::create(['name' => 'maintenance-staff']);
-        // Nanti ditambah permission modul maintenance
+        // ROLE: GUEST (Calon Penghuni)
+        // Logic: Login -> Cek permission -> Tidak punya 'access_admin_panel' -> Redirect Landing Page
+        $guest = Role::create(['name' => 'guest']);
+        $guest->givePermissionTo([
+            'access_resident_area',
+            'view_rooms',
+            'apply_lease',
+        ]);
 
-        // D. SUPER ADMIN
-        // Bisa segalanya (God Mode)
-        $roleSuperAdmin = Role::create(['name' => 'super-admin']);
-        // Super admin tidak perlu di-assign permission satu per satu
-        // Kita atur nanti di AuthServiceProvider agar dia bisa bypass semuanya.
+        // ROLE: RESIDENT (Penghuni Kost)
+        // Logic: Login -> Cek permission -> Tidak punya 'access_admin_panel' -> Redirect Landing Page (Tapi fitur bayar terbuka)
+        $resident = Role::create(['name' => 'resident']);
+        $resident->givePermissionTo([
+            'access_resident_area',
+            'view_rooms',
+            'pay_lease_bill',
+        ]);
+
+        // ROLE: ADMIN (Pengelola)
+        // Logic: Login -> Cek permission -> Punya 'access_admin_panel' -> Redirect Dashboard
+        $admin = Role::create(['name' => 'admin']);
+        $admin->givePermissionTo([
+            'access_admin_panel',
+            'manage_rooms',
+            'manage_leases',
+            'view_rooms',
+        ]);
+
+        // ROLE: SUPER ADMIN
+        // Logic: Full Akses
+        $superAdmin = Role::create(['name' => 'super-admin']);
+        $superAdmin->givePermissionTo(Permission::all());
     }
 }
