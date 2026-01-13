@@ -8,10 +8,11 @@ use App\Http\Controllers\Controller;
 use Modules\Room\Http\Requests\StoreRoomRequest;
 use Modules\Room\Transformers\RoomResource;
 use App\Traits\ApiResponse;
+use Modules\Room\Http\Requests\UpdateRoomRequest;
 
 class RoomController extends Controller
 {
-    use \App\Traits\ApiResponse;
+    use ApiResponse;
 
     public function index()
     {
@@ -34,7 +35,7 @@ class RoomController extends Controller
         return $this->apiSuccess($room, 'Detail data kamar');
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateRoomRequest $request, $id)
     {
         $room = Room::find($id);
 
@@ -42,17 +43,9 @@ class RoomController extends Controller
             return $this->apiError('Kamar tidak ditemukan', 404);
         }
 
-        $validated = $request->validate([
-            'number' => 'required|unique:rooms,number,' . $id,
-            'type' => 'required|string',
-            'price' => 'required|numeric',
-            'status' => 'required|in:available,occupied,maintenance',
-            'description' => 'nullable|string',
-        ]);
+        $room->update($request->validated());
 
-        $room->update($validated);
-
-        return $this->apiSuccess($room, 'Kamar berhasil diperbarui');
+        return $this->apiSuccess($room, 'Data kamar berhasil diperbarui');
     }
 
     public function destroy($id)

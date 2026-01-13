@@ -11,3 +11,4 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('rooms/{id}', [RoomController::class, 'update']);
     Route::delete('rooms/{id}', [RoomController::class, 'destroy']);
 });
+    
