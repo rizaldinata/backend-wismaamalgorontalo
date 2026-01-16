@@ -9,4 +9,5 @@ enum LeaseStatus: string
     case ACTIVE = 'active';
     case REJECTED = 'rejected';
     case CANCELLED = 'cancelled';
+    case FINISHED = 'finished';
 }

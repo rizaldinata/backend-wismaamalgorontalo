@@ -2,6 +2,7 @@
 
 namespace Modules\Resident\Http\Controllers;
 
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Modules\Room\Models\Room;
 use Modules\Resident\Models\Lease;
@@ -9,9 +10,19 @@ use Modules\Room\Enums\RoomStatus;
 use App\Http\Controllers\Controller;
 use Illuminate\Validation\Rules\Enum;
 use Modules\Resident\Enums\LeaseStatus;
+use Modules\Resident\Services\LeaseService;
 
 class AdminLeaseController extends Controller
 {
+    use ApiResponse;
+
+    protected $leaseService;
+
+    public function __construct(LeaseService $leaseService)
+    {
+        $this->leaseService = $leaseService;
+    }
+
     public function index(Request $request)
     {
         $status = $request->query('status');

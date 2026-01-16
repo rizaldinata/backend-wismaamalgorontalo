@@ -9,19 +9,14 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\ApiResponse;
 use Laravel\Sanctum\PersonalAccessToken;
+use Modules\Auth\Http\Requests\RegisterRequest;
 
 class AuthController extends Controller
 {
     use ApiResponse;
 
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|max:255|unique:users',
-            'password' => 'required|string|min:8',
-        ]);
-
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,

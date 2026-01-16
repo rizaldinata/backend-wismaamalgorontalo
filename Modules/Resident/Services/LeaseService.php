@@ -34,4 +34,23 @@ class LeaseService
             return $lease;
         });
     }
+
+    public function updateStatus(Lease $lease, string $newStatus)
+    {
+        return DB::transaction(function () use ($lease, $newStatus) {
+            $lease->update(['status' => $newStatus]);
+
+            $room = $lease->room;
+
+            $statusEnum = LeaseStatus::tryFrom($newStatus);
+
+            if ($statusEnum === LeaseStatus::ACTIVE) {
+                $room->update(['status' => RoomStatus::OCCUPIED]);
+            } elseif (in_array($statusEnum, [LeaseStatus::FINISHED, LeaseStatus::CANCELLED, LeaseStatus::REJECTED])) {
+                $room->update(['status' => RoomStatus::AVAILABLE]);
+            }
+
+            return $lease;
+        });
+    }
 }
