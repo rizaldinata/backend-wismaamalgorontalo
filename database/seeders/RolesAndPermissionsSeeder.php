@@ -43,7 +43,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // ROLE: GUEST (Calon Penghuni)
         // Logic: Login -> Cek permission -> Tidak punya 'access_admin_panel' -> Redirect Landing Page
-        $guest = Role::create(['name' => 'guest']);
+        $guest = Role::create(['name' => 'member']);
         $guest->givePermissionTo([
             'access_resident_area',
             'view_rooms',
