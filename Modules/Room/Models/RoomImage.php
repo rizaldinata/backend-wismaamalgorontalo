@@ -12,7 +12,7 @@ class RoomImage extends Model
 
     protected $guarded = ['id'];
 
-    protected $appends = ['image_url'];
+    protected $appends = ['image_url', 'thumbnail_url'];
 
     public function room()
     {
@@ -24,13 +24,21 @@ class RoomImage extends Model
         return $this->image_path ? Storage::url($this->image_path) : null;
     }
 
+    public function getThumbnailUrlAttribute()
+    {
+        return $this->thumbnail_path ? Storage::url($this->thumbnail_path) : $this->image_url;
+    }
+
     protected static function boot()
     {
         parent::boot();
 
         static::deleting(function ($image) {
-            if ($image->image_path && Storage::exists($image->image_path)) {
-                Storage::delete($image->image_path);
+            if ($image->image_path && Storage::disk('public')->exists($image->image_path)) {
+                Storage::disk('public')->delete($image->image_path);
+            }
+            if ($image->thumbnail_path && Storage::disk('public')->exists($image->thumbnail_path)) {
+                Storage::disk('public')->delete($image->thumbnail_path);
             }
         });
     }

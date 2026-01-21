@@ -24,6 +24,7 @@ class RoomResource extends JsonResource
                     return [
                         'id' => $image->id,
                         'url' => $image->image_url,
+                        'thumbnail' => $image->thumbnail_url,
                         'order' => $image->order,
                     ];
                 });

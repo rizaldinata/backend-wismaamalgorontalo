@@ -8,6 +8,9 @@ use App\Http\Controllers\Controller;
 use Modules\Room\Http\Requests\StoreRoomRequest;
 use Modules\Room\Transformers\RoomResource;
 use App\Traits\ApiResponse;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 use Modules\Room\Http\Requests\UpdateRoomRequest;
 
 class RoomController extends Controller
@@ -82,27 +85,53 @@ class RoomController extends Controller
 
         $request->validate([
             'images' => 'required|array',
-            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // Tingkatkan ke 5MB karena akan diresize
         ]);
 
         $uploadedImages = [];
+        $manager = new ImageManager(new Driver());
 
-        foreach ($request->file('images') as $index => $image) {
-            $path = $image->store('rooms', 'public');
+        foreach ($request->file('images') as $index => $file) {
+            // 1. Generate Nama File Unik
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $path = 'rooms/' . $filename;
+            $thumbPath = 'rooms/thumbs/' . $filename;
 
+            // Pastikan direktori ada
+            if (!Storage::disk('public')->exists('rooms/thumbs')) {
+                Storage::disk('public')->makeDirectory('rooms/thumbs');
+            }
+
+            // 2. Proses Gambar Utama (Optimize & Resize ke max 1200px)
+            $image = $manager->read($file);
+            $image->scaleDown(width: 1200); // Resize jika lebih lebar dari 1200px (tetap jaga rasio)
+
+            // Simpan gambar utama ke storage
+            Storage::disk('public')->put($path, (string) $image->encodeByExtension(quality: 80));
+
+            // 3. Proses Thumbnail (Resize ke max 400px)
+            $thumb = $manager->read($file);
+            $thumb->cover(400, 300); // Crop & Resize pas 400x300
+
+            // Simpan thumbnail ke storage
+            Storage::disk('public')->put($thumbPath, (string) $thumb->encodeByExtension(quality: 70));
+
+            // 4. Simpan ke database
             $roomImage = $room->images()->create([
                 'image_path' => $path,
+                'thumbnail_path' => $thumbPath,
                 'order' => $room->images()->count() + $index,
             ]);
 
             $uploadedImages[] = [
                 'id' => $roomImage->id,
                 'url' => $roomImage->image_url,
+                'thumbnail' => $roomImage->thumbnail_url,
                 'order' => $roomImage->order,
             ];
         }
 
-        return $this->apiSuccess($uploadedImages, 'Foto berhasil diupload', 201);
+        return $this->apiSuccess($uploadedImages, 'Foto berhasil dioptimasi dan diupload', 201);
     }
 
     // hapus foto kamar
