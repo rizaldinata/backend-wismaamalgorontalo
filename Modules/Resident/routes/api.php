@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Resident\Http\Controllers\AdminLeaseController;
+use Modules\Resident\Http\Controllers\AdminUserController;
 use Modules\Resident\Http\Controllers\LeaseController;
 use Modules\Resident\Http\Controllers\ResidentController;
 
@@ -21,4 +22,9 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::get('leases', [AdminLeaseController::class, 'index']);
     Route::get('leases/{id}', [AdminLeaseController::class, 'show']);
     Route::post('leases/{id}/status', [AdminLeaseController::class, 'updateStatus']);
+});
+
+Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
+    Route::get('roles-options', [AdminUserController::class, 'getRoles']);
+    Route::apiResource('users', AdminUserController::class);
 });

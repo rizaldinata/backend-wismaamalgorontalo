@@ -33,6 +33,12 @@ class RolesAndPermissionsSeeder extends Seeder
             'apply_lease',          // Mengajukan sewa
             'pay_lease_bill',       // Bayar tagihan
             'manage_leases',        // Approve/Reject sewa (Admin)
+
+            // CRUD data users
+            'view_users',          // Melihat daftar user (Admin)
+            'create_users',        // Membuat user baru (Admin)
+            'update_users',        // Update user (Admin)
+            'delete_users',        // Delete user (Admin)
         ];
 
         foreach ($permissions as $permission) {
@@ -67,6 +73,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage_rooms',
             'manage_leases',
             'view_rooms',
+            'view_users',
+            'create_users',
+            'update_users',
+            'delete_users',
         ]);
 
         // ROLE: SUPER ADMIN
