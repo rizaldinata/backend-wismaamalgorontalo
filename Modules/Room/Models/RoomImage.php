@@ -21,12 +21,12 @@ class RoomImage extends Model
 
     public function getImageUrlAttribute()
     {
-        return $this->image_path ? Storage::url($this->image_path) : null;
+        return $this->image_path ? url('/storage-access/' . $this->image_path) : null;
     }
 
     public function getThumbnailUrlAttribute()
     {
-        return $this->thumbnail_path ? Storage::url($this->thumbnail_path) : $this->image_url;
+        return $this->thumbnail_path ? url('/storage-access/' . $this->thumbnail_path) : $this->image_url;
     }
 
     protected static function boot()
