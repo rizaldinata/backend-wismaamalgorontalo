@@ -4,14 +4,24 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 use Modules\Resident\Models\Lease;
 use Modules\Resident\Models\Resident;
 use Modules\Room\Models\Room;
+use Modules\Room\Models\RoomImage;
 
 class DummyDataSeeder extends Seeder
 {
     public function run(): void
     {
+        // Ensure directories exist
+        if (!Storage::disk('public')->exists('rooms')) {
+            Storage::disk('public')->makeDirectory('rooms');
+        }
+        if (!Storage::disk('public')->exists('payments')) {
+            Storage::disk('public')->makeDirectory('payments');
+        }
+
         // Create Admin User
         $admin = User::create([
             'name' => 'Admin Wisma Amal',
@@ -40,7 +50,7 @@ class DummyDataSeeder extends Seeder
         ]);
         $guest->email_verified_at = now();
         $guest->save();
-        $guest->assignRole('guest');
+        $guest->assignRole('member');
 
         // Create Resident Users with their resident profile
         $residentsData = [
@@ -161,31 +171,149 @@ class DummyDataSeeder extends Seeder
 
         // Create Rooms
         $roomsData = [
-            // Lantai 1
-            ['number' => '101', 'type' => 'Single', 'price' => '500000', 'description' => 'Kamar single lantai 1, dekat tangga'],
-            ['number' => '102', 'type' => 'Single', 'price' => '500000', 'description' => 'Kamar single lantai 1'],
-            ['number' => '103', 'type' => 'Double', 'price' => '800000', 'description' => 'Kamar double lantai 1'],
-            ['number' => '104', 'type' => 'Single', 'price' => '500000', 'description' => 'Kamar single lantai 1, dekat kamar mandi'],
-            ['number' => '105', 'type' => 'Single', 'price' => '500000', 'description' => 'Kamar single lantai 1'],
-
-            // Lantai 2
-            ['number' => '201', 'type' => 'Single', 'price' => '550000', 'description' => 'Kamar single lantai 2, dekat tangga'],
-            ['number' => '202', 'type' => 'Double', 'price' => '850000', 'description' => 'Kamar double lantai 2'],
-            ['number' => '203', 'type' => 'Single', 'price' => '550000', 'description' => 'Kamar single lantai 2'],
-            ['number' => '204', 'type' => 'Double', 'price' => '850000', 'description' => 'Kamar double lantai 2, menghadap depan'],
-            ['number' => '205', 'type' => 'Single', 'price' => '550000', 'description' => 'Kamar single lantai 2'],
-
-            // Lantai 3
-            ['number' => '301', 'type' => 'Single', 'price' => '600000', 'description' => 'Kamar single lantai 3, dekat tangga'],
-            ['number' => '302', 'type' => 'Single', 'price' => '600000', 'description' => 'Kamar single lantai 3'],
-            ['number' => '303', 'type' => 'Double', 'price' => '900000', 'description' => 'Kamar double lantai 3, view bagus'],
-            ['number' => '304', 'type' => 'Single', 'price' => '600000', 'description' => 'Kamar single lantai 3'],
-            ['number' => '305', 'type' => 'Suite', 'price' => '1200000', 'description' => 'Kamar suite lantai 3, dengan kamar mandi dalam'],
+            [
+                'number' => '101',
+                'title' => 'Standard Deluxe 101',
+                'type' => 'Standard',
+                'price' => 500000,
+                'status' => 'occupied',
+                'description' => 'Kamar Standard Deluxe yang dirancang khusus untuk kenyamanan maksimal Anda. Menawarkan suasana tenang dengan pencahayaan alami yang cukup. Dilengkapi dengan fasilitas modern, area kerja yang ergonomis, dan koneksi internet cepat.',
+                'facilities' => ['AC', 'WiFi', 'Kasur Single', 'Lemari', 'Meja Belajar'],
+                'images_count' => 3,
+            ],
+            [
+                'number' => '102',
+                'title' => 'Garden View Standard 102',
+                'type' => 'Standard',
+                'price' => 500000,
+                'status' => 'available',
+                'description' => 'Ruangan standar yang tenang dengan jendela besar yang menghadap langsung ke taman hijau yang asri. Memberikan nuansa tropis yang menyegarkan setiap kali Anda membuka tirai di pagi hari.',
+                'facilities' => ['AC', 'WiFi', 'Kasur Single', 'Lemari'],
+                'images_count' => 2,
+            ],
+            [
+                'number' => '103',
+                'title' => 'Budget Standard 103',
+                'type' => 'Standard',
+                'price' => 500000,
+                'status' => 'occupied',
+                'description' => 'Pilihan praktis dan ekonomis bagi Anda yang mengutamakan fungsi tanpa mengabaikan kenyamanan dasar. Kamar ini tetap dilengkapi dengan standar kebersihan tinggi dan fasilitas WiFi.',
+                'facilities' => ['WiFi', 'Kasur Single', 'Lemari', 'Meja Belajar'],
+                'images_count' => 2,
+            ],
+            [
+                'number' => '104',
+                'title' => 'Access Standard 104',
+                'type' => 'Standard',
+                'price' => 500000,
+                'status' => 'available',
+                'description' => 'Kamar standar dengan keunggulan aksesibilitas terbaik, terletak di lantai dasar dan dekat dengan area parkir utama. Memudahkan Anda yang sering memiliki mobilitas luar ruangan tinggi.',
+                'facilities' => ['AC', 'WiFi', 'Kasur Single', 'Lemari'],
+                'images_count' => 2,
+            ],
+            [
+                'number' => '105',
+                'title' => 'Cozy Standard 105',
+                'type' => 'Standard',
+                'price' => 500000,
+                'status' => 'maintenance',
+                'description' => 'Kamar standar yang nyaman dengan pencahayaan yang hangat. Cocok untuk istirahat setelah seharian beraktivitas.',
+                'facilities' => ['AC', 'WiFi', 'Kasur Single', 'Lemari'],
+                'images_count' => 1,
+            ],
+            [
+                'number' => '201',
+                'title' => 'Executive Deluxe 201',
+                'type' => 'Deluxe',
+                'price' => 750000,
+                'status' => 'occupied',
+                'description' => 'Kamar Executive Deluxe yang menawarkan standar kemewahan dan privasi tingkat tinggi. Terletak di lantai 2, kamar ini dilengkapi dengan balkon pribadi.',
+                'facilities' => ['AC', 'WiFi', 'Kasur Queen', 'Lemari', 'Meja Belajar', 'Kamar Mandi Dalam', 'Balkon', 'TV'],
+                'images_count' => 4,
+            ],
+            [
+                'number' => '202',
+                'title' => 'Modern Deluxe 202',
+                'type' => 'Deluxe',
+                'price' => 750000,
+                'status' => 'available',
+                'description' => 'Menghadirkan konsep hunian modern minimalis yang fungsional namun tetap memberikan kesan luas dan lega. Interior didesain dengan sentuhan elegan.',
+                'facilities' => ['AC', 'WiFi', 'Kasur Queen', 'Lemari', 'Meja Belajar', 'Kamar Mandi Dalam', 'TV'],
+                'images_count' => 3,
+            ],
+            [
+                'number' => '203',
+                'title' => 'Bright Deluxe 203',
+                'type' => 'Deluxe',
+                'price' => 750000,
+                'status' => 'occupied',
+                'description' => 'Nikmati pagi yang cerah di Bright Deluxe 203 yang memiliki jendela kaca besar. Pencahayaan alami yang maksimal membuat ruangan terasa lebih luas.',
+                'facilities' => ['AC', 'WiFi', 'Kasur Queen', 'Lemari', 'Meja Belajar', 'Kamar Mandi Dalam', 'Balkon'],
+                'images_count' => 3,
+            ],
+            [
+                'number' => '204',
+                'title' => 'Silent Deluxe 204',
+                'type' => 'Deluxe',
+                'price' => 750000,
+                'status' => 'available',
+                'description' => 'Kamar deluxe yang tenang, jauh dari kebisingan. Sangat cocok bagi Anda yang membutuhkan konsentrasi tinggi untuk bekerja atau belajar.',
+                'facilities' => ['AC', 'WiFi', 'Kasur Queen', 'Lemari', 'Meja Belajar', 'Kamar Mandi Dalam'],
+                'images_count' => 2,
+            ],
+            [
+                'number' => '205',
+                'title' => 'Studio Deluxe 205',
+                'type' => 'Deluxe',
+                'price' => 750000,
+                'status' => 'maintenance',
+                'description' => 'Kamar deluxe dengan tata letak studio yang efisien. Memberikan kenyamanan maksimal dalam ruang yang fungsional.',
+                'facilities' => ['AC', 'WiFi', 'Kasur Queen', 'Lemari', 'Meja Belajar', 'Kamar Mandi Dalam'],
+                'images_count' => 2,
+            ],
+            [
+                'number' => '301',
+                'title' => 'Royal Suite 301',
+                'type' => 'Suite',
+                'price' => 1200000,
+                'status' => 'available',
+                'description' => 'Royal Suite adalah mahakarya hunian di Wisma Amal. Merupakan tipe kamar termewah yang luasnya setara dengan apartemen studio besar.',
+                'facilities' => ['AC', 'WiFi', 'Kasur King', 'Lemari Besar', 'Meja Kerja', 'Kamar Mandi Dalam', 'Balkon', 'TV', 'Kulkas', 'Dapur Kecil', 'Sofa'],
+                'images_count' => 5,
+            ],
+            [
+                'number' => '302',
+                'title' => 'Presidential Suite 302',
+                'type' => 'Suite',
+                'price' => 1200000,
+                'status' => 'available',
+                'description' => 'Kemewahan tanpa batas di Presidential Suite. Dilengkapi dengan fasilitas terbaik untuk pengalaman menginap yang tak terlupakan.',
+                'facilities' => ['AC', 'WiFi', 'Kasur King', 'Lemari Besar', 'Meja Kerja', 'Kamar Mandi Dalam', 'Balkon', 'TV', 'Kulkas', 'Dapur Kecil', 'Sofa'],
+                'images_count' => 5,
+            ],
         ];
 
         $rooms = [];
         foreach ($roomsData as $roomData) {
-            $rooms[] = Room::create($roomData);
+            $imagesCount = $roomData['images_count'];
+            unset($roomData['images_count']);
+
+            $room = Room::create($roomData);
+            $rooms[] = $room;
+
+            // Create dummy images for each room
+            for ($i = 1; $i <= $imagesCount; $i++) {
+                $imagePath = 'rooms/dummy-room-' . $room->number . '-' . $i . '.jpg';
+                RoomImage::create([
+                    'room_id' => $room->id,
+                    'image_path' => $imagePath,
+                    'order' => $i - 1,
+                ]);
+
+                // Generate physical file
+                $fullpath = storage_path('app/public/' . $imagePath);
+                $this->generatePlaceholder($fullpath, "Room " . $room->number, $room->type, 800, 600);
+            }
         }
 
         // Create Leases
@@ -196,63 +324,72 @@ class DummyDataSeeder extends Seeder
             'start_date' => now()->subMonths(3),
             'end_date' => null,
             'price_per_month' => 500000,
+            'total_price' => 1500000,
             'status' => 'active',
+            'payment_proof' => 'payments/proof-1.jpg',
         ]);
+        $this->generatePlaceholder(storage_path('app/public/payments/proof-1.jpg'), "Proof 1", "Payment", 400, 600);
 
         Lease::create([
             'user_id' => $users[1]->id,
-            'room_id' => $rooms[2]->id,
+            'room_id' => $rooms[5]->id,
             'start_date' => now()->subMonths(6),
             'end_date' => null,
-            'price_per_month' => 800000,
+            'price_per_month' => 750000,
+            'total_price' => 4500000,
             'status' => 'active',
+            'payment_proof' => 'payments/proof-2.jpg',
         ]);
+        $this->generatePlaceholder(storage_path('app/public/payments/proof-2.jpg'), "Proof 2", "Payment", 400, 600);
 
         Lease::create([
             'user_id' => $users[2]->id,
-            'room_id' => $rooms[5]->id,
+            'room_id' => $rooms[2]->id,
             'start_date' => now()->subMonths(2),
             'end_date' => null,
-            'price_per_month' => 550000,
+            'price_per_month' => 500000,
+            'total_price' => 1000000,
             'status' => 'active',
+            'payment_proof' => 'payments/proof-3.jpg',
         ]);
+        $this->generatePlaceholder(storage_path('app/public/payments/proof-3.jpg'), "Proof 3", "Payment", 400, 600);
 
         Lease::create([
             'user_id' => $users[3]->id,
-            'room_id' => $rooms[8]->id,
+            'room_id' => $rooms[7]->id,
             'start_date' => now()->subMonth(),
             'end_date' => null,
-            'price_per_month' => 850000,
+            'price_per_month' => 750000,
+            'total_price' => 750000,
             'status' => 'active',
+            'payment_proof' => 'payments/proof-4.jpg',
         ]);
-
-        Lease::create([
-            'user_id' => $users[4]->id,
-            'room_id' => $rooms[11]->id,
-            'start_date' => now()->subMonths(4),
-            'end_date' => null,
-            'price_per_month' => 600000,
-            'status' => 'active',
-        ]);
+        $this->generatePlaceholder(storage_path('app/public/payments/proof-4.jpg'), "Proof 4", "Payment", 400, 600);
 
         // Pending leases
         Lease::create([
             'user_id' => $users[5]->id,
-            'room_id' => $rooms[14]->id,
+            'room_id' => $rooms[6]->id,
             'start_date' => now()->addDays(7),
             'end_date' => null,
-            'price_per_month' => 1200000,
+            'price_per_month' => 750000,
+            'total_price' => 750000,
             'status' => 'pending',
+            'payment_proof' => 'payments/proof-pending-1.jpg',
         ]);
+        $this->generatePlaceholder(storage_path('app/public/payments/proof-pending-1.jpg'), "Pending 1", "Payment", 400, 600);
 
         Lease::create([
             'user_id' => $users[6]->id,
-            'room_id' => $rooms[6]->id,
+            'room_id' => $rooms[10]->id,
             'start_date' => now()->addDays(5),
             'end_date' => null,
-            'price_per_month' => 850000,
+            'price_per_month' => 1200000,
+            'total_price' => 1200000,
             'status' => 'pending',
+            'payment_proof' => 'payments/proof-pending-2.jpg',
         ]);
+        $this->generatePlaceholder(storage_path('app/public/payments/proof-pending-2.jpg'), "Pending 2", "Payment", 400, 600);
 
         // Finished/ended leases (use cancelled status to match enum)
         Lease::create([
@@ -261,23 +398,45 @@ class DummyDataSeeder extends Seeder
             'start_date' => now()->subYear(),
             'end_date' => now()->subMonths(2),
             'price_per_month' => 500000,
+            'total_price' => 5000000,
             'status' => 'cancelled',
+            'payment_proof' => 'payments/proof-old.jpg',
         ]);
-
-        // Update room statuses based on active leases
-        $rooms[0]->update(['status' => 'occupied']);
-        $rooms[2]->update(['status' => 'occupied']);
-        $rooms[5]->update(['status' => 'occupied']);
-        $rooms[8]->update(['status' => 'occupied']);
-        $rooms[11]->update(['status' => 'occupied']);
-
-        // Set some rooms to maintenance
-        $rooms[4]->update(['status' => 'maintenance']);
-        $rooms[9]->update(['status' => 'maintenance']);
+        $this->generatePlaceholder(storage_path('app/public/payments/proof-old.jpg'), "Old Proof", "Payment", 400, 600);
 
         $this->command->info('Dummy data seeder completed successfully!');
         $this->command->info('Admin: admin@wismaamal.com / password');
         $this->command->info('Staff: staff@wismaamal.com / password');
         $this->command->info('Residents: ahmad@example.com (and others) / password');
+    }
+
+    private function generatePlaceholder($path, $text1, $text2, $width, $height)
+    {
+        $directory = dirname($path);
+        if (!is_dir($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        if (file_exists($path)) return;
+
+        $img = \imagecreatetruecolor($width, $height);
+        $bgColor = \imagecolorallocate($img, 240, 240, 240);
+        \imagefill($img, 0, 0, $bgColor);
+        $textColor = \imagecolorallocate($img, 100, 100, 100);
+
+        // Simple text without external fonts to ensure it always works
+        \imagestring($img, 5, ($width / 2) - 50, ($height / 2) - 20, $text1, $textColor);
+        \imagestring($img, 4, ($width / 2) - 40, ($height / 2) + 10, $text2, $textColor);
+
+        if (function_exists('imagejpeg')) {
+            \imagejpeg($img, $path, 80);
+        } elseif (function_exists('imagepng')) {
+            \imagepng($img, $path);
+        } else {
+            // Last resort: simple blank file if GD is totally broken
+            \file_put_contents($path, "");
+        }
+        
+        \imagedestroy($img);
     }
 }
