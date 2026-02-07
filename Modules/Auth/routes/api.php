@@ -20,7 +20,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // route crud permission
         Route::get('/permissions', [AdminPermissionController::class, 'index'])->middleware('permission:view-permission');
         Route::post('/permissions', [AdminPermissionController::class, 'store'])->middleware('permission:create-permission');
-        Route::put('/permissions/{id}', [AdminPermissionController::class, 'update'])->middleware('permission:edit-permission');
+        Route::put('/permissions/{id}', [AdminPermissionController::class, 'update'])->middleware('permission:update-permission');
         Route::delete('/permissions/{id}', [AdminPermissionController::class, 'destroy'])->middleware('permission:delete-permission');
     });
 });
