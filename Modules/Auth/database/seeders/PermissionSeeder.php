@@ -16,6 +16,9 @@ class PermissionSeeder extends Seeder
             ['name' => 'access-admin-panel', 'target' => 'admin', 'description' => 'Akses ke panel admin'],
             ['name' => 'access-resident-area', 'target' => 'user', 'description' => 'Akses ke area penghuni'],
 
+            // sidebar dahsboard utama
+            ['name' => 'view-dashboard', 'target' => 'admin', 'description' => 'Melihat dashboard utama'],
+
             // crud permission
             ['name' => 'access-permission-management', 'target' => 'admin', 'description' => 'Akses manajemen permission'],
             ['name' => 'view-permission', 'target' => 'admin', 'description' => 'Melihat daftar permission'],

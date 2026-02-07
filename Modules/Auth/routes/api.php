@@ -2,6 +2,7 @@
 
 use Modules\Auth\Models\Permission;
 use Illuminate\Support\Facades\Route;
+use Modules\Auth\Http\Controllers\AdminPermissionController;
 use Modules\Auth\Http\Controllers\AuthController;
 use Modules\Auth\Http\Controllers\PermissionController;
 
@@ -17,9 +18,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::prefix('admin')->group(function () {
         // route crud permission
-        Route::get('/permissions', [PermissionController::class, 'index'])->middleware('permission:view-permission');
-        Route::post('/permissions', [PermissionController::class, 'store'])->middleware('permission:create-permission');
-        Route::put('/permissions/{id}', [PermissionController::class, 'update'])->middleware('permission:edit-permission');
-        Route::delete('/permissions/{id}', [PermissionController::class, 'destroy'])->middleware('permission:delete-permission');
+        Route::get('/permissions', [AdminPermissionController::class, 'index'])->middleware('permission:view-permission');
+        Route::post('/permissions', [AdminPermissionController::class, 'store'])->middleware('permission:create-permission');
+        Route::put('/permissions/{id}', [AdminPermissionController::class, 'update'])->middleware('permission:edit-permission');
+        Route::delete('/permissions/{id}', [AdminPermissionController::class, 'destroy'])->middleware('permission:delete-permission');
     });
 });

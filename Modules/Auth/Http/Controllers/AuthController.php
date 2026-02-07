@@ -15,7 +15,7 @@ class AuthController extends Controller
 {
     use ApiResponse;
 
-    // membuat user baru
+    // membuat user baru untuk pengguna aplikasi
     public function register(RegisterRequest $request)
     {
         $user = User::create([

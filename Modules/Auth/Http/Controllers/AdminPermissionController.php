@@ -2,12 +2,13 @@
 
 namespace Modules\Auth\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Modules\Auth\Models\Permission;
-use Illuminate\Http\Request;
 use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
+use Modules\Auth\Models\Permission;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
-class PermissionController extends Controller
+class AdminPermissionController extends Controller
 {
     use ApiResponse;
 
@@ -65,5 +66,20 @@ class PermissionController extends Controller
         $permission->delete();
 
         return $this->apiSuccess(null, 'Permission berhasil dihapus');
+    }
+
+    public function myPermissions()
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        // Validasi jika user tidak login
+        if (!$user) {
+            return $this->apiError('User tidak terautentikasi', 401);
+        }
+
+        $permissions = $user->getAllPermissions()->pluck('name');
+
+        return $this->apiSuccess($permissions, 'User permissions retrieved successfully');
     }
 }

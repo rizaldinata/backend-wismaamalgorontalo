@@ -21,8 +21,11 @@ class RolePermissionSeeder extends Seeder
             // redirect akses
             'access-admin-panel',
 
+            // dashboard utama
+            'view-dashboard',
+
             // crud permission
-            `access-permission-management`,
+            'access-permission-management',
             'view-permission',
             'create-permission',
             'update-permission',
@@ -52,8 +55,11 @@ class RolePermissionSeeder extends Seeder
             // redirect akses
             'access-admin-panel',
 
+            // dashbboard utama
+            'view-dashboard',
+
             // crud permission
-            `access-permission-management`,
+            'access-permission-management',
             'view-permission',
             'create-permission',
             'update-permission',
@@ -86,8 +92,7 @@ class RolePermissionSeeder extends Seeder
 
         $memberPermissions = [
             'access-resident-area',
-            'view_rooms',
-            'apply_lease',
+            'view-room',
         ];
 
         $superAdmin->syncPermissions($superAdminPermissions);
