@@ -81,10 +81,10 @@ class AuthController extends Controller
 
 
     // daftar permission use yang sedang login
-    public function myPermissions()
+    public function myPermissions(Request $request)
     {
         /** @var \App\Models\User $user */
-        $user = Auth::guard('sanctum')->user();
+        $user = $request->user('sanctum');
 
         if (!$user) {
             $guestRole = \Spatie\Permission\Models\Role::where('name', 'guest')->where('guard_name', 'api')->first();
