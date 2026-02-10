@@ -41,22 +41,22 @@ class PermissionSeeder extends Seeder
                 'description' => 'Memberikan akses untuk melihat menu Role di Dashboard'
             ],
             [
-                'name' => 'view-roles',
+                'name' => 'view-role',
                 'target' => 'Admin',
                 'description' => 'Melihat daftar role'
             ],
             [
-                'name' => 'create-roles',
+                'name' => 'create-role',
                 'target' => 'Admin',
                 'description' => 'Menambah role baru'
             ],
             [
-                'name' => 'update-roles',
+                'name' => 'update-role',
                 'target' => 'Admin',
                 'description' => 'Mengubah data role'
             ],
             [
-                'name' => 'delete-roles',
+                'name' => 'delete-role',
                 'target' => 'Admin',
                 'description' => 'Menghapus role'
             ],
@@ -78,6 +78,9 @@ class PermissionSeeder extends Seeder
             // Lease Management
             ['name' => 'view-lease', 'target' => 'admin', 'description' => 'Melihat daftar penyewaan'],
             ['name' => 'approve-lease', 'target' => 'admin', 'description' => 'Menyetujui atau menolak penyewaan'],
+
+            // Permission khusus untuk role Resident (tidak boleh diassign ke role lain)
+            ['name' => 'pay_lease_bill', 'target' => 'resident', 'description' => 'Izin untuk membayar tagihan sewa'],
         ];
 
         foreach ($permissions as $permission) {

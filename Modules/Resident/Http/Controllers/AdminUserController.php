@@ -8,6 +8,7 @@ use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\JsonResponse;
 use Modules\Resident\Http\Requests\StoreUserRequest;
 use Modules\Resident\Http\Requests\UpdateUserRequest;
 
@@ -15,16 +16,13 @@ class AdminUserController extends Controller
 {
     use ApiResponse;
 
-    public function index()
+    public function index(): JsonResponse
     {
-        $this->authorizePermission('view_users');
-
         $users = User::with('roles')->latest()->get();
-
         return $this->apiSuccess($users, 'Daftar pengguna berhasil diambil');
     }
 
-    public function store(StoreUserRequest $request)
+    public function store(StoreUserRequest $request): JsonResponse
     {
         $this->ensureRoleIsAllowed($request->role);
 
@@ -34,48 +32,37 @@ class AdminUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $role = Role::findByName($request->role, 'web');
-        $user->assignRole($role);
+        $user->assignRole($request->role);
 
-        return $this->apiSuccess($user, "Berhasil membuat pengguna baru");
+        return $this->apiSuccess($user->load('roles'), "Berhasil membuat pengguna baru", 201);
     }
 
-    public function show($id)
+    public function show($id): JsonResponse
     {
-        $this->authorizePermission('view_users');
-
         $user = User::with('roles')->findOrFail($id);
-
         return $this->apiSuccess($user, "Data detail pengguna berhasil diambil");
     }
 
-    public function update(UpdateUserRequest $request, $id)
+    public function update(UpdateUserRequest $request, $id): JsonResponse
     {
         $user = User::findOrFail($id);
 
-        $this->ensureRoleIsAllowed($request->role);
-
-        $data = [
-            'name' => $request->name,
-            'email' => $request->email,
-        ];
-
-        if ($request->filled('password')) {
-            $data['password'] = Hash::make($request->password);
+        if ($request->has('role')) {
+            $this->ensureRoleIsAllowed($request->role);
+            $user->syncRoles([$request->role]);
         }
 
-        $user->update($data);
+        $user->update($request->only(['name', 'email']));
 
-        $role = Role::findByName($request->role, 'web');
-        $user->syncRoles([$role]);
+        if ($request->filled('password')) {
+            $user->update(['password' => Hash::make($request->password)]);
+        }
 
-        return $this->apiSuccess($user, "Berhasil memperbarui data pengguna");
+        return $this->apiSuccess($user->load('roles'), "Berhasil memperbarui data pengguna");
     }
 
-    public function destroy($id)
+    public function destroy($id): JsonResponse
     {
-        $this->authorizePermission('delete_users');
-
         $user = User::findOrFail($id);
 
         if ($user->id === Auth::id()) {
@@ -83,34 +70,23 @@ class AdminUserController extends Controller
         }
 
         $user->delete();
-
         return $this->apiSuccess(null, "Berhasil menghapus pengguna");
-    }
-
-    public function getRoles()
-    {
-        $roles = Role::where('guard_name', 'web')
-            ->whereDoesntHave('permissions', function ($query) {
-                $query->where('name', 'pay_lease_bill');
-            })->get();
-
-        return $this->apiSuccess($roles, "Daftar role berhasil diambil");
-    }
-
-    private function authorizePermission($permission)
-    {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-
-        if (!$user || !$user->can($permission)) {
-            abort(403, 'Anda tidak memiliki izin untuk melakukan aksi ini.');
-        }
     }
 
     private function ensureRoleIsAllowed($roleName)
     {
-        $role = Role::findByName($roleName, 'web');
-        if ($role->hasPermissionTo('pay_lease_bill')) {
+        // Cari role secara eksplisit di guard api agar tidak bentrok dengan default 'web'
+        $role = Role::where('name', $roleName)
+            ->where('guard_name', 'api')
+            ->first();
+
+        if (!$role) {
+            // Jika role tidak ditemukan sama sekali di database
+            abort(422, "Role '$roleName' tidak ditemukan dalam sistem (Guard: api).");
+        }
+
+        // Gunakan hasPermissionTo dengan tetap memperhatikan guard
+        if ($role->hasPermissionTo('pay_lease_bill', 'api')) {
             abort(422, "Role '$roleName' tidak diizinkan untuk ditetapkan melalui panel admin.");
         }
     }

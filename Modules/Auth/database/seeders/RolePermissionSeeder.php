@@ -31,6 +31,13 @@ class RolePermissionSeeder extends Seeder
             'update-permission',
             'delete-permission',
 
+            // crud role
+            'access-role-management',
+            'view-role',
+            'create-role',
+            'update-role',
+            'delete-role',
+
             // crud user
             'access-user-management',
             'view-user',
@@ -64,6 +71,13 @@ class RolePermissionSeeder extends Seeder
             'create-permission',
             'update-permission',
             'delete-permission',
+
+            // crud role
+            'access-role-management',
+            'view-role',
+            'create-role',
+            'update-role',
+            'delete-role',
 
             // crud user
             'access-user-management',

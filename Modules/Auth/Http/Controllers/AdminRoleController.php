@@ -12,9 +12,18 @@ class AdminRoleController extends Controller
 {
     use ApiResponse;
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $roles = Role::with('permissions:id,name')->get();
+        $query = Role::with('permissions:id,name');
+
+        // Logic Clean: Jika request datang dari User Management, filter role yang bersifat internal/resident
+        if ($request->has('for_user_management')) {
+            $query->whereDoesntHave('permissions', function ($q) {
+                $q->where('name', 'pay_lease_bill');
+            });
+        }
+
+        $roles = $query->get();
         return $this->apiSuccess($roles, 'Daftar Role berhasil diambil');
     }
 
