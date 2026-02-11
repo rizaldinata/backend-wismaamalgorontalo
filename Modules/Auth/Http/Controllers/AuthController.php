@@ -2,12 +2,12 @@
 
 namespace Modules\Auth\Http\Controllers;
 
-use App\Models\User;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
 use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
+use Modules\Auth\Models\User;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\PersonalAccessToken;
 use Modules\Auth\Http\Requests\RegisterRequest;
 

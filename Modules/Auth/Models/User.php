@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace Modules\Auth\Models;
 
 use Laravel\Sanctum\HasApiTokens;
+use Database\Factories\UserFactory;
 use Modules\Resident\Models\Resident;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
@@ -37,5 +38,10 @@ class User extends Authenticatable
     public function resident()
     {
         return $this->hasOne(Resident::class);
+    }
+
+    protected static function newFactory()
+    {
+        return UserFactory::new();
     }
 }
