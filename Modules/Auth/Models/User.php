@@ -3,10 +3,10 @@
 namespace Modules\Auth\Models;
 
 use Laravel\Sanctum\HasApiTokens;
-use Database\Factories\UserFactory;
 use Modules\Resident\Models\Resident;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
+use Modules\Auth\Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 

@@ -2,7 +2,7 @@
 
 namespace Modules\Resident\Models;
 
-use App\Models\User;
+use Modules\Auth\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 

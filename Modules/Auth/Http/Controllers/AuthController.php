@@ -8,77 +8,64 @@ use Modules\Auth\Models\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Modules\Auth\Services\AuthService;
 use Laravel\Sanctum\PersonalAccessToken;
+use Modules\Auth\Http\Requests\LoginRequest;
+use Illuminate\Validation\ValidationException;
 use Modules\Auth\Http\Requests\RegisterRequest;
 
 class AuthController extends Controller
 {
     use ApiResponse;
 
+    protected $authService;
+
+    public function __construct(AuthService $authService)
+    {
+        $this->authService = $authService;
+    }
+
     // membuat user baru untuk pengguna aplikasi
     public function register(RegisterRequest $request)
     {
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        try {
+            $user = $this->authService->register($request->validated());
 
-        $user->assignRole('member');
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return $this->apiSuccess([
-            'user' => $user,
-            'token' => $token,
-            'role' => $user->getRoleNames()->first()
-        ], 'Registrasi berhasil', 201);
+            return $this->apiSuccess($user, 'Registrasi berhasil', 201);
+        } catch (\Exception $e) {
+            return $this->apiError($e->getMessage(), 500);
+        }
     }
 
     // login user
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
+        try {
+            $data = $this->authService->login(
+                $request->email,
+                $request->password
+            );
 
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return $this->apiError('Email atau password salah.', 401);
+            return $this->apiSuccess($data, 'Login berhasil');
+        } catch (ValidationException $e) {
+            return $this->apiError($e->getMessage(), 401);
+        } catch (\Exception $e) {
+            return $this->apiError('Terjadi kesalahan sistem', 500);
         }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return $this->apiSuccess([
-            'user' => $user,
-            'token' => $token,
-            'role' => $user->getRoleNames()->first()
-        ], 'Login berhasil');
     }
 
     // Logout user
     public function logout(Request $request)
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-
-        $accessToken = $user->currentAccessToken();
-
-        if ($accessToken instanceof PersonalAccessToken) {
-            $accessToken->delete();
-        }
-
+        $this->authService->logout($request->user());
         return $this->apiSuccess(null, 'Logout berhasil');
     }
 
     // mengambil data user yang sedang login
     public function me(Request $request)
     {
-        return $this->apiSuccess(Auth::user(), 'Profile User');
+        return $this->apiSuccess($request->user(), 'Data user berhasil diambil');
     }
-
 
     // daftar permission use yang sedang login
     public function myPermissions(Request $request)

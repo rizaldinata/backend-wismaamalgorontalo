@@ -64,13 +64,10 @@ class AdminPermissionController extends Controller
     {
         $permission = Permission::findOrFail($id);
 
-        // Detach relationships
         $permission->roles()->detach();
 
-        // Delete permission
         $permission->delete();
 
-        // Clear cache
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         return $this->apiSuccess(null, 'Permission berhasil dihapus');
