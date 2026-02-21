@@ -3,5 +3,6 @@
     "Resident": true,
     "Finance": true,
     "Maintenance": true,
-    "Auth": true
+    "Auth": true,
+    "Iventory": true
 }
