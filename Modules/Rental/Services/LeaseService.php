@@ -7,7 +7,7 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Modules\Rental\Enums\LeaseStatus;
-use Modules\Resident\Models\Lease;
+use Modules\Rental\Models\Lease;
 use Modules\Room\Contracts\RoomAvailabilityService;
 
 class LeaseService
