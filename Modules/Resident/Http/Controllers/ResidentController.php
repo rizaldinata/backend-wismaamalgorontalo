@@ -2,80 +2,46 @@
 
 namespace Modules\Resident\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Traits\ApiResponse;
+use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Modules\Resident\Models\Resident;
 use Illuminate\Support\Facades\Storage;
+use Modules\Resident\Http\Requests\StoreResidentProfileRequest;
+use Modules\Resident\Models\Resident;
+use Modules\Resident\Services\ResidentService;
+use Modules\Resident\Transformers\ResidentResource;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ResidentController extends Controller
 {
-    // cek apakah user sudah melengkapi biodata atau belum
+    use ApiResponse;
+
+    public function __construct(
+        private readonly ResidentService $residentService
+    ) {}
+
     public function show()
     {
-        $user = Auth::user();
-
-        $resident = Resident::where('user_id', $user->id)->first();
-
-        if (!$resident) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Anda belum melengkapi biodata',
-                'data' => null
-            ], 404);
+        try {
+            $resident = $this->residentService->getProfileByUserId(Auth::id());
+            return $this->apiSuccess(new ResidentResource($resident), 'Data profile penghuni berhasil diambil');
+        } catch (NotFoundHttpException $e) {
+            return $this->apiError($e->getMessage(), 404);
+        } catch (Exception $e) {
+            return $this->apiError('Terjadi kesalahan sistem', 500);
         }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Data profile penghuni',
-            'data' => $resident
-        ], 200);
     }
 
-    // menyimpan atau memperbarui biodata user
-    public function store(Request $request)
+    public function store(StoreResidentProfileRequest $request)
     {
-        $user = Auth::user();
-
-        $request->validate([
-            'id_card_number' => 'required|string|max:20',
-            'phone_number' => 'required|string|max:20',
-            'gender' => 'required|in:male,female',
-            'job' => 'nullable|string',
-            'address_ktp' => 'required|string',
-            'ktp_photo' => 'nullable|image|max:2048',
-        ]);
-
-        $resident = Resident::where('user_id', $user->id)->first();
-
-        $ktpPath = $resident ? $resident->ktp_photo_path : null;
-
-        if ($request->hasFile('ktp_photo')) {
-            if ($resident && $resident->ktp_photo_path) {
-                Storage::disk('public')->delete($resident->ktp_photo_path);
-            }
-
-            $ktpPath = $request->file('ktp_photo')->store('ktp_images', 'public');
-        }
-
-        $resident = Resident::updateOrCreate(
-            ['user_id' => $user->id],
-            [
-                'id_card_number' => $request->id_card_number,
-                'phone_number' => $request->phone_number,
-                'gender' => $request->gender,
-                'job' => $request->job,
-                'address_ktp' => $request->address_ktp,
-                'emergency_contact_name' => $request->emergency_contact_name,
-                'emergency_contact_phone' => $request->emergency_contact_name,
-                'ktp_photo_path' => $ktpPath,
-            ]
+        $resident = $this->residentService->updateProfile(
+            Auth::id(),
+            $request->validated(),
+            $request->file('ktp_photo')
         );
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Biodata berhasil disimpan',
-            'data' => $resident
-        ], 200);
+        return $this->apiSuccess(new ResidentResource($resident), 'Biodata berhasil disimpan');
     }
 }
