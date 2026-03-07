@@ -3,54 +3,31 @@
 namespace Modules\Rental\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Traits\ApiResponse;
+use Illuminate\Support\Facades\Auth;
+use Modules\Rental\Http\Requests\StoreLeaseRequest;
+use Modules\Rental\Services\RentalService;
+use Modules\Rental\Transformers\LeaseResource;
 
 class RentalController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    use ApiResponse;
+
+    public function __construct(
+        private readonly RentalService $rentalService
+    ) {}
+
+    public function store(StoreLeaseRequest $request)
     {
-        return view('rental::index');
+        $lease = $this->rentalService->createLease(Auth::id(), $request->validated());
+
+        return $this->apiSuccess(new LeaseResource($lease), 'Pengajuan sewa berhasil dibuat. Silakan lakukan pembayaran.', 201);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function myLeases()
     {
-        return view('rental::create');
+        $leases = $this->rentalService->getMyLeases(Auth::id());
+
+        return $this->apiSuccess(LeaseResource::collection($leases), 'Daftar sewa kamar Anda berhasil diambil.');
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('rental::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('rental::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
 }

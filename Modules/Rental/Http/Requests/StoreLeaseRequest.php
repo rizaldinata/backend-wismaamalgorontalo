@@ -14,11 +14,16 @@ class StoreLeaseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'room_id' => 'required|integer|exists:rooms,id', // Cek tabel rooms
+            'room_id' => 'required|exists:rooms,id',
             'start_date' => 'required|date|after_or_equal:today',
-            'duration_months' => 'required|integer|min:1|max:24',
-            'payment_proof' => 'nullable|image|max:2048', // Opsional saat request awal?
-            'notes' => 'nullable|string'
+            'duration' => 'required|integer|min:1|max:12',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'start_date.after_or_equal' => 'Tanggal mulai sewa tidak boleh di masa lalu.',
         ];
     }
 }
