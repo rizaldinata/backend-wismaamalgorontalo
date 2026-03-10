@@ -17,4 +17,9 @@ class InvoiceRepository implements InvoiceRepositoryInterface
         $invoice->update(['status' => $status]);
         return $invoice;
     }
+
+    public function create(array $data): Invoice
+    {
+        return Invoice::create($data);
+    }
 }

@@ -8,4 +8,5 @@ interface InvoiceRepositoryInterface
 {
     public function findById(int $id): ?Invoice;
     public function updateStatus(Invoice $invoice, string $status): Invoice;
+    public function create(array $data): Invoice;
 }

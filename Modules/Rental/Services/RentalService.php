@@ -3,6 +3,7 @@
 namespace Modules\Rental\Services;
 
 use Carbon\Carbon;
+use Modules\Finance\Services\FinanceService;
 use Modules\Rental\Enums\LeaseStatus;
 use Modules\Rental\Enums\RentalType;
 use Modules\Rental\Models\Lease;
@@ -44,6 +45,12 @@ class RentalService
             'status' => LeaseStatus::PENDING->value,
         ]);
 
+        $pricePerMonth = $this->roomAvailabilityService->getPrice($data['room_id']);
+        $totalAmount = $pricePerMonth * $data['duration'];
+
+        $financeService = app(FinanceService::class);
+        $financeService->generateInvoiceForLease($lease->id, $totalAmount, $startDate);
+
         return $lease->load('room');
     }
 
@@ -56,5 +63,14 @@ class RentalService
         }
 
         return $this->leaseRepository->getByResidentId($resident->id);
+    }
+
+    public function activateLease(int $leaseId): void
+    {
+        $lease = $this->leaseRepository->findById($leaseId);
+
+        $this->leaseRepository->updateStatus($lease, LeaseStatus::ACTIVE->value);
+
+        $this->roomAvailabilityService->markAsOccupied($lease->room_id);
     }
 }
