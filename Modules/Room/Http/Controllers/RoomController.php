@@ -7,7 +7,6 @@ use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Modules\Room\Http\Requests\StoreRoomRequest;
 use Modules\Room\Http\Requests\UpdateRoomRequest;
-use Modules\Room\Models\Room;
 use Modules\Room\Services\RoomService;
 use Modules\Room\Transformers\RoomResource;
 

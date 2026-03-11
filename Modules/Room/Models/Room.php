@@ -2,10 +2,10 @@
 
 namespace Modules\Room\Models;
 
-use Modules\Resident\Models\Lease;
-use Modules\Room\Enums\RoomStatus;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Rental\Models\Lease;
+use Modules\Room\Enums\RoomStatus;
 
 class Room extends Model
 {
