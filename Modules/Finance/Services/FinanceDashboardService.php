@@ -35,4 +35,14 @@ class FinanceDashboardService
             ]
         ];
     }
+
+    public function getDueInvoicesWidget(int $limit = 5)
+    {
+        return $this->invoiceRepository->getDueInvoices($limit);
+    }
+
+    public function getPendingPaymentsWidget(int $limit = 5)
+    {
+        return $this->paymentRepository->getPendingPayments($limit);
+    }
 }

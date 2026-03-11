@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Repositories\Contracts;
 
+use Illuminate\Database\Eloquent\Collection;
 use Modules\Finance\Models\Invoice;
 
 interface InvoiceRepositoryInterface
@@ -12,4 +13,5 @@ interface InvoiceRepositoryInterface
     public function getTotalRevenueThisMonth(): float;
     public function getTotalUnpaid(): float;
     public function getMonthlyRevenue(int $months = 6): array;
+    public function getDueInvoices(int $limit = 5): Collection;
 }

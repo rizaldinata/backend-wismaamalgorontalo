@@ -10,4 +10,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/dashboard/kpi-summary', [DashboardController::class, 'kpiSummary']);
     Route::get('/dashboard/revenue-chart', [DashboardController::class, 'revenueChart']);
+    Route::get('/dashboard/due-invoices', [DashboardController::class, 'dueInvoices']);
+    Route::get('/dashboard/pending-payment', [DashboardController::class, 'pendingPayments']);
 });

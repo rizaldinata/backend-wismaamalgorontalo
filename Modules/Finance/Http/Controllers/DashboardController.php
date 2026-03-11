@@ -25,4 +25,16 @@ class DashboardController extends Controller
         $data = $this->dashboardService->getRevenueChartData();
         return $this->apiSuccess($data, 'Data grafik pendapatan 6 bulan terakhir');
     }
+
+    public function dueInvoices()
+    {
+        $data = $this->dashboardService->getDueInvoicesWidget();
+        return $this->apiSuccess($data, 'Data tagihan jatuh tempo berhasil diambil');
+    }
+
+    public function pendingPayments()
+    {
+        $data = $this->dashboardService->getPendingPaymentsWidget();
+        return $this->apiSuccess($data, 'Data pembayaran tertunda berhasil diambil');
+    }
 }

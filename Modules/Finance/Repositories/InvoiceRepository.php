@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Repositories;
 
+use Illuminate\Database\Eloquent\Collection;
 use Modules\Finance\Enums\InvoiceStatus;
 use Modules\Finance\Models\Invoice;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
@@ -56,5 +57,15 @@ class InvoiceRepository implements InvoiceRepositoryInterface
         }
 
         return $revenueData;
+    }
+
+    public function getDueInvoices(int $limit = 5): Collection
+    {
+        return Invoice::with(['lease.resident', 'lease.room'])
+            ->where('status', InvoiceStatus::UNPAID->value)
+            ->where('due_date', '<=', now()->addDay(7))
+            ->orderBy('due_date', 'asc')
+            ->limit($limit)
+            ->get();
     }
 }
