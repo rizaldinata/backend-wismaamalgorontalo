@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Modules\Finance\Http\Requests\PayInvoiceRequest;
+use Modules\Finance\Http\Requests\VerifyPaymentRequest;
 use Modules\Finance\Services\FinanceService;
+use Modules\Finance\Transformers\PaymentResource;
 
 class PaymentController extends Controller
 {
@@ -18,32 +20,27 @@ class PaymentController extends Controller
 
     public function pay(PayInvoiceRequest $request, int $invoiceId)
     {
-        $data = $request->validated();
+        $payment = $this->financeService->processPayment($invoiceId, $request->validated());
 
-        if ($request->hasFile('payment_proof')) {
-            $data['payment_proof'] = $request->file('payment_proof');
-        }
-
-        $payment = $this->financeService->processPayment($invoiceId, $data);
-
-        return $this->apiSuccess($payment, 'Proses pembayaran berhasil diinisialisasi', 201);
+        return $this->apiSuccess(
+            new PaymentResource($payment),
+            'Proses pembayaran berhasil diinisialisasi',
+            201
+        );
     }
 
-    public function verify(Request $request, int $paymentId)
+    public function verify(VerifyPaymentRequest $request, int $paymentId)
     {
-        $request->validat([
-            'is_approved' => 'required|boolean',
-            'admin_notes' => 'nullable|string',
-        ]);
-
         $payment = $this->financeService->verifyPayment(
             $paymentId,
-            $request->is_approved,
-            $request->admin_notes,
+            $request->validated('is_approved'),
+            $request->validated('admin_notes')
         );
 
-        $message = $request->is_approved ? 'Pembayaran berhasil diverifikasi. kamar otomatis terisi' : 'Pembayaran ditolak';
+        $message = $request->validated('is_approved')
+            ? 'Pembayaran berhasil diverifikasi. Kamar otomatis terisi.'
+            : 'Pembayaran ditolak.';
 
-        return $this->apiSuccess($payment, $message);
+        return $this->apiSuccess(new PaymentResource($payment), $message);
     }
 }

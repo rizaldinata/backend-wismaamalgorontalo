@@ -18,9 +18,10 @@ class FinanceService
     public function __construct(
         private readonly InvoiceRepositoryInterface $invoiceRepository,
         private readonly SettingService $settingService,
+        private readonly RentalService $rentalService,
     ) {}
 
-    public function processPayment(int $invoiceId, array $data)
+    public function processPayment(int $invoiceId, array $data): Payment
     {
         $invoice = $this->invoiceRepository->findById($invoiceId);
 
@@ -28,18 +29,11 @@ class FinanceService
             throw new HttpException(422, 'Tagihan ini sudah lunas.');
         }
 
-        $method = $data['payment_method'];
-
-        if ($method === 'midtrans') {
-            if (!$this->settingService->isMidtransEnabled()) {
-                throw new HttpException(403, 'Mohon maaf, metode pembayaran saat ini sedang dinonaktifkan oleh admin');
-            }
-            $strategy = new MidtransPaymentStrategy();
-        } elseif ($method === 'manual') {
-            $strategy = new ManualPaymentStrategy();
-        } else {
-            throw new HttpException(422, 'Metode pembayaran tidak didukung');
-        }
+        $strategy = match ($data['payment_method']) {
+            'midtrans' => $this->resolveMidtransStrategy(),
+            'manual' => app(ManualPaymentStrategy::class),
+            default => throw new HttpException(422, 'Metode pembayaran tidak didukung')
+        };
 
         return $strategy->process($invoice, $data);
     }
@@ -57,9 +51,10 @@ class FinanceService
         ]);
     }
 
-    public function verifyPayment(int $paymentId, bool $isApproved, ?string $adminNotes = null)
+    public function verifyPayment(int $paymentId, bool $isApproved, ?string $adminNotes = null): Payment
     {
         $payment = Payment::findOrFail($paymentId);
+
         $payment->update([
             'status' => $isApproved ? PaymentStatus::VERIFIED->value : PaymentStatus::REJECTED->value,
             'admin_notes' => $adminNotes,
@@ -68,11 +63,17 @@ class FinanceService
         if ($isApproved) {
             $invoice = $this->invoiceRepository->findById($payment->invoice_id);
             $this->invoiceRepository->updateStatus($invoice, InvoiceStatus::PAID->value);
-
-            $rentalService = app(RentalService::class);
-            $rentalService->activateLease($invoice->lease_id);
+            $this->rentalService->activateLease($invoice->lease_id);
         }
 
         return $payment;
+    }
+
+    private function resolveMidtransStrategy(): MidtransPaymentStrategy
+    {
+        if (!$this->settingService->isMidtransEnabled()) {
+            throw new HttpException(403, 'Mohon maaf, metode pembayaran saat ini sedang dinonaktifkan oleh admin');
+        }
+        return app(MidtransPaymentStrategy::class);
     }
 }
