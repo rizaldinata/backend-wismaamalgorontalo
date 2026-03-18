@@ -31,4 +31,14 @@ class InventoryService
             return $inventory;
         });
     }
+
+    public function updateInventory(Inventory $inventory, array $data): Inventory
+    {
+        return $this->inventoryRepository->update($inventory, $data);
+    }
+
+    public function deleteInventory(Inventory $inventory): bool
+    {
+        return $this->inventoryRepository->delete($inventory);
+    }
 }
