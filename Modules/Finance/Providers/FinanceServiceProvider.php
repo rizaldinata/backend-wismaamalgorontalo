@@ -4,8 +4,10 @@ namespace Modules\Finance\Providers;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Modules\Finance\Repositories\Contracts\ExpenseRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
+use Modules\Finance\Repositories\ExpenseRepository;
 use Modules\Finance\Repositories\InvoiceRepository;
 use Modules\Finance\Repositories\PaymentRepository;
 use Nwidart\Modules\Traits\PathNamespace;
@@ -49,6 +51,11 @@ class FinanceServiceProvider extends ServiceProvider
         $this->app->bind(
             PaymentRepositoryInterface::class,
             PaymentRepository::class
+        );
+
+        $this->app->bind(
+            ExpenseRepositoryInterface::class,
+            ExpenseRepository::class,
         );
     }
 

@@ -7,6 +7,7 @@ use ManualPaymentStrategy;
 use Modules\Finance\Enums\InvoiceStatus;
 use Modules\Finance\Enums\PaymentStatus;
 use Modules\Finance\Models\Payment;
+use Modules\Finance\Repositories\Contracts\ExpenseRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Strategies\MidtransPaymentStrategy;
 use Modules\Rental\Services\RentalService;
@@ -19,6 +20,7 @@ class FinanceService
         private readonly InvoiceRepositoryInterface $invoiceRepository,
         private readonly SettingService $settingService,
         private readonly RentalService $rentalService,
+        private readonly ExpenseRepositoryInterface $expenseRepository,
     ) {}
 
     public function processPayment(int $invoiceId, array $data): Payment
@@ -75,5 +77,17 @@ class FinanceService
             throw new HttpException(403, 'Mohon maaf, metode pembayaran saat ini sedang dinonaktifkan oleh admin');
         }
         return app(MidtransPaymentStrategy::class);
+    }
+
+    public function recordExpense(array $data)
+    {
+        $data['expense_date'] = $data['expense_date'] ?? now()->toDateString();
+
+        return $this->expenseRepository->create($data);
+    }
+
+    public function getAllExpenses(int $perPage = 15)
+    {
+        return $this->expenseRepository->getPaginated($perPage);
     }
 }

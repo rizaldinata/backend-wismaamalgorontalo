@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Finance\Http\Controllers\DashboardController;
+use Modules\Finance\Http\Controllers\ExpenseController;
 use Modules\Finance\Http\Controllers\PaymentController;
 
 Route::prefix('finance/')->middleware(['auth:sanctum'])->group(function () {
@@ -17,4 +18,7 @@ Route::prefix('finance/')->middleware(['auth:sanctum'])->group(function () {
 
     Route::post('/invoices/{invoiceId}/pay', [PaymentController::class, 'pay'])
         ->middleware('permission:finance-invoice-create');
+
+    Route::get('/expenses', [ExpenseController::class, 'index'])
+        ->middleware('permission:finance-expense-view');
 });
