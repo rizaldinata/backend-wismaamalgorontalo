@@ -13,6 +13,14 @@ Route::prefix('finance/')->middleware(['auth:sanctum'])->group(function () {
         Route::get('/pending-payments', [DashboardController::class, 'pendingPayments']);
     });
 
+    Route::prefix('expenses')->group(function () {
+        Route::get('/', [ExpenseController::class, 'index'])->middleware('permission:finance-expense-view');
+        Route::post('/', [ExpenseController::class, 'store'])->middleware('permission:finance-expense-create');
+        Route::get('/{id}', [ExpenseController::class, 'show'])->middleware('permission:finance-expense-view');
+        Route::put('/{id}', [ExpenseController::class, 'update'])->middleware('permission:finance-expense-update');
+        Route::delete('/{id}', [ExpenseController::class, 'destroy'])->middleware('permission:finance-expense-delete');
+    });
+
     Route::post('/payments/{paymentId}/verify', [PaymentController::class, 'verify'])
         ->middleware('permission:finance-payment-verify');
 

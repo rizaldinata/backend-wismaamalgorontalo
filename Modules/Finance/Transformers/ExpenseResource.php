@@ -15,6 +15,10 @@ class ExpenseResource extends JsonResource
             'description' => $this->description,
             'amount' => (float) $this->amount,
             'expense_date' => $this->expense_date->format('Y-m-d'),
+
+            'is_integrated' => $this->reference_type !== null,
+            'source' => $this->reference_type !== null ? 'Inventory / Sistem' : 'Manual Finance',
+
             'created_at' => $this->created_at->toIso8601String(),
         ];
     }

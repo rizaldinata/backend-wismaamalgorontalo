@@ -35,4 +35,9 @@ class ExpenseRepository implements ExpenseRepositoryInterface
     {
         return $expense->delete();
     }
+
+    public function findById(int $id): ?Expense
+    {
+        return Expense::find($id);
+    }
 }

@@ -12,4 +12,5 @@ interface ExpenseRepositoryInterface
     public function findByReference(int $refId, string $refType): ?Expense;
     public function update(Expense $expense, array $data): Expense;
     public function delete(Expense $expense): bool;
+    public function findById(int $id): ?Expense;
 }
