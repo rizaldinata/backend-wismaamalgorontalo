@@ -22,4 +22,9 @@ class PaymentRepository implements PaymentRepositoryInterface
             ->limit($limit)
             ->get();
     }
+
+    public function findByReference(string $transactionId): ?Payment
+    {
+        return Payment::where('transaction_id', $transactionId)->first();
+    }
 }

@@ -5,6 +5,7 @@ namespace Modules\Finance\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Modules\Finance\Http\Requests\PayInvoiceRequest;
 use Modules\Finance\Http\Requests\VerifyPaymentRequest;
 use Modules\Finance\Services\FinanceService;
@@ -42,5 +43,16 @@ class PaymentController extends Controller
             : 'Pembayaran ditolak.';
 
         return $this->apiSuccess(new PaymentResource($payment), $message);
+    }
+
+    public function midtransNotification(Request $request)
+    {
+        try {
+            $this->financeService->handleMidtransNotification($request->all());
+            return response()->json(['message' => 'Notifikasi berhasil diproses']);
+        } catch (\Exception $e) {
+            // Midtrans akan mencoba mengirim ulang jika kita merespon selain 200 OK
+            return response()->json(['message' => $e->getMessage()], 500);
+        }
     }
 }
