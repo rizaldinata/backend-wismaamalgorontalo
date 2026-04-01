@@ -13,9 +13,8 @@ class MidtransPaymentStrategy implements PaymentStrategyInterface
 {
     public function __construct()
     {
-        // Konfigurasi Midtrans
-        Config::$serverKey = config('services.midtrans.server_key');
-        Config::$isProduction = config('services.midtrans.is_production');
+        Config::$serverKey = config('finance.midtrans.server_key');
+        Config::$isProduction = config('finance.midtrans.is_production');
         Config::$isSanitized = true;
         Config::$is3ds = true;
     }
@@ -23,22 +22,25 @@ class MidtransPaymentStrategy implements PaymentStrategyInterface
     public function process(Invoice $invoice, array $data): Payment
     {
         // 1. Catat data pembayaran awal di database dengan status PENDING
+        // Gunakan variabel sementara untuk ID transaksi
+        $transactionId = 'TRX-' . time() . '-' . $invoice->id;
+
         $payment = Payment::create([
             'invoice_id' => $invoice->id,
-            'amount' => $invoice->amount,
+            // Hapus 'amount' karena tidak ada di $fillable tabel Payment
             'payment_method' => 'midtrans',
-            'status' => 'pending', // Anda bisa sesuaikan dengan Enum PaymentStatus
-            'reference_id' => 'TRX-' . time() . '-' . $invoice->id, // Order ID unik
+            'status' => 'pending',
+            'transaction_id' => $transactionId, // Ganti reference_id menjadi transaction_id
         ]);
 
         // 2. Siapkan parameter untuk Midtrans
         $params = [
             'transaction_details' => [
-                'order_id' => $payment->reference_id,
-                'gross_amount' => (int) $payment->amount,
+                'order_id' => $payment->transaction_id, // Panggil transaction_id
+                'gross_amount' => (int) $invoice->amount, // Ambil amount langsung dari relasi $invoice
             ],
             'customer_details' => [
-                'first_name' => 'Nama Customer', // Bisa diambil dari relasi User/Customer
+                'first_name' => 'Nama Customer',
                 'email' => 'customer@email.com',
             ],
             'item_details' => [
@@ -55,7 +57,7 @@ class MidtransPaymentStrategy implements PaymentStrategyInterface
             // 3. Dapatkan Snap Token dari Midtrans
             $snapToken = Snap::getSnapToken($params);
 
-            // 4. Simpan token ke database agar bisa diakses kapan saja
+            // 4. Pastikan kolom payment_gateway_token ada di database dan fillable
             $payment->update(['payment_gateway_token' => $snapToken]);
 
             return $payment;

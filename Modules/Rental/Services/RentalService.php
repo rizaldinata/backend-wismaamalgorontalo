@@ -34,7 +34,7 @@ class RentalService
         }
 
         $startDate = Carbon::parse($data['start_date']);
-        $endDate = $startDate->copy()->addMonths($data['duration']);
+        $endDate = $startDate->copy()->addMonths((int) $data['duration']);
 
         $lease = $this->leaseRepository->create([
             'resident_id' => $resident->id,

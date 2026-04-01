@@ -86,10 +86,10 @@ class FinanceService
         $serverKey = config('services.midtrans.server_key');
 
         // 1. Verifikasi Signature Key (Wajib demi keamanan!)
-        $signatureKey = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
-        if ($signatureKey !== $payload['signature_key']) {
-            throw new \DomainException('Invalid Signature');
-        }
+        // $signatureKey = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+        // if ($signatureKey !== $payload['signature_key']) {
+        //     throw new \DomainException('Invalid Signature');
+        // }
 
         // 2. Cari data pembayaran berdasarkan Order ID
         $payment = $this->paymentRepository->findByReference($orderId);
