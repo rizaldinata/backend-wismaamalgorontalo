@@ -86,23 +86,31 @@ class FinanceService
         $serverKey = config('services.midtrans.server_key');
 
         // 1. Verifikasi Signature Key (Wajib demi keamanan!)
-        // $signatureKey = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
-        // if ($signatureKey !== $payload['signature_key']) {
-        //     throw new \DomainException('Invalid Signature');
-        // }
+        $signatureKey = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+        if ($signatureKey !== $payload['signature_key']) {
+            throw new \DomainException('Invalid Signature');
+        }
 
         // 2. Cari data pembayaran berdasarkan Order ID
         $payment = $this->paymentRepository->findByReference($orderId);
         if (!$payment) return;
 
         $transactionStatus = $payload['transaction_status'];
+        $invoice = $payment->invoice;
 
         // 3. Update status pembayaran dan invoice
         if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
-            $payment->update(['status' => 'paid']); // Atau pakai Enum
-            $payment->invoice->update(['status' => 'paid']);
+            $payment->update(['status' => 'paid']);
+            $invoice->update(['status' => 'paid']); // Sesuaikan jika pakai Enum InvoiceStatus::PAID->value
+
+            // Panggil fungsi untuk mengaktifkan sewa (kamar jadi tidak tersedia)
+            $this->rentalService->activateLease($invoice->lease_id);
         } elseif ($transactionStatus == 'cancel' || $transactionStatus == 'deny' || $transactionStatus == 'expire') {
             $payment->update(['status' => 'failed']);
+            $invoice->update(['status' => 'failed']); // Atau 'unpaid', tergantung desain database Anda
+
+            // Panggil fungsi untuk membatalkan sewa (kamar kembali tersedia)
+            $this->rentalService->cancelLease($invoice->lease_id);
         }
     }
 }

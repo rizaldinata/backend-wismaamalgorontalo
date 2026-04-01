@@ -16,6 +16,7 @@ class PaymentResource extends JsonResource
             'payment_proof_url' => $this->payment_proof_path ? url('/storage/' . $this->payment_proof_path) : null,
             'transaction_id' => $this->transaction_id,
             'status' => $this->status->value,
+            'snap_token' => $this->snap_token,
             'admin_notes' => $this->admin_notes,
             'created_at' => $this->created_at->toIso8601String(),
         ];

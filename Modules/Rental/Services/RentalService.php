@@ -73,4 +73,14 @@ class RentalService
 
         $this->roomAvailabilityService->markAsOccupied($lease->room_id);
     }
+
+    public function cancelLease(int $leaseId)
+    {
+        $lease = $this->leaseRepository->findById($leaseId);
+
+        if ($lease) {
+            $lease->update(['status' => 'cancelled']);
+            $lease->room()->update(['status' => 'Tersedia']);
+        }
+    }
 }

@@ -18,6 +18,7 @@ class Payment extends Model
         'transaction_id',
         'status',
         'admin_notes',
+        'snap_token',
     ];
 
     protected $casts = [
