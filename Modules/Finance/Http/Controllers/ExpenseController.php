@@ -8,10 +8,9 @@ use DomainException;
 use Illuminate\Http\Request;
 use Modules\Finance\Http\Requests\StoreExpenseRequest;
 use Modules\Finance\Http\Requests\UpdateExpenseRequest;
-use Modules\Finance\Repositories\ExpenseRepository;
+use Modules\Finance\Repositories\Contracts\ExpenseRepositoryInterface;
 use Modules\Finance\Services\ExpenseService;
 use Modules\Finance\Transformers\ExpenseResource;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ExpenseController extends Controller
 {
@@ -19,7 +18,7 @@ class ExpenseController extends Controller
 
     public function __construct(
         private readonly ExpenseService $expenseService,
-        private readonly ExpenseRepository $expenseRepository
+        private readonly ExpenseRepositoryInterface $expenseRepository
     ) {}
 
     public function index(Request $request)
