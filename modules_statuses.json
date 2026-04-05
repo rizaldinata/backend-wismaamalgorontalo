@@ -7,5 +7,6 @@
     "Iventory": true,
     "Inventory": true,
     "Setting": true,
-    "Rental": true
+    "Rental": true,
+    "Notification": true
 }

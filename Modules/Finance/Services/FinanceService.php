@@ -5,11 +5,11 @@ namespace Modules\Finance\Services;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
-use Log;
 use Modules\Finance\Contracts\PaymentStrategyInterface;
 use Modules\Finance\Enums\InvoiceStatus;
 use Modules\Finance\Enums\PaymentStatus;
-use Modules\Finance\Models\Payment;
+use Modules\Finance\Events\PaymentSettled;
+use Modules\Finance\Models\Payment; // dibutuhkan sebagai return type hint
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
 use Modules\Finance\Strategies\ManualPaymentStrategy;
@@ -54,9 +54,9 @@ class FinanceService
     public function verifyPayment(int $paymentId, bool $isApproved, ?string $adminNotes = null): Payment
     {
         return DB::transaction(function () use ($paymentId, $isApproved, $adminNotes) {
-            $payment = Payment::findOrFail($paymentId);
+            $payment = $this->paymentRepository->findOrFail($paymentId);
 
-            $payment->update([
+            $this->paymentRepository->update($payment, [
                 'status' => $isApproved ? PaymentStatus::VERIFIED : PaymentStatus::REJECTED,
                 'admin_notes' => $adminNotes,
             ]);
@@ -64,6 +64,7 @@ class FinanceService
             if ($isApproved) {
                 $this->invoiceRepository->updateStatus($payment->invoice, InvoiceStatus::PAID->value);
                 $this->rentalService->activateLease($payment->invoice->lease_id);
+                event(new PaymentSettled($payment));
             }
 
             return $payment;
@@ -105,14 +106,15 @@ class FinanceService
 
         // 3. Update status pembayaran dan invoice
         if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
-            $payment->update(['status' => 'paid']);
-            $invoice->update(['status' => 'paid']); // Sesuaikan jika pakai Enum InvoiceStatus::PAID->value
+            $this->paymentRepository->update($payment, ['status' => PaymentStatus::PAID->value]);
+            $this->invoiceRepository->updateStatus($invoice, InvoiceStatus::PAID->value);
 
             // Panggil fungsi untuk mengaktifkan sewa (kamar jadi tidak tersedia)
             $this->rentalService->activateLease($invoice->lease_id);
+            event(new PaymentSettled($payment));
         } elseif ($transactionStatus == 'cancel' || $transactionStatus == 'deny' || $transactionStatus == 'expire') {
-            $payment->update(['status' => 'failed']);
-            $invoice->update(['status' => 'failed']); // Atau 'unpaid', tergantung desain database Anda
+            $this->paymentRepository->update($payment, ['status' => PaymentStatus::FAILED->value]);
+            $this->invoiceRepository->updateStatus($invoice, InvoiceStatus::UNPAID->value); // Kembali ke unpaid agar bisa dibayar ulang
 
             // Panggil fungsi untuk membatalkan sewa (kamar kembali tersedia)
             $this->rentalService->cancelLease($invoice->lease_id);

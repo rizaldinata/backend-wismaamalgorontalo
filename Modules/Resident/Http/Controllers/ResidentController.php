@@ -23,6 +23,7 @@ class ResidentController extends Controller
     {
         try {
             $resident = $this->residentService->getProfileByUserId(Auth::id());
+
             return $this->apiSuccess(new ResidentResource($resident), 'Data profile penghuni berhasil diambil');
         } catch (NotFoundHttpException $e) {
             return $this->apiError($e->getMessage(), 404);

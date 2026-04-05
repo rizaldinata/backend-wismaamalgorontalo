@@ -1,18 +1,18 @@
 <?php
 
-namespace Modules\Finance\Http\Controllers;
+namespace Modules\Notification\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class FinanceController extends Controller
+class NotificationController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return view('finance::index');
+        return view('notification::index');
     }
 
     /**
@@ -20,7 +20,7 @@ class FinanceController extends Controller
      */
     public function create()
     {
-        return view('finance::create');
+        return view('notification::create');
     }
 
     /**
@@ -33,7 +33,7 @@ class FinanceController extends Controller
      */
     public function show($id)
     {
-        return view('finance::show');
+        return view('notification::show');
     }
 
     /**
@@ -41,7 +41,7 @@ class FinanceController extends Controller
      */
     public function edit($id)
     {
-        return view('finance::edit');
+        return view('notification::edit');
     }
 
     /**

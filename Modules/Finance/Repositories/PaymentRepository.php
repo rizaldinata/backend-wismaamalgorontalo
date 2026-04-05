@@ -9,6 +9,11 @@ use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
 
 class PaymentRepository implements PaymentRepositoryInterface
 {
+    public function findOrFail(int $id): Payment
+    {
+        return Payment::findOrFail($id);
+    }
+
     public function countPendingVerification(): int
     {
         return Payment::where('status', PaymentStatus::PENDING->value)->count();
@@ -26,5 +31,15 @@ class PaymentRepository implements PaymentRepositoryInterface
     public function findByReference(string $transactionId): ?Payment
     {
         return Payment::where('transaction_id', $transactionId)->first();
+    }
+
+    public function create(array $data): Payment
+    {
+        return Payment::create($data);
+    }
+
+    public function update(Payment $payment, array $data): bool
+    {
+        return $payment->update($data);
     }
 }
