@@ -3,54 +3,45 @@
 namespace Modules\Maintenance\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Traits\ApiResponse;
+use Illuminate\Support\Facades\Auth;
+use Modules\Maintenance\Http\Requests\StoreMaintenanceRequest;
+use Modules\Maintenance\Services\MaintenanceService;
+use Modules\Maintenance\Transformers\MaintenanceRequestResource;
 
 class MaintenanceController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    use ApiResponse;
+
+    public function __construct(
+        private readonly MaintenanceService $maintenanceService
+    ) {}
+
+    public function myReports()
     {
-        return view('maintenance::index');
+        $reports = $this->maintenanceService->getResidentReports(Auth::id());
+        return $this->apiSuccess(MaintenanceRequestResource::collection($reports), 'Berhasil mengambil data laporan kerusakan.');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(StoreMaintenanceRequest $request)
     {
-        return view('maintenance::create');
+        $validated = $request->validated();
+        $images = $request->file('images') ?? [];
+
+        $report = $this->maintenanceService->createReport(Auth::id(), $validated, $images);
+        
+        return $this->apiSuccess(new MaintenanceRequestResource($report), 'Laporan kerusakan berhasil dibuat.', 201);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
     public function show($id)
     {
-        return view('maintenance::show');
+        $report = $this->maintenanceService->getReportById($id);
+        
+        // Prevent seeing other resident's report
+        if ($report->resident->user_id !== Auth::id()) {
+            return $this->apiError('Anda tidak memiliki akses ke laporan ini.', 403);
+        }
+
+        return $this->apiSuccess(new MaintenanceRequestResource($report), 'Berhasil mengambil detail laporan.');
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('maintenance::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
 }

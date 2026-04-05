@@ -3,54 +3,76 @@
 namespace Modules\Room\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
+use Modules\Room\Http\Requests\StoreRoomRequest;
+use Modules\Room\Http\Requests\UpdateRoomRequest;
+use Modules\Room\Services\RoomService;
+use Modules\Room\Transformers\RoomResource;
 
 class RoomController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    use ApiResponse;
+
+    public function __construct(
+        private readonly RoomService $roomService
+    ) {}
+
+    public function index(Request $request)
     {
-        return view('room::index');
+        $rooms = $this->roomService->getAllRooms($request->query());
+        return $this->apiSuccess(
+            RoomResource::collection($rooms)->response()->getData(true),
+            'Data kamar berhasil diambil'
+        );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(StoreRoomRequest $request)
     {
-        return view('room::create');
+        $room = $this->roomService->createRoom(
+            $request->validated(),
+            $request->file('images', [])
+        );
+
+        return $this->apiSuccess(new RoomResource($room), 'Kamar berhasil dibuat', 201);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
     public function show($id)
     {
-        return view('room::show');
+        $room = $this->roomService->getRoomDetails($id);
+        return $this->apiSuccess(new RoomResource($room), 'Detail kamar berhasil diambil');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
+    public function update(UpdateRoomRequest $request, $id)
     {
-        return view('room::edit');
+        $updatedRoom = $this->roomService->updateRoom(
+            $id,
+            $request->validated(),
+            $request->file('images', [])
+        );
+
+        return $this->apiSuccess(new RoomResource($updatedRoom), 'Kamar berhasil diupdate');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
+    public function destroy($id)
+    {
+        $this->roomService->deleteRoom($id);
+        return $this->apiSuccess(null, 'Kamar berhasil dihapus');
+    }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
+    public function uploadImages(Request $request, $id)
+    {
+        $request->validate(['images' => 'required|array', 'images.*' => 'image|max:5120']);
+        $room = $this->roomService->getRoomDetails($id);
+
+        $this->roomService->uploadImages($room, $request->file('images'));
+
+        return $this->apiSuccess(new RoomResource($room->refresh()), 'Foto berhasil ditambahkan');
+    }
+
+    public function deleteImage($roomId, $imageId)
+    {
+        $this->roomService->deleteImage($imageId);
+        return $this->apiSuccess(null, 'Foto berhasil dihapus');
+    }
 }

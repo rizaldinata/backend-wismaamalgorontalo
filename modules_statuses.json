@@ -2,5 +2,11 @@
     "Room": true,
     "Resident": true,
     "Finance": true,
-    "Maintenance": true
+    "Maintenance": true,
+    "Auth": true,
+    "Iventory": true,
+    "Inventory": true,
+    "Setting": true,
+    "Rental": true,
+    "Notification": true
 }

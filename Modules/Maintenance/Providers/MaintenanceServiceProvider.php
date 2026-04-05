@@ -36,6 +36,11 @@ class MaintenanceServiceProvider extends ServiceProvider
     {
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
+
+        $this->app->bind(
+            \Modules\Maintenance\Repositories\Contracts\MaintenanceRequestRepositoryInterface::class,
+            \Modules\Maintenance\Repositories\Eloquent\MaintenanceRequestRepository::class
+        );
     }
 
     /**
