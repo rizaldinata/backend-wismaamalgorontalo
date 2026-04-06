@@ -56,6 +56,10 @@ class FinanceService
         return DB::transaction(function () use ($paymentId, $isApproved, $adminNotes) {
             $payment = $this->paymentRepository->findOrFail($paymentId);
 
+            if (in_array($payment->status, [PaymentStatus::VERIFIED, PaymentStatus::REJECTED, PaymentStatus::PAID])) {
+                throw new \DomainException('Pembayaran ini sudah terproses dan tidak bisa diverifikasi ulang.');
+            }
+
             $this->paymentRepository->update($payment, [
                 'status' => $isApproved ? PaymentStatus::VERIFIED : PaymentStatus::REJECTED,
                 'admin_notes' => $adminNotes,
