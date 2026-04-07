@@ -13,5 +13,8 @@ interface InvoiceRepositoryInterface
     public function getTotalRevenueThisMonth(): float;
     public function getTotalUnpaid(): float;
     public function getMonthlyRevenue(int $months = 6): array;
+    public function getRevenueByRentalTypeThisMonth(string $rentalType): float;
+    public function getTotalOverdueAmount(): float;
+    public function countOverdueInvoices(): int;
     public function getDueInvoices(int $limit = 5): Collection;
 }

@@ -78,6 +78,12 @@ class PermissionSeeder extends Seeder
             ['name' => 'finance-dashboard-view', 'target' => 'admin', 'description' => 'Untuk melihat dashboard module finance'],
             ['name' => 'finance-payment-verify', 'target' => 'admin', 'description' => 'Untuk memverifikasi pembayaran yang dilakukan secara manual'],
             ['name' => 'finance-invoice-create', 'target' => 'user', 'description' => 'Untuk pengguna membuat invoice pembayaran baru'],
+
+            ['name' => 'finance-expense-access', 'target' => 'admin', 'description' => 'Akses manajemen pengeluaran'],
+            ['name' => 'finance-expense-view', 'target' => 'admin', 'description' => 'Untuk admin melihat pengeluaran'],
+            ['name' => 'finance-expense-create', 'target' => 'admin', 'description' => 'Untuk admin membuat pengeluaran baru'],
+            ['name' => 'finance-expense-update', 'target' => 'admin', 'description' => 'Untuk admin mengubah pengeluaran'],
+            ['name' => 'finance-expense-delete', 'target' => 'admin', 'description' => 'Untuk admin menghapus pengeluaran'],
         ];
 
         foreach ($permissions as $permission) {
