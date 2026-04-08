@@ -23,7 +23,12 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Gate::before(function ($user, $ability) {
-            return $user->hasROle('super-admin') ? true : null;
+            return $user->hasRole('super-admin') ? true : null;
+        });
+
+        // Mengizinkan akses publik ke dokumentasi API
+        Gate::define('viewApiDocs', function ($user = null) {
+            return true;
         });
 
         Scramble::configure()
