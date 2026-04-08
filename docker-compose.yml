@@ -1,9 +1,7 @@
 services:
+  # Backend (Laravel)
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: ghcr.io/ALFIAN-code/backend-wisma-amal:latest
+    image: ghcr.io/alfian-code/backend-wisma-amal:latest
     restart: unless-stopped
     volumes:
       - ./.env:/var/www/.env
@@ -13,6 +11,7 @@ services:
     networks:
       - app-network
 
+  # Database (MariaDB)
   db:
     image: mariadb:10.11
     restart: unless-stopped
@@ -26,25 +25,25 @@ services:
     networks:
       - app-network
 
+  # Web Server (Nginx)
   nginx:
     image: nginx:alpine
     restart: unless-stopped
     ports:
       - "80:80"
     volumes:
-      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ./public:/var/www/public
       - ./storage:/var/www/storage
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     depends_on:
       - app
       - frontend
     networks:
       - app-network
 
+  # Frontend (Flutter Web)
   frontend:
-    image: ghcr.io/ALFIAN-code/frontend-wisma-amal:latest
+    image: ghcr.io/alfian-code/frontend-wisma-amal:latest
     restart: unless-stopped
     networks:
       - app-network
