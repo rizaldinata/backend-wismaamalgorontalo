@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Modules\Notification\Contracts\WhatsAppProviderInterface;
 
-class FonnteWhatsappProvider implements WhatsAppProviderInterface
+class FonnteWhatsAppProvider implements WhatsAppProviderInterface
 {
     private string $token;
     private string $endpoint = 'https://api.fonnte.com/send';
