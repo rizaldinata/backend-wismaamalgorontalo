@@ -58,8 +58,11 @@ COPY --from=build /var/www /var/www
 # Set permissions
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# Performance optimization: PHP-FPM settings (optional but good)
-# RUN sed -i 's/pm.max_children = 5/pm.max_children = 20/' /usr/local/etc/php-fpm.d/www.conf
+# Copy entrypoint script
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 9000
+
+ENTRYPOINT ["entrypoint.sh"]
 CMD ["php-fpm"]

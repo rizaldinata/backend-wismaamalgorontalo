@@ -26,20 +26,23 @@ services:
     networks:
       - app-network
 
-  nginx:
+   nginx:
     image: nginx:alpine
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "80:80" # Mapping port 80 laptop ke 80 container
     volumes:
-      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ./public:/var/www/public
       - ./storage:/var/www/storage
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # Agar container bisa akses port 8080 di laptop Anda
     depends_on:
       - app
       - frontend
     networks:
       - app-network
+
 
   frontend:
     # This will be updated by the frontend repo's CI
