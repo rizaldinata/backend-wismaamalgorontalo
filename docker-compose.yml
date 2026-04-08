@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/backend-wisma-amal:latest
+    image: ghcr.io/ALFIAN-code/backend-wisma-amal:latest
     restart: unless-stopped
     volumes:
       - ./.env:/var/www/.env
@@ -43,7 +43,7 @@ services:
 
   frontend:
     # This will be updated by the frontend repo's CI
-    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/frontend-wisma-amal:latest
+    image: ghcr.io/ALFIAN-code/frontend-wisma-amal:latest
     restart: unless-stopped
     networks:
       - app-network
