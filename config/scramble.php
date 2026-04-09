@@ -100,7 +100,8 @@ return [
      * ```
      */
     'servers' => [
-        'Production' => 'https://alfian.taild9066e.ts.net/be',
+        'Local' => url('/api'),
+        'Production' => 'https://alfian.taild9066e.ts.net/be/api',
     ],
 
     /**
