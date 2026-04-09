@@ -100,6 +100,7 @@ return [
      * ```
      */
     'servers' => [
+        'Local' => url('/'),
         'Production' => 'https://alfian.taild9066e.ts.net/be',
     ],
 
