@@ -34,19 +34,23 @@ class RentalService
         }
 
         $startDate = Carbon::parse($data['start_date']);
-        $endDate = $startDate->copy()->addMonths((int) $data['duration']);
+        $rentalType = RentalType::tryFrom($data['rental_type']) ?? RentalType::MONTHLY;
+
+        $endDate = $rentalType === RentalType::DAILY
+            ? $startDate->copy()->addDays((int) $data['duration'])
+            : $startDate->copy()->addMonths((int) $data['duration']);
 
         $lease = $this->leaseRepository->create([
             'resident_id' => $resident->id,
             'room_id' => $data['room_id'],
             'start_date' => $startDate,
             'end_date' => $endDate,
-            'rental_type' => RentalType::MONTHLY->value,
+            'rental_type' => $rentalType->value,
             'status' => LeaseStatus::PENDING->value,
         ]);
 
-        $pricePerMonth = $this->roomAvailabilityService->getPrice($data['room_id']);
-        $totalAmount = $pricePerMonth * $data['duration'];
+        $pricePerUnit = $this->roomAvailabilityService->getPrice($data['room_id'], $rentalType);
+        $totalAmount = $pricePerUnit * $data['duration'];
 
         $financeService = app(FinanceService::class);
         $financeService->generateInvoiceForLease($lease->id, $totalAmount, $startDate);

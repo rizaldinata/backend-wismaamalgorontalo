@@ -101,6 +101,13 @@ class RolePermissionSeeder extends Seeder
             'finance-management-access',
             'finance-dashboard-view',
             'finance-payment-verify',
+
+            // expense management
+            'finance-expense-access',
+            'finance-expense-view',
+            'finance-expense-create',
+            'finance-expense-update',
+            'finance-expense-delete',
         ];
 
         $residentPermissions = [

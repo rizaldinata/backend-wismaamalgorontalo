@@ -36,6 +36,16 @@ class NotificationServiceProvider extends ServiceProvider
     {
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
+
+        $this->app->bind(
+            \Modules\Notification\Contracts\WhatsAppProviderInterface::class,
+            \Modules\Notification\Infrastructure\Providers\FonnteWhatsAppProvider::class
+        );
+    
+        $this->app->bind(
+            \Modules\Notification\Contracts\NotificationRepositoryInterface::class,
+            \Modules\Notification\Repositories\NotificationRepository::class
+        );
     }
 
     /**
