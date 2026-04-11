@@ -110,6 +110,13 @@ Modul ini menyertakan `MaintenanceRequestSeeder` yang menghasilkan data dummy un
 > [!NOTE]
 > Selalu gunakan `Modules\Auth\Models\User` daripada `App\Models\User` (default Laravel) di dalam modul untuk menjaga konsistensi dengan sistem Auth modular.
 
+### 6.5 Manajemen Inventaris (Inventory Module)
+Modul ini menangani pencatatan aset barang di Wisma. 
+Logika kuncinya:
+- **Otomatisasi Finansial**: Setiap penambahan barang dengan `purchase_price` akan otomatis memanggil `FinanceService@recordExpense` untuk mencatat pengeluaran di laporan keuangan.
+- **Sinkronisasi Revisi**: Update pada harga beli barang akan melakukan *sync* terhadap data pengeluaran terkait di modul Finance menggunakan mekanisme `ByReference`.
+- **Enum-based Condition**: Menggunakan Enum `ItemCondition` (good, fair, broken, lost) untuk validasi status barang yang konsisten antara Database dan UI.
+
 ---
 
 ## 7. Workflow Pengembangan Fitur Baru

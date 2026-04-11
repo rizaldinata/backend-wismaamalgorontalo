@@ -5,7 +5,7 @@ namespace Modules\Inventory\Transformers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class StoreInventoryResource extends JsonResource
+class InventoryResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
