@@ -3,6 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Maintenance\Http\Controllers\AdminMaintenanceController;
 use Modules\Maintenance\Http\Controllers\MaintenanceController;
+use Modules\Maintenance\Http\Controllers\MediaController;
+
+Route::get('maintenance/media/{path}', [MediaController::class, 'show'])->where('path', '.*');
 
 Route::middleware(['auth:sanctum'])->prefix('v1/maintenance')->group(function () {
     // Resident routes
