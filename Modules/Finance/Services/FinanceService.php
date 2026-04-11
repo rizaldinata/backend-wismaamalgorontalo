@@ -9,7 +9,7 @@ use Modules\Finance\Contracts\PaymentStrategyInterface;
 use Modules\Finance\Enums\InvoiceStatus;
 use Modules\Finance\Enums\PaymentStatus;
 use Modules\Finance\Events\PaymentSettled;
-use Modules\Finance\Models\Payment; // dibutuhkan sebagai return type hint
+use Modules\Finance\Models\Payment; 
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
 use Modules\Finance\Strategies\ManualPaymentStrategy;
@@ -95,32 +95,25 @@ class FinanceService
         $grossAmount = $payload['gross_amount'];
         $serverKey = config('finance.midtrans.server_key');
 
-        // 1. Verifikasi Signature Key (Wajib demi keamanan!)
         $signatureKey = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
         if ($signatureKey !== $payload['signature_key']) {
             throw new \DomainException('Invalid Signature');
         }
 
-        // 2. Cari data pembayaran berdasarkan Order ID
         $payment = $this->paymentRepository->findByReference($orderId);
         if (!$payment) return;
 
         $transactionStatus = $payload['transaction_status'];
         $invoice = $payment->invoice;
 
-        // 3. Update status pembayaran dan invoice
         if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
             $this->paymentRepository->update($payment, ['status' => PaymentStatus::PAID->value]);
             $this->invoiceRepository->updateStatus($invoice, InvoiceStatus::PAID->value);
-
-            // Panggil fungsi untuk mengaktifkan sewa (kamar jadi tidak tersedia)
             $this->rentalService->activateLease($invoice->lease_id);
             event(new PaymentSettled($payment));
         } elseif ($transactionStatus == 'cancel' || $transactionStatus == 'deny' || $transactionStatus == 'expire') {
             $this->paymentRepository->update($payment, ['status' => PaymentStatus::FAILED->value]);
-            $this->invoiceRepository->updateStatus($invoice, InvoiceStatus::UNPAID->value); // Kembali ke unpaid agar bisa dibayar ulang
-
-            // Panggil fungsi untuk membatalkan sewa (kamar kembali tersedia)
+            $this->invoiceRepository->updateStatus($invoice, InvoiceStatus::UNPAID->value); 
             $this->rentalService->cancelLease($invoice->lease_id);
         }
     }
