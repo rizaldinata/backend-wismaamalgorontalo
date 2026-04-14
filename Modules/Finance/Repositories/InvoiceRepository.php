@@ -3,12 +3,23 @@
 namespace Modules\Finance\Repositories;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Modules\Finance\Enums\InvoiceStatus;
 use Modules\Finance\Models\Invoice;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 
 class InvoiceRepository implements InvoiceRepositoryInterface
 {
+    public function getPaginated(int $perPage = 15, array $filters = []): LengthAwarePaginator
+    {
+        $query = Invoice::with(['lease.resident', 'lease.room'])->orderBy('created_at', 'desc');
+
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        return $query->paginate($perPage);
+    }
     public function findById(int $id): ?Invoice
     {
         return Invoice::findOrFail($id);

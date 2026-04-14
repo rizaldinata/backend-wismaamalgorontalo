@@ -59,29 +59,15 @@ class ExpenseController extends Controller
     {
         $expense = $this->expenseRepository->findOrFail($id);
 
-        try {
-            $updatedExpense = $this->expenseService->updateManualExpense($expense, $request->validated());
-            return $this->apiSuccess(new ExpenseResource($updatedExpense), 'Data pengeluaran berhasil diperbarui');
-        } catch (DomainException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 403);
-        }
+        $updatedExpense = $this->expenseService->updateManualExpense($expense, $request->validated());
+        return $this->apiSuccess(new ExpenseResource($updatedExpense), 'Data pengeluaran berhasil diperbarui');
     }
 
     public function destroy(int $id)
     {
         $expense = $this->expenseRepository->findOrFail($id);
 
-        try {
-            $this->expenseService->deleteManualExpense($expense);
-            return $this->apiSuccess(null, 'Data pengeluaran berhasil dihapus');
-        } catch (DomainException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 403);
-        }
+        $this->expenseService->deleteManualExpense($expense);
+        return $this->apiSuccess(null, 'Data pengeluaran berhasil dihapus');
     }
 }

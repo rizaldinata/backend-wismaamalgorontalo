@@ -86,20 +86,7 @@ class FinanceService
 
     public function handleMidtransNotification(array $payload)
     {
-        if (!isset($payload['order_id']) || !isset($payload['signature_key'])) {
-            return;
-        }
-
         $orderId = $payload['order_id'];
-        $statusCode = $payload['status_code'];
-        $grossAmount = $payload['gross_amount'];
-        $serverKey = config('finance.midtrans.server_key');
-
-        $signatureKey = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
-        if ($signatureKey !== $payload['signature_key']) {
-            throw new \DomainException('Invalid Signature');
-        }
-
         $payment = $this->paymentRepository->findByReference($orderId);
         if (!$payment) return;
 
