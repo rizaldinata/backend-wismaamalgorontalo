@@ -78,7 +78,7 @@ class MidtransPaymentStrategy implements PaymentStrategyInterface
                 'admin_notes' => 'Midtrans Error: ' . $e->getMessage(),
             ]);
 
-            throw new \DomainException('Gagal menghubungi server pembayaran: ' . $e->getMessage());
+            throw new \DomainException('Gagal memproses metode pembayaran. Silakan coba kembali beberapa saat lagi.');
         }
     }
 }

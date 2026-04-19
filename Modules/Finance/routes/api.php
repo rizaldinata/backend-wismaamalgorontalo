@@ -3,10 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Finance\Http\Controllers\DashboardController;
 use Modules\Finance\Http\Controllers\ExpenseController;
+use Modules\Finance\Http\Controllers\InvoiceController;
 use Modules\Finance\Http\Controllers\PaymentController;
+use Modules\Finance\Http\Middleware\VerifyMidtransSignature;
 
-
-Route::post('/finance/payments/midtrans/notification', [PaymentController::class, 'midtransNotification']);
+Route::post('/finance/payments/midtrans/notification', [PaymentController::class, 'midtransNotification'])
+    ->middleware(VerifyMidtransSignature::class);
 
 Route::prefix('finance/')->middleware(['auth:sanctum'])->group(function () {
     Route::prefix('dashboard')->middleware('permission:finance-dashboard-view')->group(function () {
@@ -27,6 +29,9 @@ Route::prefix('finance/')->middleware(['auth:sanctum'])->group(function () {
     Route::post('/payments/{paymentId}/verify', [PaymentController::class, 'verify'])
         ->middleware('permission:finance-payment-verify');
 
-    Route::post('/invoices/{invoiceId}/pay', [PaymentController::class, 'pay'])
-        ->middleware('permission:finance-invoice-create');
+    Route::prefix('invoices')->group(function () {
+        Route::get('/', [InvoiceController::class, 'index'])->middleware('permission:finance-invoice-view');
+        Route::get('/{id}', [InvoiceController::class, 'show'])->middleware('permission:finance-invoice-view');
+        Route::post('/{invoiceId}/pay', [PaymentController::class, 'pay'])->middleware('permission:finance-invoice-create');
+    });
 });
