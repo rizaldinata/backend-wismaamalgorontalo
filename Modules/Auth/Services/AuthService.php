@@ -20,8 +20,14 @@ class AuthService
             ]);
 
             $user->assignRole('member');
+            
+            $token = $user->createToken('auth_token')->plainTextToken;
 
-            return $user;
+            return [
+                'user' => $user,
+                'token' => $token,
+                'role' => 'member',
+            ];
         });
     }
 

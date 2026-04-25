@@ -25,6 +25,11 @@ class RoomService implements RoomAvailabilityService
         return $this->roomRepository->getAllPaginated($filters);
     }
 
+    public function getRoomSchedules()
+    {
+        return $this->roomRepository->getAllWithSchedules();
+    }
+
     public function getRoomDetails(int $id): Room
     {
         return $this->roomRepository->findById($id);
