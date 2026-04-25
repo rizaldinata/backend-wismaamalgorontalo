@@ -153,7 +153,7 @@ class DummyDataSeeder extends Seeder
             ]);
             $user->email_verified_at = now();
             $user->save();
-            $user->assignRole('resident');
+            $user->assignRole('member');
 
             Resident::create([
                 'user_id' => $user->id,

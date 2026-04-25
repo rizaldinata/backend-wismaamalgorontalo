@@ -14,7 +14,6 @@ class RolePermissionSeeder extends Seeder
 
         $superAdmin = Role::findByName('super-admin', 'api');
         $admin = Role::findByName('admin', 'api');
-        $resident = Role::findByName('resident', 'api');
         $member = Role::findByName('member', 'api');
 
         $superAdminPermissions = [
@@ -55,7 +54,7 @@ class RolePermissionSeeder extends Seeder
             // sewa menyewa
             'view-lease',
             'approve-lease',
-            
+
             // finance management
             'finance-management-access',
             'finance-dashboard-view',
@@ -124,7 +123,7 @@ class RolePermissionSeeder extends Seeder
             'finance-expense-create',
             'finance-expense-update',
             'finance-expense-delete',
-            
+
             // invoice management
             'finance-invoice-view',
 
@@ -134,20 +133,14 @@ class RolePermissionSeeder extends Seeder
             'setting-update',
         ];
 
-        $residentPermissions = [
-            'view-room',
-            'view-lease',
-            'finance-invoice-create'
-        ];
-
         $memberPermissions = [
             'view-room',
+            'view-lease',
             'finance-invoice-create',
         ];
 
         $superAdmin->syncPermissions($superAdminPermissions);
         $admin->syncPermissions($adminPermissions);
-        $resident->syncPermissions($residentPermissions);
         $member->syncPermissions($memberPermissions);
 
         $this->command->info('Relasi Role dan Permission berhasil disinkronkan!');

@@ -11,10 +11,12 @@ Route::get('maintenance/media/{path}', [MediaController::class, 'show'])->where(
 
 // Damage Reports (Laporan Kerusakan dari Penghuni)
 Route::middleware(['auth:sanctum'])->prefix('v1/damage-reports')->group(function () {
-    // Resident routes
-    Route::get('/my-reports', [DamageReportController::class, 'myReports']);
-    Route::get('/{id}', [DamageReportController::class, 'show'])->where('id', '[0-9]+');
-    Route::post('/', [DamageReportController::class, 'store']);
+    // Resident routes (Only for active residents)
+    Route::middleware(['can:resident-access'])->group(function () {
+        Route::get('/my-reports', [DamageReportController::class, 'myReports']);
+        Route::get('/{id}', [DamageReportController::class, 'show'])->where('id', '[0-9]+');
+        Route::post('/', [DamageReportController::class, 'store']);
+    });
 
     // Admin routes
     Route::prefix('admin')->group(function () {
@@ -33,5 +35,3 @@ Route::middleware(['auth:sanctum'])->prefix('v1/schedules')->group(function () {
     Route::delete('/{id}', [ScheduleController::class, 'destroy']);
     Route::post('/{id}/updates', [ScheduleController::class, 'storeUpdate']);
 });
-
-
