@@ -83,4 +83,39 @@ class AuthController extends Controller
 
         return $this->apiSuccess($permissions, 'User permissions retrieved successfully');
     }
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+        
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'phone_number' => 'nullable|string|max:20',
+        ]);
+
+        $user->update($validated);
+
+        return $this->apiSuccess($user, 'Profil berhasil diperbarui');
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'old_password' => 'required',
+            'new_password' => 'required|min:8|confirmed',
+        ]);
+
+        $user = $request->user();
+
+        if (!Hash::check($request->old_password, $user->password)) {
+            return $this->apiError('Password lama tidak sesuai', 422);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->new_password)
+        ]);
+
+        return $this->apiSuccess(null, 'Password berhasil diubah');
+    }
 }
