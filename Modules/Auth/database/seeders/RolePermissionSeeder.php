@@ -55,9 +55,25 @@ class RolePermissionSeeder extends Seeder
             // sewa menyewa
             'view-lease',
             'approve-lease',
+            
+            // finance management
+            'finance-management-access',
+            'finance-dashboard-view',
+            'finance-payment-verify',
+            'finance-invoice-view',
+
+            // expense management
+            'finance-expense-access',
+            'finance-expense-view',
+            'finance-expense-create',
+            'finance-expense-update',
+            'finance-expense-delete',
+
+            // setting management
+            'setting-management-access',
+            'setting-view',
+            'setting-update',
         ];
-
-
         $adminPermissions = [
             // redirect akses
             'access-admin-panel',
@@ -108,6 +124,14 @@ class RolePermissionSeeder extends Seeder
             'finance-expense-create',
             'finance-expense-update',
             'finance-expense-delete',
+            
+            // invoice management
+            'finance-invoice-view',
+
+            // setting management
+            'setting-management-access',
+            'setting-view',
+            'setting-update',
         ];
 
         $residentPermissions = [

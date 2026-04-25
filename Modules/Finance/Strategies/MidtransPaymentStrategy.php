@@ -17,8 +17,9 @@ class MidtransPaymentStrategy implements PaymentStrategyInterface
     public function __construct(
         private readonly PaymentRepositoryInterface $paymentRepository
     ) {
-        Config::$serverKey = config('finance.midtrans.server_key');
-        Config::$isProduction = config('finance.midtrans.is_production');
+        $settingService = app(\Modules\Setting\Services\SettingService::class);
+        Config::$serverKey = $settingService->getMidtransServerKey();
+        Config::$isProduction = $settingService->isMidtransProduction();
         Config::$isSanitized = true;
         Config::$is3ds = true;
         Config::$overrideNotifUrl = config('finance.midtrans.notification_url');
@@ -60,6 +61,11 @@ class MidtransPaymentStrategy implements PaymentStrategyInterface
                 ]
             ]
         ];
+
+        $enabledPayments = app(\Modules\Setting\Services\SettingService::class)->getMidtransEnabledPayments();
+        if (!empty($enabledPayments)) {
+            $params['enabled_payments'] = $enabledPayments;
+        }
 
         try {
             // 3. Dapatkan Snap Token dari Midtrans

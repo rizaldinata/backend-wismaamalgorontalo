@@ -7,6 +7,7 @@ use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Transformers\InvoiceResource;
+use Modules\Setting\Services\SettingService;
 
 class InvoiceController extends Controller
 {
@@ -48,5 +49,18 @@ class InvoiceController extends Controller
         $invoice->load(['lease.resident', 'lease.room', 'payments']);
 
         return $this->apiSuccess(new InvoiceResource($invoice), 'Detail tagihan berhasil diambil');
+    }
+
+    public function printPdf(int $id)
+    {
+        $invoice = $this->invoiceRepository->findById($id);
+        if (!$invoice) abort(404);
+
+        $invoice->load(['lease.resident', 'lease.room', 'payments']);
+
+        $settingService = app(SettingService::class);
+        $wismaName = $settingService->getSettingValue('wisma_name', 'Wisma Amal Gorontalo');
+
+        return view('finance::invoice-print', compact('invoice', 'wismaName'));
     }
 }

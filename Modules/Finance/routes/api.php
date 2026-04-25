@@ -26,12 +26,17 @@ Route::prefix('finance/')->middleware(['auth:sanctum'])->group(function () {
         Route::delete('/{id}', [ExpenseController::class, 'destroy'])->middleware('permission:finance-expense-delete');
     });
 
-    Route::post('/payments/{paymentId}/verify', [PaymentController::class, 'verify'])
-        ->middleware('permission:finance-payment-verify');
+    Route::prefix('payments')->group(function () {
+        Route::get('/', [PaymentController::class, 'index'])->middleware('permission:finance-payment-view');
+        Route::get('/{id}', [PaymentController::class, 'show'])->middleware('permission:finance-payment-view');
+        Route::post('/{paymentId}/verify', [PaymentController::class, 'verify'])->middleware('permission:finance-payment-verify');
+        Route::post('/{paymentId}/refund', [PaymentController::class, 'refund'])->middleware('permission:finance-payment-refund');
+    });
 
     Route::prefix('invoices')->group(function () {
         Route::get('/', [InvoiceController::class, 'index'])->middleware('permission:finance-invoice-view');
         Route::get('/{id}', [InvoiceController::class, 'show'])->middleware('permission:finance-invoice-view');
+        Route::get('/{id}/print', [InvoiceController::class, 'printPdf'])->middleware('permission:finance-invoice-view');
         Route::post('/{invoiceId}/pay', [PaymentController::class, 'pay'])->middleware('permission:finance-invoice-create');
     });
 });

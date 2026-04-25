@@ -84,6 +84,12 @@ class PermissionSeeder extends Seeder
             ['name' => 'finance-expense-create', 'target' => 'admin', 'description' => 'Untuk admin membuat pengeluaran baru'],
             ['name' => 'finance-expense-update', 'target' => 'admin', 'description' => 'Untuk admin mengubah pengeluaran'],
             ['name' => 'finance-expense-delete', 'target' => 'admin', 'description' => 'Untuk admin menghapus pengeluaran'],
+            ['name' => 'finance-invoice-view', 'target' => 'admin', 'description' => 'Melihat daftar seluruh tagihan'],
+
+            // Setting management
+            ['name' => 'setting-management-access', 'target' => 'super-admin', 'description' => 'Akses manajemen pengaturan white-label'],
+            ['name' => 'setting-view', 'target' => 'super-admin', 'description' => 'Melihat detail pengaturan Midtrans dan Aplikasi'],
+            ['name' => 'setting-update', 'target' => 'super-admin', 'description' => 'Menyimpan pembaruan ke tabel pengaturan'],
         ];
 
         foreach ($permissions as $permission) {
