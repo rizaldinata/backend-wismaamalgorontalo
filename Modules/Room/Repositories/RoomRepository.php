@@ -11,8 +11,8 @@ class RoomRepository implements RoomRepositoryInterface
     public function getAllPaginated(array $filters = [])
     {
         return Room::query()
-            ->when(isset($filters['type']), function ($q) use ($filters) {
-                $q->where('title', 'like', '%' . $filters['saerch'] . '%')
+            ->when(isset($filters['search']), function ($q) use ($filters) {
+                $q->where('title', 'like', '%' . $filters['search'] . '%')
                     ->orWhere('description', 'like', '%' . $filters['search'] . '$')
                     ->orWhere('number', 'like', '%' . $filters['search'] . '%');
             })
@@ -37,6 +37,11 @@ class RoomRepository implements RoomRepositoryInterface
     {
         $room->update($data);
         return $room;
+    }
+
+    public function getAllWithSchedules()
+    {
+        return Room::with(['leases.resident.user'])->get();
     }
 
     public function delete(Room $room): void

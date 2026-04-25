@@ -39,6 +39,11 @@ class ResidentService
 
         $data['ktp_photo_path'] = $ktpPath;
 
-        return $this->residentRepository->updateOrCreateByUserId($userId, $data);
+        $resident = $this->residentRepository->updateOrCreateByUserId($userId, $data);
+        
+        // Otomatis upgrade role ke resident
+        $resident->user->syncRoles(['resident']);
+        
+        return $resident;
     }
 }

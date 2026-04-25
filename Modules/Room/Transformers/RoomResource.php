@@ -29,6 +29,7 @@ class RoomResource extends JsonResource
                     ];
                 });
             }),
+            'schedules' => \Modules\Rental\Transformers\LeaseResource::collection($this->whenLoaded('leases')),
         ];
     }
 }
