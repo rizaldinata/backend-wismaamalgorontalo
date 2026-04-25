@@ -34,6 +34,11 @@ class AppServiceProvider extends ServiceProvider
             return true;
         });
 
+        // Gate khusus penghuni aktif
+        Gate::define('resident-access', function ($user) {
+            return $user->hasActiveLease();
+        });
+
         Scramble::configure()
             ->withDocumentTransformers(function (OpenApi $openApi) {
                 $openApi->secure(

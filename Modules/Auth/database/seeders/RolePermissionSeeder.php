@@ -14,7 +14,6 @@ class RolePermissionSeeder extends Seeder
 
         $superAdmin = Role::findByName('super-admin', 'api');
         $admin = Role::findByName('admin', 'api');
-        $resident = Role::findByName('resident', 'api');
         $member = Role::findByName('member', 'api');
 
         $superAdminPermissions = [
@@ -42,7 +41,8 @@ class RolePermissionSeeder extends Seeder
             'delete-room',
             'view-lease',
             'approve-lease',
-            'create-lease',
+
+            // finance management
             'finance-management-access',
             'finance-dashboard-view',
             'finance-payment-verify',
@@ -108,47 +108,24 @@ class RolePermissionSeeder extends Seeder
             'finance-expense-create',
             'finance-expense-update',
             'finance-expense-delete',
-            'access-inventory-management',
-            'view-inventory',
-            'create-inventory',
-            'update-inventory',
-            'delete-inventory',
-            'access-maintenance-management',
-            'view-maintenance',
-            'create-maintenance',
-            'update-maintenance',
-            'delete-maintenance',
-            'schedule-maintenance',
-            'view-damage-report',
-            'access-resident-management',
-            'view-resident',
-            'create-resident',
-            'update-resident',
-            'delete-resident',
-        ];
 
-        $residentPermissions = [
-            'access-resident-area',
-            'view-room',
-            'view-lease',
-            'create-lease',
-            'pay_lease_bill',
+            // invoice management
             'finance-invoice-view',
-            'finance-invoice-create',
-            'create-maintenance',
-            'view-maintenance',
-            'complete-resident-profile',
+
+            // setting management
+            'setting-management-access',
+            'setting-view',
+            'setting-update',
         ];
 
         $memberPermissions = [
             'view-room',
-            'create-lease',
-            'complete-resident-profile',
+            'view-lease',
+            'finance-invoice-create',
         ];
 
         $superAdmin->syncPermissions($superAdminPermissions);
         $admin->syncPermissions($adminPermissions);
-        $resident->syncPermissions($residentPermissions);
         $member->syncPermissions($memberPermissions);
 
         $this->command->info('Relasi Role dan Permission berhasil disinkronkan!');

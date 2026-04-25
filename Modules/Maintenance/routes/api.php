@@ -45,5 +45,3 @@ Route::middleware(['auth:sanctum'])->prefix('v1/schedules')->group(function () {
     Route::post('/{id}/updates', [ScheduleController::class, 'storeUpdate'])
         ->middleware('permission:schedule-maintenance');
 });
-
-

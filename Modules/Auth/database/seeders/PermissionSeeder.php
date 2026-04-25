@@ -69,10 +69,6 @@ class PermissionSeeder extends Seeder
             ['name' => 'approve-lease', 'target' => 'admin', 'description' => 'Menyetujui atau menolak penyewaan'],
             ['name' => 'create-lease', 'target' => 'user', 'description' => 'Mengajukan penyewaan kamar baru'],
 
-            // Permission khusus untuk role Resident (tidak boleh diassign ke role lain)
-            ['name' => 'pay_lease_bill', 'target' => 'resident', 'description' => 'Izin untuk membayar tagihan sewa'],
-            // Area khusus penhuni (untuk dipancing menunya)
-            ['name' => 'access-resident-area', 'target' => 'resident', 'description' => 'Akses area khusus penghuni'],
 
             // Finance managemet
             ['name' => 'finance-management-access', 'target' => 'admin', 'description' => 'Akses manajemen keuangan'],

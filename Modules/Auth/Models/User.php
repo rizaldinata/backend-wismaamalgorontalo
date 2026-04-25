@@ -41,6 +41,22 @@ class User extends Authenticatable
         return $this->hasOne(Resident::class);
     }
 
+    public function leases()
+    {
+        return $this->hasManyThrough(\Modules\Rental\Models\Lease::class, Resident::class);
+    }
+
+    public function hasActiveLease(): bool
+    {
+        return $this->leases()
+            ->where('status', \Modules\Rental\Enums\LeaseStatus::ACTIVE->value)
+            ->where(function ($query) {
+                $query->whereNull('end_date')
+                    ->orWhere('end_date', '>=', now()->startOfDay());
+            })
+            ->exists();
+    }
+
     protected static function newFactory()
     {
         return UserFactory::new();
