@@ -12,6 +12,7 @@ use Modules\Room\Enums\RoomStatus;
 use Modules\Room\Models\Room;
 use Modules\Room\Models\RoomImage;
 use Modules\Room\Repositories\Contracts\RoomRepositoryInterface;
+use Modules\Rental\Enums\RentalType;
 
 class RoomService implements RoomAvailabilityService
 {
@@ -22,6 +23,11 @@ class RoomService implements RoomAvailabilityService
     public function getAllRooms(array $filters = [])
     {
         return $this->roomRepository->getAllPaginated($filters);
+    }
+
+    public function getRoomSchedules()
+    {
+        return $this->roomRepository->getAllWithSchedules();
     }
 
     public function getRoomDetails(int $id): Room
@@ -122,9 +128,10 @@ class RoomService implements RoomAvailabilityService
         $this->roomRepository->update($room, ['status' => RoomStatus::AVAILABLE]);
     }
 
-    public function getPrice(int $roomId): float
+    public function getPrice(int $roomId, RentalType $type = RentalType::MONTHLY): float
     {
-        return $this->roomRepository->findById($roomId)->price;
+        $room = $this->roomRepository->findById($roomId);
+        return $type === RentalType::DAILY ? (float) $room->price_daily : (float) $room->price;
     }
 
     public function getName(int $roomId): string

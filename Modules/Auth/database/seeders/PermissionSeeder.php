@@ -67,6 +67,7 @@ class PermissionSeeder extends Seeder
             // Lease Management
             ['name' => 'view-lease', 'target' => 'admin', 'description' => 'Melihat daftar penyewaan'],
             ['name' => 'approve-lease', 'target' => 'admin', 'description' => 'Menyetujui atau menolak penyewaan'],
+            ['name' => 'create-lease', 'target' => 'user', 'description' => 'Mengajukan penyewaan kamar baru'],
 
             // Permission khusus untuk role Resident (tidak boleh diassign ke role lain)
             ['name' => 'pay_lease_bill', 'target' => 'resident', 'description' => 'Izin untuk membayar tagihan sewa'],
@@ -78,13 +79,49 @@ class PermissionSeeder extends Seeder
             ['name' => 'finance-dashboard-view', 'target' => 'admin', 'description' => 'Untuk melihat dashboard module finance'],
             ['name' => 'finance-payment-verify', 'target' => 'admin', 'description' => 'Untuk memverifikasi pembayaran yang dilakukan secara manual'],
             ['name' => 'finance-invoice-create', 'target' => 'user', 'description' => 'Untuk pengguna membuat invoice pembayaran baru'],
+
+            ['name' => 'finance-expense-access', 'target' => 'admin', 'description' => 'Akses manajemen pengeluaran'],
+            ['name' => 'finance-expense-view', 'target' => 'admin', 'description' => 'Untuk admin melihat pengeluaran'],
+            ['name' => 'finance-expense-create', 'target' => 'admin', 'description' => 'Untuk admin membuat pengeluaran baru'],
+            ['name' => 'finance-expense-update', 'target' => 'admin', 'description' => 'Untuk admin mengubah pengeluaran'],
+            ['name' => 'finance-expense-delete', 'target' => 'admin', 'description' => 'Untuk admin menghapus pengeluaran'],
+            ['name' => 'finance-invoice-view', 'target' => 'admin', 'description' => 'Melihat daftar seluruh tagihan'],
+
+            // Inventory Module
+            ['name' => 'access-inventory-management', 'target' => 'admin', 'description' => 'Akses manajemen inventaris'],
+            ['name' => 'view-inventory', 'target' => 'admin', 'description' => 'Melihat daftar inventaris'],
+            ['name' => 'create-inventory', 'target' => 'admin', 'description' => 'Menambah barang inventaris'],
+            ['name' => 'update-inventory', 'target' => 'admin', 'description' => 'Mengubah data inventaris'],
+            ['name' => 'delete-inventory', 'target' => 'admin', 'description' => 'Menghapus data inventaris'],
+
+            // Maintenance Module
+            ['name' => 'access-maintenance-management', 'target' => 'admin', 'description' => 'Akses manajemen pemeliharaan'],
+            ['name' => 'view-maintenance', 'target' => 'admin', 'description' => 'Melihat daftar tugas pemeliharaan'],
+            ['name' => 'create-maintenance', 'target' => 'admin', 'description' => 'Membuat request pemeliharaan'],
+            ['name' => 'update-maintenance', 'target' => 'admin', 'description' => 'Memperbarui status pemeliharaan'],
+            ['name' => 'delete-maintenance', 'target' => 'admin', 'description' => 'Menghapus data pemeliharaan'],
+            ['name' => 'schedule-maintenance', 'target' => 'admin', 'description' => 'Membuat jadwal pemeliharaan'],
+            ['name' => 'view-damage-report', 'target' => 'admin', 'description' => 'Melihat laporan kerusakan dari penghuni'],
+
+            // Resident Module Specific
+            ['name' => 'access-resident-management', 'target' => 'admin', 'description' => 'Akses manajemen data penghuni'],
+            ['name' => 'view-resident', 'target' => 'admin', 'description' => 'Melihat daftar penghuni'],
+            ['name' => 'create-resident', 'target' => 'admin', 'description' => 'Menambah penghuni baru secara manual'],
+            ['name' => 'update-resident', 'target' => 'admin', 'description' => 'Mengubah data penghuni'],
+            ['name' => 'delete-resident', 'target' => 'admin', 'description' => 'Menghapus data penghuni'],
+            ['name' => 'complete-resident-profile', 'target' => 'user', 'description' => 'Melengkapi profil untuk menjadi penghuni resmi'],
+
+            // Setting management
+            ['name' => 'setting-management-access', 'target' => 'super-admin', 'description' => 'Akses manajemen pengaturan white-label'],
+            ['name' => 'setting-view', 'target' => 'super-admin', 'description' => 'Melihat detail pengaturan Midtrans dan Aplikasi'],
+            ['name' => 'setting-update', 'target' => 'super-admin', 'description' => 'Menyimpan pembaruan ke tabel pengaturan'],
         ];
 
         foreach ($permissions as $permission) {
             Permission::updateOrCreate(
                 ['name' => $permission['name'], 'guard_name' => 'api'],
                 [
-                    'target' => $permission['target'],
+                    'target' => strtolower($permission['target']),
                     'description' => $permission['description'],
                 ]
             );

@@ -7,15 +7,15 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Modules\Maintenance\Enums\MaintenanceStatus;
 use Modules\Maintenance\Models\MaintenanceRequest;
-use Modules\Maintenance\Repositories\Contracts\MaintenanceRequestRepositoryInterface;
+use Modules\Maintenance\Repositories\Contracts\DamageReportRepositoryInterface;
 use Modules\Resident\Repositories\Contracts\ResidentRepositoryInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class MaintenanceService
+class DamageReportService
 {
     public function __construct(
-        private readonly MaintenanceRequestRepositoryInterface $requestRepository,
+        private readonly DamageReportRepositoryInterface $requestRepository,
         private readonly ResidentRepositoryInterface $residentRepository
     ) {}
 

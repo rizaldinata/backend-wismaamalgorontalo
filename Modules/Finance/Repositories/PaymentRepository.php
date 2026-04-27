@@ -3,12 +3,27 @@
 namespace Modules\Finance\Repositories;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Modules\Finance\Enums\PaymentStatus;
 use Modules\Finance\Models\Payment;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
 
 class PaymentRepository implements PaymentRepositoryInterface
 {
+    public function getPaginated(int $perPage = 15, array $filters = []): LengthAwarePaginator
+    {
+        $query = Payment::with(['invoice.lease.resident', 'invoice.lease.room'])->orderBy('created_at', 'desc');
+
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+        
+        if (!empty($filters['payment_method'])) {
+            $query->where('payment_method', $filters['payment_method']);
+        }
+
+        return $query->paginate($perPage);
+    }
     public function findOrFail(int $id): Payment
     {
         return Payment::findOrFail($id);

@@ -6,15 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Auth;
 use Modules\Maintenance\Http\Requests\StoreMaintenanceRequest;
-use Modules\Maintenance\Services\MaintenanceService;
+use Modules\Maintenance\Services\DamageReportService;
 use Modules\Maintenance\Transformers\MaintenanceRequestResource;
 
-class MaintenanceController extends Controller
+class DamageReportController extends Controller
 {
     use ApiResponse;
 
     public function __construct(
-        private readonly MaintenanceService $maintenanceService
+        private readonly DamageReportService $maintenanceService
     ) {}
 
     public function myReports()

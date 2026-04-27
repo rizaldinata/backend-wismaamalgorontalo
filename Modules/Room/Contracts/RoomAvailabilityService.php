@@ -2,6 +2,8 @@
 
 namespace Modules\Room\Contracts;
 
+use Modules\Rental\Enums\RentalType;
+
 interface RoomAvailabilityService
 {
     /**
@@ -22,7 +24,7 @@ interface RoomAvailabilityService
     /**
      * Ambil harga kamar (penting untuk perhitungan sewa)
      */
-    public function getPrice(int $roomId): float;
+    public function getPrice(int $roomId, RentalType $type = RentalType::MONTHLY): float;
 
     /**
      * Ambil nama kamar (untuk invoice/display)

@@ -18,100 +18,132 @@ class RolePermissionSeeder extends Seeder
         $member = Role::findByName('member', 'api');
 
         $superAdminPermissions = [
-            // redirect akses
             'access-admin-panel',
-
-            // dashboard utama
             'view-dashboard',
-
-            // crud permission
             'access-permission-management',
             'view-permission',
             'create-permission',
             'update-permission',
             'delete-permission',
-
-            // crud role
             'access-role-management',
             'view-role',
             'create-role',
             'update-role',
             'delete-role',
-
-            // crud user
             'access-user-management',
             'view-user',
             'create-user',
             'update-user',
             'delete-user',
-
-            // crud room
             'access-room-management',
             'view-room',
             'create-room',
             'update-room',
             'delete-room',
-
-            // sewa menyewa
             'view-lease',
             'approve-lease',
-        ];
-
-
-        $adminPermissions = [
-            // redirect akses
-            'access-admin-panel',
-
-            // dashbboard utama
-            'view-dashboard',
-
-            // crud permission
-            'access-permission-management',
-            'view-permission',
-            'create-permission',
-            'update-permission',
-            'delete-permission',
-
-            // crud role
-            'access-role-management',
-            'view-role',
-            'create-role',
-            'update-role',
-            'delete-role',
-
-            // crud user
-            'access-user-management',
-            'view-user',
-            'create-user',
-            'update-user',
-            'delete-user',
-
-            // crud room
-            'access-room-management',
-            'view-room',
-            'create-room',
-            'update-room',
-            'delete-room',
-
-            // sewa menyewa
-            'view-lease',
-            'approve-lease',
-
-            // finance management
+            'create-lease',
             'finance-management-access',
             'finance-dashboard-view',
             'finance-payment-verify',
+            'finance-invoice-view',
+            'finance-expense-access',
+            'finance-expense-view',
+            'finance-expense-create',
+            'finance-expense-update',
+            'finance-expense-delete',
+            'access-inventory-management',
+            'view-inventory',
+            'create-inventory',
+            'update-inventory',
+            'delete-inventory',
+            'access-maintenance-management',
+            'view-maintenance',
+            'create-maintenance',
+            'update-maintenance',
+            'delete-maintenance',
+            'schedule-maintenance',
+            'view-damage-report',
+            'access-resident-management',
+            'view-resident',
+            'create-resident',
+            'update-resident',
+            'delete-resident',
+            'setting-management-access',
+            'setting-view',
+            'setting-update',
+        ];
+
+        $adminPermissions = [
+            'access-admin-panel',
+            'view-dashboard',
+            'access-permission-management',
+            'view-permission',
+            'create-permission',
+            'update-permission',
+            'delete-permission',
+            'access-role-management',
+            'view-role',
+            'create-role',
+            'update-role',
+            'delete-role',
+            'access-user-management',
+            'view-user',
+            'create-user',
+            'update-user',
+            'delete-user',
+            'access-room-management',
+            'view-room',
+            'create-room',
+            'update-room',
+            'delete-room',
+            'view-lease',
+            'approve-lease',
+            'finance-management-access',
+            'finance-dashboard-view',
+            'finance-payment-verify',
+            'finance-invoice-view',
+            'finance-expense-access',
+            'finance-expense-view',
+            'finance-expense-create',
+            'finance-expense-update',
+            'finance-expense-delete',
+            'access-inventory-management',
+            'view-inventory',
+            'create-inventory',
+            'update-inventory',
+            'delete-inventory',
+            'access-maintenance-management',
+            'view-maintenance',
+            'create-maintenance',
+            'update-maintenance',
+            'delete-maintenance',
+            'schedule-maintenance',
+            'view-damage-report',
+            'access-resident-management',
+            'view-resident',
+            'create-resident',
+            'update-resident',
+            'delete-resident',
         ];
 
         $residentPermissions = [
+            'access-resident-area',
             'view-room',
             'view-lease',
-            'finance-invoice-create'
+            'create-lease',
+            'pay_lease_bill',
+            'finance-invoice-view',
+            'finance-invoice-create',
+            'create-maintenance',
+            'view-maintenance',
+            'complete-resident-profile',
         ];
 
         $memberPermissions = [
             'view-room',
-            'finance-invoice-create',
+            'create-lease',
+            'complete-resident-profile',
         ];
 
         $superAdmin->syncPermissions($superAdminPermissions);

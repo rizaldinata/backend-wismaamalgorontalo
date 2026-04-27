@@ -23,7 +23,10 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Gate::before(function ($user, $ability) {
-            return $user->hasRole('super-admin') ? true : null;
+            if (method_exists($user, 'hasRole')) {
+                return $user->hasRole('super-admin') ? true : null;
+            }
+            return null;
         });
 
         // Mengizinkan akses publik ke dokumentasi API
