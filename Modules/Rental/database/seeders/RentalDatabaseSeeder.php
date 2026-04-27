@@ -15,43 +15,51 @@ class RentalDatabaseSeeder extends Seeder
     public function run(): void
     {
         $residents = Resident::all();
-        $occupiedRooms = Room::where('status', 'occupied')->get();
-        $availableRooms = Room::where('status', 'available')->take(3)->get();
+        $rooms = Room::orderBy('id')->get();
 
-        if ($residents->isEmpty() || $occupiedRooms->isEmpty()) {
+        if ($residents->count() < 10 || $rooms->count() < 10) {
             return;
         }
 
-        // Create ACTIVE leases for occupied rooms
-        foreach ($occupiedRooms as $index => $room) {
-            $resident = $residents[$index % $residents->count()];
-            
-            Lease::updateOrCreate(
-                [
-                    'resident_id' => $resident->id,
-                    'room_id' => $room->id
-                ],
-                [
-                    'start_date' => Carbon::now()->subMonths(rand(1, 3)),
-                    'end_date' => Carbon::now()->addMonths(rand(3, 9)),
-                    'rental_type' => RentalType::MONTHLY->value,
-                    'status' => LeaseStatus::ACTIVE->value,
-                ]
-            );
-        }
-
-        // Create some PENDING leases for available rooms
-        foreach ($availableRooms as $index => $room) {
-            $resident = $residents[($index + 5) % $residents->count()];
+        // 1. Buat 7 Penghuni Aktif (Sudah masuk kamar)
+        for ($i = 0; $i < 7; $i++) {
+            $room = $rooms[$i];
+            $room->update(['status' => 'occupied']);
             
             Lease::create([
-                'resident_id' => $resident->id,
+                'resident_id' => $residents[$i]->id,
                 'room_id' => $room->id,
-                'start_date' => Carbon::now()->addDays(rand(1, 7)),
+                'start_date' => Carbon::now()->subMonths(rand(1, 5)),
+                'end_date' => Carbon::now()->addMonths(rand(2, 7)),
+                'rental_type' => RentalType::MONTHLY->value,
+                'status' => LeaseStatus::ACTIVE->value,
+            ]);
+        }
+
+        // 2. Buat 4 Penghuni Pending (Masih keep, belum bayar)
+        for ($i = 7; $i < 11; $i++) {
+            $room = $rooms[$i];
+            // Kamar yang di keep biasanya masih 'available' atau 'occupied'. 
+            // Kita set 'available' agar tetap terbaca sebagai Kamar Tersedia di stat, atau biarkan.
+            $room->update(['status' => 'available']);
+            
+            Lease::create([
+                'resident_id' => $residents[$i]->id,
+                'room_id' => $room->id,
+                'start_date' => Carbon::now()->addDays(rand(1, 5)),
                 'end_date' => Carbon::now()->addMonths(6),
                 'rental_type' => RentalType::MONTHLY->value,
                 'status' => LeaseStatus::PENDING->value,
             ]);
+        }
+
+        // 3. Sisanya pastikan status kamar 'available' atau 'maintenance'
+        for ($i = 11; $i < count($rooms); $i++) {
+            if ($i == count($rooms) - 1) {
+                $rooms[$i]->update(['status' => 'maintenance']);
+            } else {
+                $rooms[$i]->update(['status' => 'available']);
+            }
         }
     }
 }

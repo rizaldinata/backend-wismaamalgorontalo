@@ -3,23 +3,28 @@
 namespace Modules\Resident\Transformers;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Modules\Finance\Enums\InvoiceStatus;
+use Modules\Rental\Enums\LeaseStatus;
 
 class AdminResidentResource extends JsonResource
 {
     public function toArray($request)
     {
-        // Mengecek apakah status invoice terakhir sudah 'paid'
-        $isBelumLunas = $this->latestInvoice ? $this->latestInvoice->status !== 'paid' : true;
-        
-        // Mengecek apakah status kontrak sewa masih pending
-        $isPending = $this->status === 'pending';
+        $latestInvoiceStatus = $this->latestInvoice?->status?->value ?? $this->latestInvoice?->status;
+        $leaseStatus = $this->status?->value ?? $this->status;
+
+        // Belum lunas jika belum ada invoice atau invoice terakhir bukan paid
+        $isBelumLunas = $latestInvoiceStatus !== InvoiceStatus::PAID->value;
+
+        // Pending jika status kontrak pending
+        $isPending = $leaseStatus === LeaseStatus::PENDING->value;
 
         return [
             'id' => (string) $this->id,
-            'nama' => $this->user->name ?? '-',
+            'nama' => $this->resident?->user?->name ?? '-',
             'kamar' => $this->room->number ?? '-',
             // Mengambil nomor HP dari relasi profile Resident
-            'kontak' => $this->user->resident->phone_number ?? '-',
+            'kontak' => $this->resident?->phone_number ?? '-',
             
             // Format yang diminta Flutter
             'detail_bayar' => $isBelumLunas ? 'Belum Lunas' : 'Lunas',

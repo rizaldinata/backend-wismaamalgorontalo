@@ -11,6 +11,7 @@ use Modules\Rental\Enums\LeaseStatus;
 use Modules\Rental\Enums\RentalType;
 use Modules\Resident\Models\Resident;
 use Modules\Room\Models\Room;
+use Modules\Finance\Models\Invoice;
 
 class Lease extends Model
 {
@@ -33,9 +34,14 @@ class Lease extends Model
         'rental_type' => RentalType::class,
     ];
 
-    public function user()
+    public function invoices()
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(Invoice::class);
+    }
+
+    public function latestInvoice()
+    {
+        return $this->hasOne(Invoice::class)->latestOfMany();
     }
 
     public function resident()
