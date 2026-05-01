@@ -4,11 +4,8 @@ namespace Modules\Rental\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
 use Modules\Rental\Http\Requests\StoreLeaseRequest;
-use Modules\Rental\Models\Lease;
 use Modules\Rental\Services\RentalService;
 use Modules\Rental\Transformers\LeaseResource;
 
@@ -23,26 +20,16 @@ class RentalController extends Controller
 
     public function store(StoreLeaseRequest $request)
     {
-        $lease = $this->rentalService->createLease(
-            Auth::id(),
-            $request->validated()
-        );
+        $lease = $this->rentalService->createLease(Auth::id(), $request->validated());
 
-        return $this->apiSuccess(
-            new LeaseResource($lease),
-            'Pengajuan sewa berhasil dibuat. Silakan lakukan pembayaran.',
-            201
-        );
+        return $this->apiSuccess(new LeaseResource($lease), 'Pengajuan sewa berhasil dibuat. Silakan lakukan pembayaran.', 201);
     }
 
     public function myLeases()
     {
         $leases = $this->rentalService->getMyLeases(Auth::id());
 
-        return $this->apiSuccess(
-            LeaseResource::collection($leases),
-            'Daftar sewa kamar Anda berhasil diambil.'
-        );
+        return $this->apiSuccess(LeaseResource::collection($leases), 'Daftar sewa kamar Anda berhasil diambil.');
     }
 
     public function index()
@@ -52,24 +39,6 @@ class RentalController extends Controller
         return $this->apiSuccess(
             $rentals,
             'Data reservasi berhasil diambil'
-        );
-    }
-
-    public function updateStatus(Request $request, $id)
-    {
-        $request->validate([
-            'status' => 'required|in:pending,active,cancelled'
-        ]);
-
-        $lease = Lease::findOrFail($id);
-
-        $lease->update([
-            'status' => $request->status
-        ]);
-
-        return $this->apiSuccess(
-            $lease,
-            'Status reservasi berhasil diperbarui'
         );
     }
 }

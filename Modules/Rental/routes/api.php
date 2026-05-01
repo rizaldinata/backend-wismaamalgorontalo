@@ -15,8 +15,4 @@ Route::middleware(['auth:sanctum'])->group(function () {
         [RentalController::class, 'store']
     )->middleware('permission:create-lease');
 
-    Route::patch(
-        'rentals/{id}/status',
-        [RentalController::class, 'updateStatus']
-    )->middleware('permission:approve-lease');
 });
