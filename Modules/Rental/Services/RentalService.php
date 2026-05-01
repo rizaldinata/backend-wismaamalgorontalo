@@ -78,13 +78,92 @@ class RentalService
         $this->roomAvailabilityService->markAsOccupied($lease->room_id);
     }
 
+    public function extendLease(int $userId, int $leaseId, int $durationMonths): Lease
+    {
+        $resident = $this->residentRepository->findByUserId($userId);
+
+        if (!$resident) {
+            throw new HttpException(403, 'Anda belum melengkapi biodata penghuni.');
+        }
+
+        $oldLease = $this->leaseRepository->findById($leaseId);
+
+        if (!$oldLease || $oldLease->resident_id !== $resident->id) {
+            throw new NotFoundHttpException('Data sewa tidak ditemukan atau bukan milik Anda.');
+        }
+
+        if ($oldLease->status->value !== LeaseStatus::ACTIVE->value) {
+            throw new HttpException(422, 'Hanya sewa yang sedang aktif yang bisa diperpanjang.');
+        }
+
+        if ($oldLease->rental_type->value !== RentalType::MONTHLY->value) {
+            throw new HttpException(422, 'Saat ini hanya sewa bulanan yang bisa diperpanjang masa sewanya.');
+        }
+
+        // Cek apakah sudah ada perpanjangan (baik pending maupun active)
+        $existingExtension = Lease::where('resident_id', $resident->id)
+            ->where('room_id', $oldLease->room_id)
+            ->where('start_date', '>=', $oldLease->end_date)
+            ->whereIn('status', [LeaseStatus::PENDING->value, LeaseStatus::ACTIVE->value])
+            ->exists();
+
+        if ($existingExtension) {
+            throw new HttpException(422, 'Gagal. Anda sudah memiliki perpanjangan aktif atau tagihan yang belum dibayar untuk periode setelah sewa ini. Silakan pilih sewa Anda yang paling terakhir jika ingin memperpanjang lagi.');
+        }
+
+        $newStartDate = $oldLease->end_date->copy();
+        $newEndDate = $newStartDate->copy()->addMonths($durationMonths);
+
+        $newLease = $this->leaseRepository->create([
+            'resident_id' => $resident->id,
+            'room_id' => $oldLease->room_id,
+            'start_date' => $newStartDate,
+            'end_date' => $newEndDate,
+            'rental_type' => RentalType::MONTHLY->value,
+            'status' => LeaseStatus::PENDING->value,
+        ]);
+
+        $pricePerUnit = $this->roomAvailabilityService->getPrice($oldLease->room_id, RentalType::MONTHLY);
+        $totalAmount = $pricePerUnit * $durationMonths;
+
+        $financeService = app(FinanceService::class);
+        $financeService->generateInvoiceForLease($newLease->id, $totalAmount, $newStartDate);
+
+        return $newLease->load('room');
+    }
+
     public function cancelLease(int $leaseId)
     {
         $lease = $this->leaseRepository->findById($leaseId);
 
         if ($lease) {
-            $lease->update(['status' => 'cancelled']);
-            $lease->room()->update(['status' => 'Tersedia']);
+            $originalStatus = $lease->status->value;
+            $comparisonDate = $lease->end_date ? $lease->end_date->copy() : now();
+
+            if ($originalStatus === LeaseStatus::ACTIVE->value) {
+                $lease->update([
+                    'status' => LeaseStatus::FINISHED->value,
+                    'finished_at' => now()
+                ]);
+            } else {
+                $lease->update([
+                    'status' => LeaseStatus::CANCELLED->value,
+                    'finished_at' => now()
+                ]);
+            }
+
+            // Buka kamar jika ini adalah sewa yang sedang bersinggungan hari ini
+            if ($originalStatus === LeaseStatus::ACTIVE->value || $lease->start_date <= now()) {
+                $this->roomAvailabilityService->markAsAvailable($lease->room_id);
+            }
+
+            // Cascade cancel future pending/active extensions for this resident and room
+            Lease::where('resident_id', $lease->resident_id)
+                ->where('room_id', $lease->room_id)
+                ->where('start_date', '>=', $comparisonDate)
+                ->where('id', '!=', $lease->id)
+                ->whereNotIn('status', [LeaseStatus::CANCELLED->value, LeaseStatus::FINISHED->value])
+                ->update(['status' => LeaseStatus::CANCELLED->value]);
         }
     }
 }

@@ -22,6 +22,7 @@ class Lease extends Model
         'room_id',
         'start_date',
         'end_date',
+        'finished_at',
         'rental_type',
         'status',
     ];
@@ -29,6 +30,7 @@ class Lease extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'finished_at' => 'datetime',
         'status' => LeaseStatus::class,
         'rental_type' => RentalType::class,
     ];

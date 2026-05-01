@@ -30,4 +30,15 @@ class RentalController extends Controller
 
         return $this->apiSuccess(LeaseResource::collection($leases), 'Daftar sewa kamar Anda berhasil diambil.');
     }
+
+    public function extend(\Illuminate\Http\Request $request, int $id)
+    {
+        $data = $request->validate([
+            'duration' => 'required|integer|min:1|max:12',
+        ]);
+
+        $lease = $this->rentalService->extendLease(Auth::id(), $id, $data['duration']);
+
+        return $this->apiSuccess(new LeaseResource($lease), 'Sewa berhasil diperpanjang. Silakan lakukan pembayaran tagihan terbaru.', 201);
+    }
 }
