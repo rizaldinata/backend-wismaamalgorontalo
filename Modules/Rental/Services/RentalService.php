@@ -19,8 +19,7 @@ class RentalService
         private readonly LeaseRepositoryInterface $leaseRepository,
         private readonly ResidentRepositoryInterface $residentRepository,
         private readonly RoomAvailabilityService $roomAvailabilityService
-    ) {
-    }
+    ) {}
 
     public function createLease(int $userId, array $data): Lease
     {
@@ -87,13 +86,5 @@ class RentalService
             $lease->update(['status' => 'cancelled']);
             $lease->room()->update(['status' => 'Tersedia']);
         }
-    }
-
-    public function getAllRentals()
-    {
-        return Lease::with([
-            'room',
-            'resident.user'
-        ])->get();
     }
 }

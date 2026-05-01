@@ -15,8 +15,7 @@ class RentalController extends Controller
 
     public function __construct(
         private readonly RentalService $rentalService
-    ) {
-    }
+    ) {}
 
     public function store(StoreLeaseRequest $request)
     {
@@ -30,15 +29,5 @@ class RentalController extends Controller
         $leases = $this->rentalService->getMyLeases(Auth::id());
 
         return $this->apiSuccess(LeaseResource::collection($leases), 'Daftar sewa kamar Anda berhasil diambil.');
-    }
-
-    public function index()
-    {
-        $rentals = $this->rentalService->getAllRentals();
-
-        return $this->apiSuccess(
-            $rentals,
-            'Data reservasi berhasil diambil'
-        );
     }
 }
