@@ -40,16 +40,26 @@ class SettingService
 
     public function getPublicSettings(): array
     {
-        // Menyediakan rincian konfigurasi ke Frontend tanpa membahayakan data enkripsi
         return [
-            'wisma_name' => $this->getSettingValue('wisma_name', 'Sistem Manajemen Kos'),
-            'feature_daily_rental' => $this->isDailyRentalEnabled()
+            'wisma_name'                  => $this->getSettingValue('wisma_name', 'Sistem Manajemen Kos'),
+            'feature_daily_rental'        => $this->isDailyRentalEnabled(),
+            'feature_whatsapp_receipt'    => $this->isFeatureEnabled('feature_whatsapp_receipt'),
+            'feature_whatsapp_pdf_link'   => $this->isFeatureEnabled('feature_whatsapp_pdf_link'),
         ];
     }
-
 
     public function isDailyRentalEnabled(): bool
     {
         return $this->isFeatureEnabled('feature_daily_rental');
+    }
+
+    public function isWhatsAppReceiptEnabled(): bool
+    {
+        return $this->isFeatureEnabled('feature_whatsapp_receipt');
+    }
+
+    public function isWhatsAppPdfLinkEnabled(): bool
+    {
+        return $this->isFeatureEnabled('feature_whatsapp_pdf_link');
     }
 }

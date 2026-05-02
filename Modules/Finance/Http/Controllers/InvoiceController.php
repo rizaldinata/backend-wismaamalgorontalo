@@ -20,11 +20,11 @@ class InvoiceController extends Controller
     public function index(Request $request)
     {
         $request->validate([
-            'per_page' => 'nullable|integer|min:1|max:50',
+            'per_page' => 'nullable|integer|min:1|max:200',
             'status' => 'nullable|string'
         ]);
 
-        $perPage = (int) $request->query('per_page', 15);
+        $perPage = (int) $request->query('per_page', 200);
         $filters = $request->only(['status']);
 
         $invoices = $this->invoiceRepository->getPaginated($perPage, $filters);

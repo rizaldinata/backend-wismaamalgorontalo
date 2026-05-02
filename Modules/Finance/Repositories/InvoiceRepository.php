@@ -38,13 +38,16 @@ class InvoiceRepository implements InvoiceRepositoryInterface
 
     public function getTotalRevenueThisMonth(?int $month = null, ?int $year = null): float
     {
-        $month = $month ?? now()->month;
         $year = $year ?? now()->year;
 
-        return Invoice::where('status', InvoiceStatus::PAID->value)
-            ->whereMonth('updated_at', $month)
-            ->whereYear('updated_at', $year)
-            ->sum('amount');
+        $query = Invoice::where('status', InvoiceStatus::PAID->value)
+            ->whereYear('updated_at', $year);
+
+        if ($month !== null) {
+            $query->whereMonth('updated_at', $month);
+        }
+
+        return $query->sum('amount');
     }
 
     public function getTotalUnpaid(): float
@@ -54,16 +57,19 @@ class InvoiceRepository implements InvoiceRepositoryInterface
 
     public function getRevenueByRentalTypeThisMonth(string $rentalType, ?int $month = null, ?int $year = null): float
     {
-        $month = $month ?? now()->month;
         $year = $year ?? now()->year;
 
-        return Invoice::where('status', InvoiceStatus::PAID->value)
-            ->whereMonth('updated_at', $month)
+        $query = Invoice::where('status', InvoiceStatus::PAID->value)
             ->whereYear('updated_at', $year)
             ->whereHas('lease', function ($query) use ($rentalType) {
                 $query->where('rental_type', $rentalType);
-            })
-            ->sum('amount');
+            });
+
+        if ($month !== null) {
+            $query->whereMonth('updated_at', $month);
+        }
+
+        return $query->sum('amount');
     }
 
     public function getTotalOverdueAmount(): float
