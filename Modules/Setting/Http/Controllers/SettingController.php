@@ -34,24 +34,15 @@ class SettingController extends Controller
         $validator = $request->validate([
             'settings' => 'required|array',
             'settings.wisma_name' => 'nullable|string',
-            'settings.feature_midtrans_payment' => 'nullable|boolean',
-            'settings.midtrans_is_production' => 'nullable|boolean',
             'settings.feature_daily_rental' => 'nullable|boolean',
-            'settings.midtrans_enabled_payments' => 'nullable|array',
-            'settings.midtrans_server_key' => 'nullable|string',
-            'settings.midtrans_client_key' => 'nullable|string',
         ]);
 
         $settingsToSave = $validator['settings'];
 
         foreach ($settingsToSave as $key => $value) {
-            // Ignore saving pseudo-password strings
-            if ($value === '********') {
-                continue; 
-            }
             $this->settingService->updateSetting($key, $value);
         }
 
-        return $this->apiSuccess($this->settingService->getPublicSettings(), 'Seluruh konfigurasi internal dan Midtrans berhasil diamankan dan diperbarui!');
+        return $this->apiSuccess($this->settingService->getPublicSettings(), 'Seluruh konfigurasi internal berhasil diperbarui!');
     }
 }

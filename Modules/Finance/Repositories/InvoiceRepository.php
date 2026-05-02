@@ -36,11 +36,14 @@ class InvoiceRepository implements InvoiceRepositoryInterface
         return Invoice::create($data);
     }
 
-    public function getTotalRevenueThisMonth(): float
+    public function getTotalRevenueThisMonth(?int $month = null, ?int $year = null): float
     {
+        $month = $month ?? now()->month;
+        $year = $year ?? now()->year;
+
         return Invoice::where('status', InvoiceStatus::PAID->value)
-            ->whereMonth('updated_at', now()->month)
-            ->whereYear('updated_at', now()->year)
+            ->whereMonth('updated_at', $month)
+            ->whereYear('updated_at', $year)
             ->sum('amount');
     }
 
@@ -49,11 +52,14 @@ class InvoiceRepository implements InvoiceRepositoryInterface
         return Invoice::where('status', InvoiceStatus::UNPAID->value)->sum('amount');
     }
 
-    public function getRevenueByRentalTypeThisMonth(string $rentalType): float
+    public function getRevenueByRentalTypeThisMonth(string $rentalType, ?int $month = null, ?int $year = null): float
     {
+        $month = $month ?? now()->month;
+        $year = $year ?? now()->year;
+
         return Invoice::where('status', InvoiceStatus::PAID->value)
-            ->whereMonth('updated_at', now()->month)
-            ->whereYear('updated_at', now()->year)
+            ->whereMonth('updated_at', $month)
+            ->whereYear('updated_at', $year)
             ->whereHas('lease', function ($query) use ($rentalType) {
                 $query->where('rental_type', $rentalType);
             })

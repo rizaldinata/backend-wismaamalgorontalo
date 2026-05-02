@@ -12,12 +12,12 @@ class FinanceDashboardService
         private readonly PaymentRepositoryInterface $paymentRepository
     ) {}
 
-    public function getKpiSummary(): array
+    public function getKpiSummary(?int $month = null, ?int $year = null): array
     {
         return [
-            'total_revenue_this_month' => $this->invoiceRepository->getTotalRevenueThisMonth(),
-            'revenue_monthly_rents' => $this->invoiceRepository->getRevenueByRentalTypeThisMonth('monthly'),
-            'revenue_daily_rents' => $this->invoiceRepository->getRevenueByRentalTypeThisMonth('daily'),
+            'total_revenue_this_month' => $this->invoiceRepository->getTotalRevenueThisMonth($month, $year),
+            'revenue_monthly_rents' => $this->invoiceRepository->getRevenueByRentalTypeThisMonth('monthly', $month, $year),
+            'revenue_daily_rents' => $this->invoiceRepository->getRevenueByRentalTypeThisMonth('daily', $month, $year),
             'total_unpaid_invoices_amount' => $this->invoiceRepository->getTotalUnpaid(),
             'total_overdue_amount' => $this->invoiceRepository->getTotalOverdueAmount(),
             'overdue_invoices_count' => $this->invoiceRepository->countOverdueInvoices(),

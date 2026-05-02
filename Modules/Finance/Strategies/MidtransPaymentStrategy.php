@@ -17,9 +17,8 @@ class MidtransPaymentStrategy implements PaymentStrategyInterface
     public function __construct(
         private readonly PaymentRepositoryInterface $paymentRepository
     ) {
-        $settingService = app(\Modules\Setting\Services\SettingService::class);
-        Config::$serverKey = $settingService->getMidtransServerKey();
-        Config::$isProduction = $settingService->isMidtransProduction();
+        Config::$serverKey = config('finance.midtrans.server_key');
+        Config::$isProduction = config('finance.midtrans.is_production', false);
         Config::$isSanitized = true;
         Config::$is3ds = true;
         Config::$overrideNotifUrl = config('finance.midtrans.notification_url');
@@ -62,7 +61,7 @@ class MidtransPaymentStrategy implements PaymentStrategyInterface
             ]
         ];
 
-        $enabledPayments = app(\Modules\Setting\Services\SettingService::class)->getMidtransEnabledPayments();
+        $enabledPayments = config('finance.midtrans.enabled_payments', []);
         if (!empty($enabledPayments)) {
             $params['enabled_payments'] = $enabledPayments;
         }

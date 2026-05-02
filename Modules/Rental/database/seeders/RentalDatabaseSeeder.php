@@ -26,12 +26,19 @@ class RentalDatabaseSeeder extends Seeder
             $room = $rooms[$i];
             $room->update(['status' => 'occupied']);
             
+            // Buat 2 diantaranya sewa harian
+            $rentalType = $i < 2 ? RentalType::DAILY->value : RentalType::MONTHLY->value;
+            $startDate = Carbon::now()->subMonths(rand(0, 5))->subDays(rand(1, 20));
+            $endDate = $rentalType === RentalType::DAILY->value 
+                ? (clone $startDate)->addDays(rand(1, 7))
+                : (clone $startDate)->addMonths(rand(1, 6));
+
             Lease::create([
                 'resident_id' => $residents[$i]->id,
                 'room_id' => $room->id,
-                'start_date' => Carbon::now()->subMonths(rand(1, 5)),
-                'end_date' => Carbon::now()->addMonths(rand(2, 7)),
-                'rental_type' => RentalType::MONTHLY->value,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'rental_type' => $rentalType,
                 'status' => LeaseStatus::ACTIVE->value,
             ]);
         }

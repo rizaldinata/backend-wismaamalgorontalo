@@ -55,8 +55,7 @@ class ResidentDatabaseSeeder extends Seeder
                 ]
             );
 
-            // 2. Update Role menjadi resident
-            $user->syncRoles(['resident']);
+            // Role tetap member, status penghuni dicek lewat relasi lease (hasActiveLease)
         }
     }
 }

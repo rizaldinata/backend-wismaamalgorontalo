@@ -89,8 +89,8 @@ class FinanceService
             }
 
             try {
-                Config::$serverKey = $this->settingService->getMidtransServerKey();
-                Config::$isProduction = $this->settingService->isMidtransProduction();
+                Config::$serverKey = config('finance.midtrans.server_key');
+                Config::$isProduction = config('finance.midtrans.is_production', false);
 
                 $params = [
                     'refund_key' => 'refund-' . time() . '-' . $paymentId,
@@ -118,7 +118,7 @@ class FinanceService
 
     private function resolveStrategy(string $method): PaymentStrategyInterface
     {
-        if ($method === 'midtrans' && !$this->settingService->isMidtransEnabled()) {
+        if ($method === 'midtrans' && !config('finance.midtrans.enabled', true)) {
             throw new \DomainException('Penyedia layanan (Admin) sedang menonaktifkan fitur pembayaran dengan Midtrans saat ini.');
         }
 

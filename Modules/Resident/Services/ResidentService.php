@@ -41,8 +41,8 @@ class ResidentService
 
         $resident = $this->residentRepository->updateOrCreateByUserId($userId, $data);
         
-        // Otomatis upgrade role ke resident
-        $resident->user->syncRoles(['resident']);
+        // Role tetap sama (member), tidak perlu mengubah role
+        // Status penghuni otomatis valid karena profil resident sudah dibuat
         
         return $resident;
     }
