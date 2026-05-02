@@ -69,6 +69,28 @@ class RentalService
         return $this->leaseRepository->getByResidentId($resident->id);
     }
 
+    public function getAllLeases(array $filters = [])
+    {
+        return $this->leaseRepository->getAllPaginated($filters);
+    }
+
+    public function updateLeaseStatus(int $leaseId, string $status): Lease
+    {
+        $lease = $this->leaseRepository->findById($leaseId);
+        
+        // Logika bisnis tambahan berdasarkan status
+        if ($status === LeaseStatus::ACTIVE->value && $lease->status->value !== LeaseStatus::ACTIVE->value) {
+            $this->roomAvailabilityService->markAsOccupied($lease->room_id);
+        }
+
+        if (in_array($status, [LeaseStatus::CANCELLED->value, LeaseStatus::FINISHED->value]) 
+            && in_array($lease->status->value, [LeaseStatus::ACTIVE->value, LeaseStatus::PENDING->value])) {
+            $this->roomAvailabilityService->markAsAvailable($lease->room_id);
+        }
+
+        return $this->leaseRepository->updateStatus($lease, $status);
+    }
+
     public function activateLease(int $leaseId): void
     {
         $lease = $this->leaseRepository->findById($leaseId);

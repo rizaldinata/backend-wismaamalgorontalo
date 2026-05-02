@@ -4,6 +4,7 @@ namespace Modules\Rental\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Modules\Rental\Http\Requests\StoreLeaseRequest;
 use Modules\Rental\Services\RentalService;
@@ -16,6 +17,13 @@ class RentalController extends Controller
     public function __construct(
         private readonly RentalService $rentalService
     ) {}
+
+    public function index(Request $request)
+    {
+        $leases = $this->rentalService->getAllLeases($request->all());
+
+        return $this->apiSuccess(LeaseResource::collection($leases), 'Daftar reservasi berhasil diambil.');
+    }
 
     public function store(StoreLeaseRequest $request)
     {
@@ -31,7 +39,18 @@ class RentalController extends Controller
         return $this->apiSuccess(LeaseResource::collection($leases), 'Daftar sewa kamar Anda berhasil diambil.');
     }
 
-    public function extend(\Illuminate\Http\Request $request, int $id)
+    public function updateStatus(Request $request, int $id)
+    {
+        $data = $request->validate([
+            'status' => 'required|string',
+        ]);
+
+        $lease = $this->rentalService->updateLeaseStatus($id, $data['status']);
+
+        return $this->apiSuccess(new LeaseResource($lease), 'Status reservasi berhasil diperbarui.');
+    }
+
+    public function extend(Request $request, int $id)
     {
         $data = $request->validate([
             'duration' => 'required|integer|min:1|max:12',
