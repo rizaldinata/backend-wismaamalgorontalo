@@ -32,9 +32,11 @@ class SettingController extends Controller
     public function updateBulk(Request $request): JsonResponse
     {
         $validator = $request->validate([
-            'settings' => 'required|array',
-            'settings.wisma_name' => 'nullable|string',
-            'settings.feature_daily_rental' => 'nullable|boolean',
+            'settings'                              => 'required|array',
+            'settings.wisma_name'                   => 'nullable|string|max:100',
+            'settings.feature_daily_rental'         => 'nullable|boolean',
+            'settings.feature_whatsapp_receipt'     => 'nullable|boolean',
+            'settings.feature_whatsapp_pdf_link'    => 'nullable|boolean',
         ]);
 
         $settingsToSave = $validator['settings'];

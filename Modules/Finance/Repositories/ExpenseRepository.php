@@ -45,4 +45,19 @@ class ExpenseRepository implements ExpenseRepositoryInterface
     {
         return Expense::findOrFail($id);
     }
+
+    public function getTotalByPeriod(?int $month = null, ?int $year = null): float
+    {
+        $query = Expense::query();
+
+        if ($year !== null) {
+            $query->whereYear('expense_date', $year);
+        }
+
+        if ($month !== null) {
+            $query->whereMonth('expense_date', $month);
+        }
+
+        return (float) $query->sum('amount');
+    }
 }

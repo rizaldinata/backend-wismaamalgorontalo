@@ -14,4 +14,5 @@ interface ExpenseRepositoryInterface
     public function delete(Expense $expense): bool;
     public function findById(int $id): ?Expense;
     public function findOrFail(int $id): ?Expense;
+    public function getTotalByPeriod(?int $month = null, ?int $year = null): float;
 }

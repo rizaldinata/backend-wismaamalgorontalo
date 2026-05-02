@@ -24,10 +24,10 @@ class ExpenseController extends Controller
     public function index(Request $request)
     {
         $request->validate([
-            'per_page' => 'nullable|integer|min:1|max:50'
+            'per_page' => 'nullable|integer|min:1|max:200'
         ]);
 
-        $perPage = (int) $request->query('per_page', 15);
+        $perPage = (int) $request->query('per_page', 50);
 
         $expenses = $this->expenseService->getAllExpenses($perPage);
 
