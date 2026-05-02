@@ -72,7 +72,6 @@ class RolePermissionSeeder extends Seeder
             'create-resident',
             'update-resident',
             'delete-resident',
-            'complete-resident-profile',
             // Setting
             'setting-view',
             'setting-update',
