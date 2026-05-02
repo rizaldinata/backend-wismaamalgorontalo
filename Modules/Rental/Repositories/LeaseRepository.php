@@ -11,15 +11,15 @@ class LeaseRepository implements LeaseRepositoryInterface
 {
     public function getAllPaginated(array $filters = []): LengthAwarePaginator
     {
-        return Lease::with(['room', 'resident'])
+        return Lease::with(['room', 'resident.user'])
             ->when(isset($filters['status']), fn($q) => $q->where('status', $filters['status']))
             ->latest()
-            ->paginate(10);
+            ->paginate(15);
     }
 
     public function findById(int $id): ?Lease
     {
-        return Lease::with(['room', 'resident'])->findOrFail($id);
+        return Lease::with(['room', 'resident.user'])->findOrFail($id);
     }
 
     public function getByResidentId(int $residentId): Collection

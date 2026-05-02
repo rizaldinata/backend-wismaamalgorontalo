@@ -13,115 +13,141 @@ class RolePermissionSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         $superAdmin = Role::findByName('super-admin', 'api');
-        $admin = Role::findByName('admin', 'api');
-        $member = Role::findByName('member', 'api');
+        $admin      = Role::findByName('admin', 'api');
+        $member     = Role::findByName('member', 'api');
 
+        // ─── Super Admin: akses penuh ke semua modul ─────────────────────
         $superAdminPermissions = [
-            'access-admin-panel',
+            // Dashboard
             'view-dashboard',
-            'access-permission-management',
+            // Permission Management
             'view-permission',
             'create-permission',
             'update-permission',
             'delete-permission',
-            'access-role-management',
+            // Role Management
             'view-role',
             'create-role',
             'update-role',
             'delete-role',
-            'access-user-management',
+            // User Management
             'view-user',
             'create-user',
             'update-user',
             'delete-user',
-            'access-room-management',
+            // Room Management
             'view-room',
             'create-room',
             'update-room',
             'delete-room',
+            // Lease
             'view-lease',
             'approve-lease',
-
-            // finance management
-            'finance-management-access',
+            'create-lease',
+            // Finance
             'finance-dashboard-view',
             'finance-payment-verify',
             'finance-invoice-view',
-            'finance-expense-access',
+            'finance-invoice-create',
             'finance-expense-view',
             'finance-expense-create',
             'finance-expense-update',
             'finance-expense-delete',
-            'access-inventory-management',
+            // Inventory
             'view-inventory',
             'create-inventory',
             'update-inventory',
             'delete-inventory',
-            'access-maintenance-management',
+            // Maintenance
             'view-maintenance',
             'create-maintenance',
             'update-maintenance',
             'delete-maintenance',
             'schedule-maintenance',
             'view-damage-report',
-            'access-resident-management',
+            'create-damage-report',
+            'view-my-damage-report',
+            // Resident
             'view-resident',
             'create-resident',
             'update-resident',
             'delete-resident',
-            'setting-management-access',
+            'complete-resident-profile',
+            // Setting
             'setting-view',
             'setting-update',
         ];
 
+        // ─── Admin: manajemen operasional, tanpa akses setting sistem ─────
         $adminPermissions = [
-            'access-admin-panel',
+            // Dashboard
             'view-dashboard',
-            'access-permission-management',
+            // Permission Management
             'view-permission',
             'create-permission',
             'update-permission',
             'delete-permission',
-            'access-role-management',
+            // Role Management
             'view-role',
             'create-role',
             'update-role',
             'delete-role',
-            'access-user-management',
+            // User Management
             'view-user',
             'create-user',
             'update-user',
             'delete-user',
-            'access-room-management',
+            // Room Management
             'view-room',
             'create-room',
             'update-room',
             'delete-room',
+            // Lease
             'view-lease',
             'approve-lease',
-            'finance-management-access',
+            // Finance
             'finance-dashboard-view',
             'finance-payment-verify',
             'finance-invoice-view',
-            'finance-expense-access',
             'finance-expense-view',
             'finance-expense-create',
             'finance-expense-update',
             'finance-expense-delete',
-
-            // invoice management
-            'finance-invoice-view',
-
-            // setting management
-            'setting-management-access',
-            'setting-view',
-            'setting-update',
+            // Inventory
+            'view-inventory',
+            'create-inventory',
+            'update-inventory',
+            'delete-inventory',
+            // Maintenance (admin lihat semua)
+            'view-maintenance',
+            'create-maintenance',
+            'update-maintenance',
+            'delete-maintenance',
+            'schedule-maintenance',
+            'view-damage-report',
+            'view-my-damage-report',
+            // Resident
+            'view-resident',
+            'create-resident',
+            'update-resident',
+            'delete-resident',
         ];
 
+        // ─── Member / Penghuni: akses fitur sebagai penghuni ─────────────
         $memberPermissions = [
+            // Room (publik)
             'view-room',
+            // Lease (mengajukan sewa)
+            'create-lease',
             'view-lease',
+            // Finance (tagihan sendiri)
             'finance-invoice-create',
+            // Maintenance & Damage Report (laporan sendiri)
+            'view-maintenance',
+            'create-damage-report',
+            'view-my-damage-report',
+            // Profil
+            'complete-resident-profile',
         ];
 
         $superAdmin->syncPermissions($superAdminPermissions);
