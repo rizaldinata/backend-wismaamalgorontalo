@@ -17,16 +17,19 @@ class RoomDatabaseSeeder extends Seeder
             'standard' => [
                 'titles' => ['Standard Deluxe', 'Garden View Standard', 'Budget Standard', 'Access Standard', 'Cozy Standard'],
                 'price' => 500000,
+                'price_daily' => 50000,
                 'facilities' => ['AC', 'WiFi', 'Kasur Single', 'Lemari', 'Meja Belajar'],
             ],
             'deluxe' => [
                 'titles' => ['Executive Deluxe', 'Modern Deluxe', 'Bright Deluxe', 'Smart Deluxe', 'Prime Deluxe'],
                 'price' => 750000,
+                'price_daily' => 75000,
                 'facilities' => ['AC', 'WiFi', 'Kasur Queen', 'Lemari', 'Meja Belajar', 'Kamar Mandi Dalam', 'TV'],
             ],
             'suite' => [
                 'titles' => ['Royal Suite', 'Penthouse Suite', 'Family Suite', 'Presidential Suite', 'Business Suite'],
                 'price' => 1200000,
+                'price_daily' => 120000,
                 'facilities' => ['AC', 'WiFi', 'Kasur King', 'Lemari Besar', 'Meja Kerja', 'Kamar Mandi Dalam', 'Balkon', 'TV', 'Kulkas', 'Dapur Kecil', 'Sofa'],
             ],
         ];
@@ -62,6 +65,7 @@ class RoomDatabaseSeeder extends Seeder
                     'number' => $roomNumber,
                     'title' => $title,
                     'price' => $typeData['price'],
+                    'price_daily' => $typeData['price_daily'],
                     'status' => $status,
                     'description' => "Kamar {$title} yang dirancang khusus untuk kenyamanan maksimal Anda. Menawarkan suasana tenang dengan pencahayaan alami yang cukup. Dilengkapi dengan fasilitas modern, area kerja yang ergonomis, dan koneksi internet cepat, menjadikannya pilihan ideal baik bagi wisatawan maupun profesional.",
                     'facilities' => $typeData['facilities'],
