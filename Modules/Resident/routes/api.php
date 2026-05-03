@@ -13,4 +13,5 @@ Route::middleware(['auth:sanctum'])->prefix('resident')->group(function () {
 
 Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
     Route::get('/residents', [AdminResidentController::class, 'index'])->middleware('permission:view-resident');
+    Route::get('/residents/{id}', [AdminResidentController::class, 'show'])->middleware('permission:view-resident');
 });

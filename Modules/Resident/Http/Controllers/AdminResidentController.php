@@ -4,11 +4,13 @@ namespace Modules\Resident\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Modules\Finance\Enums\InvoiceStatus;
 use Modules\Rental\Models\Lease;
 use Modules\Room\Enums\RoomStatus;
 use Modules\Room\Models\Room;
+use Modules\Resident\Transformers\AdminResidentDetailResource;
 use Modules\Resident\Transformers\AdminResidentResource;
 use Exception;
 
@@ -67,6 +69,19 @@ class AdminResidentController extends Controller
                 ]
             ]);
 
+        } catch (Exception $e) {
+            return $this->apiError('Terjadi kesalahan: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function show(int $id)
+    {
+        try {
+            $lease = Lease::with(['resident.user', 'room'])->findOrFail($id);
+
+            return $this->apiSuccess(new AdminResidentDetailResource($lease), 'Detail penghuni berhasil diambil');
+        } catch (ModelNotFoundException $e) {
+            return $this->apiError('Data penghuni tidak ditemukan', 404);
         } catch (Exception $e) {
             return $this->apiError('Terjadi kesalahan: ' . $e->getMessage(), 500);
         }

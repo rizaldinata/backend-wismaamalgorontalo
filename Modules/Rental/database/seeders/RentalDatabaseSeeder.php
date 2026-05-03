@@ -14,6 +14,10 @@ class RentalDatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        if (Lease::count() > 0) {
+            return;
+        }
+
         $residents = Resident::all();
         $rooms = Room::orderBy('id')->get();
 
