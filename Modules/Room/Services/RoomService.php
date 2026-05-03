@@ -18,7 +18,8 @@ class RoomService implements RoomAvailabilityService
 {
     public function __construct(
         private readonly RoomRepositoryInterface $roomRepository
-    ) {}
+    ) {
+    }
 
     public function getAllRooms(array $filters = [])
     {
@@ -75,7 +76,8 @@ class RoomService implements RoomAvailabilityService
         $manager = new ImageManager(new Driver());
 
         foreach ($files as $index => $file) {
-            if (!$file instanceof UploadedFile) continue;
+            if (!$file instanceof UploadedFile)
+                continue;
 
             $extension = $file->getClientOriginalExtension();
             $filename = uniqid('room_') . '.' . $extension;
@@ -112,13 +114,14 @@ class RoomService implements RoomAvailabilityService
 
     public function isAvailable(int $roomId): bool
     {
-        $room = $this->roomRepository->findByid($roomId);
-        return $room && $room->status === RoomStatus::AVAILABLE;
+        $room = $this->roomRepository->findById($roomId);
+
+        return $room->status !== RoomStatus::MAINTENANCE;
     }
 
     public function markAsOccupied(int $roomId): void
     {
-        $room  = $this->roomRepository->findById($roomId);
+        $room = $this->roomRepository->findById($roomId);
         $this->roomRepository->update($room, ['status' => RoomStatus::OCCUPIED]);
     }
 

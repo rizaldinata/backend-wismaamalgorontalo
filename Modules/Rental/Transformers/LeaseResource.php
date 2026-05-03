@@ -17,6 +17,7 @@ class LeaseResource extends JsonResource
             'end_date' => $this->end_date->format('Y-m-d'),
             'rental_type' => $this->rental_type,
             'status' => $this->status,
+            'payment_status' => $this->latestInvoice?->status,
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
 
             'room' => $this->whenLoaded('room'),
