@@ -18,6 +18,12 @@ class InvoiceRepository implements InvoiceRepositoryInterface
             $query->where('status', $filters['status']);
         }
 
+        if (!empty($filters['resident_id'])) {
+            $query->whereHas('lease', function ($q) use ($filters) {
+                $q->where('resident_id', $filters['resident_id']);
+            });
+        }
+
         return $query->paginate($perPage);
     }
     public function findById(int $id): ?Invoice

@@ -5,6 +5,7 @@ use Modules\Finance\Http\Controllers\DashboardController;
 use Modules\Finance\Http\Controllers\ExpenseController;
 use Modules\Finance\Http\Controllers\InvoiceController;
 use Modules\Finance\Http\Controllers\PaymentController;
+use Modules\Finance\Http\Controllers\ResidentFinanceController;
 use Modules\Finance\Http\Middleware\VerifyMidtransSignature;
 
 Route::post('/finance/payments/midtrans/notification', [PaymentController::class, 'midtransNotification'])
@@ -38,5 +39,12 @@ Route::prefix('finance/')->middleware(['auth:sanctum'])->group(function () {
         Route::get('/{id}', [InvoiceController::class, 'show'])->middleware('permission:finance-invoice-view');
         Route::get('/{id}/print', [InvoiceController::class, 'printPdf'])->middleware('permission:finance-invoice-view');
         Route::post('/{invoiceId}/pay', [PaymentController::class, 'pay'])->middleware('permission:finance-invoice-create');
+    });
+
+    // Resident/Member Routes
+    Route::prefix('me')->group(function () {
+        Route::get('/summary', [ResidentFinanceController::class, 'summary'])->middleware('permission:finance-me-summary-view');
+        Route::get('/invoices', [ResidentFinanceController::class, 'invoices'])->middleware('permission:finance-me-invoice-view');
+        Route::get('/payments', [ResidentFinanceController::class, 'payments'])->middleware('permission:finance-me-payment-view');
     });
 });
