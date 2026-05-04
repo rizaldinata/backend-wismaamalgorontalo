@@ -9,8 +9,7 @@ class AdminResidentResource extends JsonResource
     public function toArray($request)
     {
         $leaseStatus = $this->status?->value ?? $this->status;
-        $hasPaymentProof = !empty($this->payment_proof ?? $this->payment_proof_path ?? null);
-        $isBelumLunas = !$hasPaymentProof;
+        $isBelumLunas = $leaseStatus !== 'active';
         $isPending = $leaseStatus === 'pending';
 
         return [
