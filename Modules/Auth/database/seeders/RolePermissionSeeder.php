@@ -141,6 +141,9 @@ class RolePermissionSeeder extends Seeder
             'view-lease',
             // Finance (tagihan sendiri)
             'finance-invoice-create',
+            'finance-me-summary-view',
+            'finance-me-invoice-view',
+            'finance-me-payment-view',
             // Maintenance & Damage Report (laporan sendiri)
             'view-maintenance',
             'create-damage-report',

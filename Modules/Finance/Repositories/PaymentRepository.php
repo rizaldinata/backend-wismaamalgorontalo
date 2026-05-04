@@ -22,6 +22,12 @@ class PaymentRepository implements PaymentRepositoryInterface
             $query->where('payment_method', $filters['payment_method']);
         }
 
+        if (!empty($filters['resident_id'])) {
+            $query->whereHas('invoice.lease', function ($q) use ($filters) {
+                $q->where('resident_id', $filters['resident_id']);
+            });
+        }
+
         return $query->paginate($perPage);
     }
     public function findOrFail(int $id): Payment
