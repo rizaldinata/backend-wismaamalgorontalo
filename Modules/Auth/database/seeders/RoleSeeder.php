@@ -12,5 +12,6 @@ class RoleSeeder extends Seeder
         Role::updateOrCreate(['name' => 'super-admin', 'guard_name' => 'api', 'description' => 'Admin utama / owner kost']);
         Role::updateOrCreate(['name' => 'admin', 'guard_name' => 'api', 'description' => 'admin pengelola kost']);
         Role::updateOrCreate(['name' => 'member', 'guard_name' => 'api', 'description' => 'pengguna aplikasi yang belum menjadi penghuni kost']);
+        Role::updateOrCreate(['name' => 'resident', 'guard_name' => 'api', 'description' => 'penghuni kost yang sudah memiliki sewa aktif']);
     }
 }

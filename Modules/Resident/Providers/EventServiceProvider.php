@@ -11,7 +11,11 @@ class EventServiceProvider extends ServiceProvider
      *
      * @var array<string, array<int, string>>
      */
-    protected $listen = [];
+    protected $listen = [
+        \Modules\Finance\Events\PaymentSettled::class => [
+            \Modules\Resident\Listeners\UpgradeToResident::class,
+        ],
+    ];
 
     /**
      * Indicates if events should be discovered.
