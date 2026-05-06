@@ -20,6 +20,7 @@ class AppServiceProvider extends ServiceProvider
     {
         if ($this->app->environment('production') || $this->app->environment('staging')) {
             URL::forceScheme('https');
+            URL::forceRootUrl(config('app.url'));
         }
 
         Gate::before(function ($user, $ability) {
