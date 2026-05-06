@@ -30,10 +30,10 @@ class RoomImagePlaceholderSeeder extends Seeder
                     $image->update(['thumbnail_path' => 'rooms/thumbs/' . $filename]);
                 }
 
-                // Skip jika file gambar utama sudah ada
-                if (file_exists($path)) {
+                // Skip jika file gambar utama sudah ada dan tidak kosong (0 bytes)
+                if (file_exists($path) && filesize($path) > 0) {
                     // Cek thumbnail juga
-                    if (!file_exists($thumbPath)) {
+                    if (!file_exists($thumbPath) || filesize($thumbPath) == 0) {
                         $this->generatePlaceholder($thumbPath, $room->number, "Thumb", 400, 300);
                     }
                     continue;
