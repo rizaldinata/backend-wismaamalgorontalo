@@ -26,10 +26,10 @@ class RoomImage extends Model
     public function getImageUrlAttribute()
     {
         if ($this->image_path && Storage::disk('public')->exists($this->image_path)) {
-            return url('/storage-access/' . $this->image_path);
+            return url('storage-access/' . $this->image_path);
         }
 
-        return url('/storage-access/rooms/default.jpg');
+        return url('storage-access/rooms/default.jpg');
     }
 
     // public function getThumbnailUrlAttribute()
@@ -39,10 +39,10 @@ class RoomImage extends Model
     public function getThumbnailUrlAttribute()
     {
         if ($this->thumbnail_path && Storage::disk('public')->exists($this->thumbnail_path)) {
-            return url('/storage-access/' . $this->thumbnail_path);
+            return url('storage-access/' . $this->thumbnail_path);
         }
 
-        return url('/storage-access/rooms/default.jpg');
+        return url('storage-access/rooms/default.jpg');
     }
 
     protected static function boot()
