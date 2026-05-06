@@ -57,15 +57,20 @@ class RoomImagePlaceholderSeeder extends Seeder
             mkdir($directory, 0755, true);
         }
 
-        $img = imagecreatetruecolor($width, $height);
-        $bgColor = imagecolorallocate($img, 240, 240, 240);
-        imagefill($img, 0, 0, $bgColor);
-        $textColor = imagecolorallocate($img, 100, 100, 100);
+        if (function_exists('imagecreatetruecolor')) {
+            $img = imagecreatetruecolor($width, $height);
+            $bgColor = imagecolorallocate($img, 240, 240, 240);
+            imagefill($img, 0, 0, $bgColor);
+            $textColor = imagecolorallocate($img, 100, 100, 100);
 
-        imagestring($img, 5, ($width / 2) - 50, ($height / 2) - 20, "Room " . $text1, $textColor);
-        imagestring($img, 4, ($width / 2) - 40, ($height / 2) + 10, $text2, $textColor);
+            imagestring($img, 5, ($width / 2) - 50, ($height / 2) - 20, "Room " . $text1, $textColor);
+            imagestring($img, 4, ($width / 2) - 40, ($height / 2) + 10, $text2, $textColor);
 
-        imagejpeg($img, $path, 80);
-        imagedestroy($img);
+            imagejpeg($img, $path, 80);
+            imagedestroy($img);
+        } else {
+            // Fallback if GD is not installed
+            file_put_contents($path, "");
+        }
     }
 }
