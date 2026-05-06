@@ -9,11 +9,27 @@ use Intervention\Image\Drivers\Gd\Driver;
 
 class ImageService
 {
-    private ImageManager $manager;
+    private ?ImageManager $manager = null;
 
-    public function __construct()
+    /**
+     * Get or initialize the image manager safely
+     */
+    private function getManager(): ?ImageManager
     {
-        $this->manager = new ImageManager(new Driver());
+        if ($this->manager !== null) {
+            return $this->manager;
+        }
+
+        try {
+            if (!extension_loaded('gd')) {
+                return null;
+            }
+            $this->manager = new ImageManager(new Driver());
+            return $this->manager;
+        } catch (\Exception $e) {
+            \Log::warning('ImageService: Gagal menginisialisasi driver gambar. ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**
@@ -30,7 +46,13 @@ class ImageService
         }
 
         try {
-            $image = $this->manager->read($file);
+            $manager = $this->getManager();
+            
+            if (!$manager) {
+                return $file->store($folder, 'public');
+            }
+
+            $image = $manager->read($file);
             
             // Resize if wider than max width
             $image->scaleDown(width: $width);
@@ -40,7 +62,8 @@ class ImageService
 
             Storage::disk('public')->put($path, (string) $encoded);
         } catch (\Exception $e) {
-            // Fallback to original if processing fails (e.g. missing GD)
+            \Log::error('ImageService: Gagal memproses gambar. ' . $e->getMessage());
+            // Fallback to original if processing fails
             return $file->store($folder, 'public');
         }
 
@@ -60,13 +83,21 @@ class ImageService
         }
 
         try {
-            $image = $this->manager->read($file);
+            $manager = $this->getManager();
+
+            if (!$manager) {
+                // If failed, just use original file but as thumbnail
+                return $file->store($folder, 'public');
+            }
+
+            $image = $manager->read($file);
             $image->cover($size, $size);
             $encoded = $image->toWebp($quality);
 
             Storage::disk('public')->put($path, (string) $encoded);
         } catch (\Exception $e) {
-            // If failed, just use original file but as thumbnail (not ideal but safe)
+            \Log::error('ImageService: Gagal memproses thumbnail. ' . $e->getMessage());
+            // If failed, just use original file
             return $file->store($folder, 'public');
         }
 
