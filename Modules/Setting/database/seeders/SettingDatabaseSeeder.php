@@ -17,6 +17,7 @@ class SettingDatabaseSeeder extends Seeder
 
             'feature_whatsapp_receipt' => 'true',
             'feature_whatsapp_pdf_link' => 'true',
+            'feature_payment_midtrans' => 'true',
         ];
 
         foreach ($settings as $key => $value) {

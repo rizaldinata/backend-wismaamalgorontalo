@@ -45,6 +45,7 @@ class SettingService
             'feature_daily_rental'        => $this->isDailyRentalEnabled(),
             'feature_whatsapp_receipt'    => $this->isFeatureEnabled('feature_whatsapp_receipt'),
             'feature_whatsapp_pdf_link'   => $this->isFeatureEnabled('feature_whatsapp_pdf_link'),
+            'feature_payment_midtrans'    => $this->isMidtransEnabled(),
         ];
     }
 
@@ -61,5 +62,10 @@ class SettingService
     public function isWhatsAppPdfLinkEnabled(): bool
     {
         return $this->isFeatureEnabled('feature_whatsapp_pdf_link');
+    }
+
+    public function isMidtransEnabled(): bool
+    {
+        return $this->isFeatureEnabled('feature_payment_midtrans');
     }
 }

@@ -37,6 +37,7 @@ class SettingController extends Controller
             'settings.feature_daily_rental'         => 'nullable|boolean',
             'settings.feature_whatsapp_receipt'     => 'nullable|boolean',
             'settings.feature_whatsapp_pdf_link'    => 'nullable|boolean',
+            'settings.feature_payment_midtrans'     => 'nullable|boolean',
         ]);
 
         $settingsToSave = $validator['settings'];

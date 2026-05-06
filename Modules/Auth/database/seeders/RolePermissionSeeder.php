@@ -130,6 +130,9 @@ class RolePermissionSeeder extends Seeder
             'create-resident',
             'update-resident',
             'delete-resident',
+            // Setting
+            'setting-view',
+            'setting-update',
         ];
 
         // ─── Member / Penghuni: akses fitur sebagai penghuni ─────────────
