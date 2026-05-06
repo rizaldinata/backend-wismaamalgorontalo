@@ -53,7 +53,8 @@ class RoomDatabaseSeeder extends Seeder
                 $typeData = $roomTypes[$typeKey];
                 $title = $typeData['titles'][array_rand($typeData['titles'])] . ' ' . $roomNumber;
 
-                $status = fake()->randomElement(['available', 'occupied', 'maintenance']);
+                $statuses = ['available', 'occupied', 'maintenance'];
+                $status = $statuses[array_rand($statuses)];
 
                 // Make sure we have a good mix
                 if ($roomNumber == '101' || $roomNumber == '201')
