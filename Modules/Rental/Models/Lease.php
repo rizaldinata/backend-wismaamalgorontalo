@@ -11,6 +11,7 @@ use Modules\Rental\Enums\LeaseStatus;
 use Modules\Rental\Enums\RentalType;
 use Modules\Resident\Models\Resident;
 use Modules\Room\Models\Room;
+use Modules\Finance\Models\Invoice;
 
 class Lease extends Model
 {
@@ -22,6 +23,8 @@ class Lease extends Model
         'room_id',
         'start_date',
         'end_date',
+        'finished_at',
+        'payment_expires_at',
         'rental_type',
         'status',
     ];
@@ -29,13 +32,20 @@ class Lease extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'finished_at' => 'datetime',
+        'payment_expires_at' => 'datetime',
         'status' => LeaseStatus::class,
         'rental_type' => RentalType::class,
     ];
 
-    public function user()
+    public function invoices()
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(Invoice::class);
+    }
+
+    public function latestInvoice()
+    {
+        return $this->hasOne(Invoice::class)->latestOfMany();
     }
 
     public function resident()

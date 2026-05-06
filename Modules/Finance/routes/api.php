@@ -3,10 +3,13 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Finance\Http\Controllers\DashboardController;
 use Modules\Finance\Http\Controllers\ExpenseController;
+use Modules\Finance\Http\Controllers\InvoiceController;
 use Modules\Finance\Http\Controllers\PaymentController;
+use Modules\Finance\Http\Controllers\ResidentFinanceController;
+use Modules\Finance\Http\Middleware\VerifyMidtransSignature;
 
-
-Route::post('/finance/payments/midtrans/notification', [PaymentController::class, 'midtransNotification']);
+Route::post('/finance/payments/midtrans/notification', [PaymentController::class, 'midtransNotification'])
+    ->middleware(VerifyMidtransSignature::class);
 
 Route::prefix('finance/')->middleware(['auth:sanctum'])->group(function () {
     Route::prefix('dashboard')->middleware('permission:finance-dashboard-view')->group(function () {
@@ -24,9 +27,24 @@ Route::prefix('finance/')->middleware(['auth:sanctum'])->group(function () {
         Route::delete('/{id}', [ExpenseController::class, 'destroy'])->middleware('permission:finance-expense-delete');
     });
 
-    Route::post('/payments/{paymentId}/verify', [PaymentController::class, 'verify'])
-        ->middleware('permission:finance-payment-verify');
+    Route::prefix('payments')->group(function () {
+        Route::get('/', [PaymentController::class, 'index'])->middleware('permission:finance-payment-view');
+        Route::get('/{id}', [PaymentController::class, 'show'])->middleware('permission:finance-payment-view');
+        Route::post('/{paymentId}/verify', [PaymentController::class, 'verify'])->middleware('permission:finance-payment-verify');
+        Route::post('/{paymentId}/refund', [PaymentController::class, 'refund'])->middleware('permission:finance-payment-refund');
+    });
 
-    Route::post('/invoices/{invoiceId}/pay', [PaymentController::class, 'pay'])
-        ->middleware('permission:finance-invoice-create');
+    Route::prefix('invoices')->group(function () {
+        Route::get('/', [InvoiceController::class, 'index'])->middleware('permission:finance-invoice-view');
+        Route::get('/{id}', [InvoiceController::class, 'show'])->middleware('permission:finance-invoice-view');
+        Route::get('/{id}/print', [InvoiceController::class, 'printPdf'])->middleware('permission:finance-invoice-view');
+        Route::post('/{invoiceId}/pay', [PaymentController::class, 'pay'])->middleware('permission:finance-invoice-create');
+    });
+
+    // Resident/Member Routes
+    Route::prefix('me')->group(function () {
+        Route::get('/summary', [ResidentFinanceController::class, 'summary'])->middleware('permission:finance-me-summary-view');
+        Route::get('/invoices', [ResidentFinanceController::class, 'invoices'])->middleware('permission:finance-me-invoice-view');
+        Route::get('/payments', [ResidentFinanceController::class, 'payments'])->middleware('permission:finance-me-payment-view');
+    });
 });

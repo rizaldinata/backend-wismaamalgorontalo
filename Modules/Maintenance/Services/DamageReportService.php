@@ -7,16 +7,17 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Modules\Maintenance\Enums\MaintenanceStatus;
 use Modules\Maintenance\Models\MaintenanceRequest;
-use Modules\Maintenance\Repositories\Contracts\MaintenanceRequestRepositoryInterface;
+use Modules\Maintenance\Repositories\Contracts\DamageReportRepositoryInterface;
 use Modules\Resident\Repositories\Contracts\ResidentRepositoryInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class MaintenanceService
+class DamageReportService
 {
     public function __construct(
-        private readonly MaintenanceRequestRepositoryInterface $requestRepository,
-        private readonly ResidentRepositoryInterface $residentRepository
+        private readonly DamageReportRepositoryInterface $requestRepository,
+        private readonly ResidentRepositoryInterface $residentRepository,
+        private readonly \App\Services\ImageService $imageService
     ) {}
 
     public function createReport(int $userId, array $data, array $images = []): MaintenanceRequest
@@ -46,7 +47,7 @@ class MaintenanceService
         $resident = $this->residentRepository->findByUserId($userId);
 
         if (!$resident) {
-            throw new NotFoundHttpException('Biodata penghuni tidak ditemukan.');
+            return collect([]);
         }
 
         return $this->requestRepository->getByResidentId($resident->id);
@@ -91,7 +92,8 @@ class MaintenanceService
         $paths = [];
         foreach ($images as $image) {
             if ($image instanceof UploadedFile) {
-                $paths[] = $image->store($folder, 'public');
+                // Menggunakan global ImageService untuk compress & convert ke WebP
+                $paths[] = $this->imageService->uploadAndCompress($image, $folder);
             }
         }
         return $paths;

@@ -153,7 +153,7 @@ class DummyDataSeeder extends Seeder
             ]);
             $user->email_verified_at = now();
             $user->save();
-            $user->assignRole('resident');
+            $user->assignRole('member');
 
             Resident::create([
                 'user_id' => $user->id,
@@ -404,6 +404,7 @@ class DummyDataSeeder extends Seeder
             'room_id' => $rooms[1]->id,
             'start_date' => now()->subYear(),
             'end_date' => now()->subMonths(2),
+            'finished_at' => now()->subMonths(2),
             'price_per_month' => 500000,
             'total_price' => 5000000,
             'status' => 'cancelled',

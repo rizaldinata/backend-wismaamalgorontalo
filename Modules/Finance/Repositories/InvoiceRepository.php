@@ -3,12 +3,29 @@
 namespace Modules\Finance\Repositories;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Modules\Finance\Enums\InvoiceStatus;
 use Modules\Finance\Models\Invoice;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 
 class InvoiceRepository implements InvoiceRepositoryInterface
 {
+    public function getPaginated(int $perPage = 15, array $filters = []): LengthAwarePaginator
+    {
+        $query = Invoice::with(['lease.resident', 'lease.room'])->orderBy('created_at', 'desc');
+
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (!empty($filters['resident_id'])) {
+            $query->whereHas('lease', function ($q) use ($filters) {
+                $q->where('resident_id', $filters['resident_id']);
+            });
+        }
+
+        return $query->paginate($perPage);
+    }
     public function findById(int $id): ?Invoice
     {
         return Invoice::findOrFail($id);
@@ -25,17 +42,54 @@ class InvoiceRepository implements InvoiceRepositoryInterface
         return Invoice::create($data);
     }
 
-    public function getTotalRevenueThisMonth(): float
+    public function getTotalRevenueThisMonth(?int $month = null, ?int $year = null): float
     {
-        return Invoice::where('status', InvoiceStatus::PAID->value)
-            ->whereMonth('updated_at', now()->month)
-            ->whereYear('updated_at', now()->year)
-            ->sum('amount');
+        $year = $year ?? now()->year;
+
+        $query = Invoice::where('status', InvoiceStatus::PAID->value)
+            ->whereYear('updated_at', $year);
+
+        if ($month !== null) {
+            $query->whereMonth('updated_at', $month);
+        }
+
+        return $query->sum('amount');
     }
 
     public function getTotalUnpaid(): float
     {
         return Invoice::where('status', InvoiceStatus::UNPAID->value)->sum('amount');
+    }
+
+    public function getRevenueByRentalTypeThisMonth(string $rentalType, ?int $month = null, ?int $year = null): float
+    {
+        $year = $year ?? now()->year;
+
+        $query = Invoice::where('status', InvoiceStatus::PAID->value)
+            ->whereYear('updated_at', $year)
+            ->whereHas('lease', function ($query) use ($rentalType) {
+                $query->where('rental_type', $rentalType);
+            });
+
+        if ($month !== null) {
+            $query->whereMonth('updated_at', $month);
+        }
+
+        return $query->sum('amount');
+    }
+
+    public function getTotalOverdueAmount(): float
+    {
+        return Invoice::where('status', InvoiceStatus::UNPAID->value)
+            ->where('due_date', '<', now()->startOfDay())
+            ->sum('amount');
+    }
+
+    public function countOverdueInvoices(): int
+    {
+        return Invoice::where('status', InvoiceStatus::UNPAID->value)
+            ->where('due_date', '<', now()->startOfDay())
+            ->count();
     }
 
     public function getMonthlyRevenue(int $months = 6): array
@@ -45,14 +99,25 @@ class InvoiceRepository implements InvoiceRepositoryInterface
         for ($i = $months - 1; $i >= 0; $i--) {
             $date = now()->subMonths($i);
 
-            $total = Invoice::where('status', InvoiceStatus::PAID->value)
+            $monthlyQuery = Invoice::where('status', InvoiceStatus::PAID->value)
                 ->whereMonth('updated_at', $date->month)
-                ->whereYear('updated_at', $date->year)
-                ->sum('amount');
+                ->whereYear('updated_at', $date->year);
+
+            $total = (clone $monthlyQuery)->sum('amount');
+            
+            $monthlyRentTotal = (clone $monthlyQuery)->whereHas('lease', function ($q) {
+                $q->where('rental_type', 'monthly');
+            })->sum('amount');
+
+            $dailyRentTotal = (clone $monthlyQuery)->whereHas('lease', function ($q) {
+                $q->where('rental_type', 'daily');
+            })->sum('amount');
 
             $revenueData[] = [
                 'date_instance' => clone $date,
-                'total' => (float) $total
+                'total' => (float) $total,
+                'monthly_rent_revenue' => (float) $monthlyRentTotal,
+                'daily_rent_revenue' => (float) $dailyRentTotal
             ];
         }
 
@@ -63,7 +128,7 @@ class InvoiceRepository implements InvoiceRepositoryInterface
     {
         return Invoice::with(['lease.resident', 'lease.room'])
             ->where('status', InvoiceStatus::UNPAID->value)
-            ->where('due_date', '<=', now()->addDay(7))
+            ->where('due_date', '<=', now()->addDays(7))
             ->orderBy('due_date', 'asc')
             ->limit($limit)
             ->get();

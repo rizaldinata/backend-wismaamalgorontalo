@@ -18,7 +18,7 @@ class MidtransPaymentStrategy implements PaymentStrategyInterface
         private readonly PaymentRepositoryInterface $paymentRepository
     ) {
         Config::$serverKey = config('finance.midtrans.server_key');
-        Config::$isProduction = config('finance.midtrans.is_production');
+        Config::$isProduction = config('finance.midtrans.is_production', false);
         Config::$isSanitized = true;
         Config::$is3ds = true;
         Config::$overrideNotifUrl = config('finance.midtrans.notification_url');
@@ -61,6 +61,11 @@ class MidtransPaymentStrategy implements PaymentStrategyInterface
             ]
         ];
 
+        $enabledPayments = config('finance.midtrans.enabled_payments', []);
+        if (!empty($enabledPayments)) {
+            $params['enabled_payments'] = $enabledPayments;
+        }
+
         try {
             // 3. Dapatkan Snap Token dari Midtrans
             $snapToken = Snap::getSnapToken($params);
@@ -78,7 +83,7 @@ class MidtransPaymentStrategy implements PaymentStrategyInterface
                 'admin_notes' => 'Midtrans Error: ' . $e->getMessage(),
             ]);
 
-            throw new \DomainException('Gagal menghubungi server pembayaran: ' . $e->getMessage());
+            throw new \DomainException('Gagal memproses metode pembayaran. Silakan coba kembali beberapa saat lagi.');
         }
     }
 }

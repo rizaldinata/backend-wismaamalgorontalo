@@ -7,14 +7,18 @@ RUN apk add --no-cache \
     unzip \
     libxml2-dev \
     libpng-dev \
+    libwebp-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
     libzip-dev \
     icu-dev \
     oniguruma-dev \
     mariadb-client \
     $PHPIZE_DEPS
 
-# Install PHP extensions
-RUN docker-php-ext-install \
+# Configure and Install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install \
     pdo_mysql \
     mbstring \
     exif \
@@ -41,6 +45,9 @@ FROM php:8.2-fpm-alpine
 # Install runtime dependencies
 RUN apk add --no-cache \
     libpng \
+    libwebp \
+    libjpeg-turbo \
+    freetype \
     libzip \
     icu-libs \
     oniguruma \
@@ -49,6 +56,11 @@ RUN apk add --no-cache \
 # Copy PHP extensions from build stage
 COPY --from=build /usr/local/lib/php/extensions /usr/local/lib/php/extensions
 COPY --from=build /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
+
+# Set PHP upload limits
+RUN echo "upload_max_filesize=40M" > /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "post_max_size=40M" >> /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "memory_limit=256M" >> /usr/local/etc/php/conf.d/uploads.ini
 
 WORKDIR /var/www
 

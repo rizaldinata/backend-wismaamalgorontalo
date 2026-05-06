@@ -11,7 +11,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class ResidentService
 {
     public function __construct(
-        private readonly ResidentRepositoryInterface $residentRepository
+        private readonly ResidentRepositoryInterface $residentRepository,
+        private readonly \App\Services\ImageService $imageService
     ) {}
 
     public function getProfileByUserId(int $userId): Resident
@@ -34,11 +35,17 @@ class ResidentService
             if ($ktpPath && Storage::disk('public')->exists($ktpPath)) {
                 Storage::disk('public')->delete($ktpPath);
             }
-            $ktpPath = $ktpPhoto->store('ktp_images', 'public');
+            // Menggunakan ImageService untuk compress foto KTP
+            $ktpPath = $this->imageService->uploadAndCompress($ktpPhoto, 'ktp_images');
         }
 
         $data['ktp_photo_path'] = $ktpPath;
 
-        return $this->residentRepository->updateOrCreateByUserId($userId, $data);
+        $resident = $this->residentRepository->updateOrCreateByUserId($userId, $data);
+        
+        // Role tetap sama (member), tidak perlu mengubah role
+        // Status penghuni otomatis valid karena profil resident sudah dibuat
+        
+        return $resident;
     }
 }

@@ -22,13 +22,50 @@ class SettingService
         $this->settingRepository->updateOrCreate($featureKey, $valueString, $description);
     }
 
-    public function isMidtransEnabled(): bool
+    public function updateSetting(string $key, $value, string $description = ''): void
     {
-        return $this->isFeatureEnabled('feature_midtrans_payment');
+        if (is_array($value)) {
+            $value = json_encode($value);
+        } elseif (is_bool($value)) {
+            $value = $value ? 'true' : 'false';
+        }
+
+        $this->settingRepository->updateOrCreate($key, (string)$value, $description);
+    }
+
+    public function getSettingValue(string $key, $default = '')
+    {
+        return $this->settingRepository->getValueByKey($key, $default);
+    }
+
+    public function getPublicSettings(): array
+    {
+        return [
+            'wisma_name'                  => $this->getSettingValue('wisma_name', 'Sistem Manajemen Kos'),
+            'feature_daily_rental'        => $this->isDailyRentalEnabled(),
+            'feature_whatsapp_receipt'    => $this->isFeatureEnabled('feature_whatsapp_receipt'),
+            'feature_whatsapp_pdf_link'   => $this->isFeatureEnabled('feature_whatsapp_pdf_link'),
+            'feature_payment_midtrans'    => $this->isMidtransEnabled(),
+        ];
     }
 
     public function isDailyRentalEnabled(): bool
     {
         return $this->isFeatureEnabled('feature_daily_rental');
+    }
+
+    public function isWhatsAppReceiptEnabled(): bool
+    {
+        return $this->isFeatureEnabled('feature_whatsapp_receipt');
+    }
+
+    public function isWhatsAppPdfLinkEnabled(): bool
+    {
+        return $this->isFeatureEnabled('feature_whatsapp_pdf_link');
+    }
+
+    public function isMidtransEnabled(): bool
+    {
+        return $this->isFeatureEnabled('feature_payment_midtrans');
     }
 }

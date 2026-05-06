@@ -14,7 +14,9 @@ class RoomResource extends JsonResource
             'title' => $this->title,
             'number' => $this->number,
             'price' => $this->price,
+            'price_daily' => $this->price_daily,
             'price_formatted' => 'Rp ' . number_format($this->price, 0, ',', '.'),
+            'price_daily_formatted' => $this->price_daily ? 'Rp ' . number_format($this->price_daily, 0, ',', '.') : '-',
             'status' => $this->status->label(),
             'status_code' => $this->status->value,
             'description' => $this->description,
@@ -29,6 +31,7 @@ class RoomResource extends JsonResource
                     ];
                 });
             }),
+            'schedules' => \Modules\Rental\Transformers\LeaseResource::collection($this->whenLoaded('leases')),
         ];
     }
 }

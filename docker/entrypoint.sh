@@ -9,9 +9,13 @@ mkdir -p /var/www/storage/framework/views
 mkdir -p /var/www/storage/logs
 
 # Fix permissions so Laravel can write to them
-# We use 777 as a fallback for local laptop deployments but chown for standard practice
 chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
-chmod -R 777 /var/www/storage /var/www/bootstrap/cache
+chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+
+# Create storage link if it doesn't exist
+if [ ! -L /var/www/public/storage ]; then
+    php artisan storage:link
+fi
 
 # Execute the main command (passed from CMD in Dockerfile)
 exec "$@"

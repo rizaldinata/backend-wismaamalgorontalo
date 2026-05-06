@@ -19,14 +19,30 @@ class RoomImage extends Model
         return $this->belongsTo(Room::class);
     }
 
+    // public function getImageUrlAttribute()
+    // {
+    //     return $this->image_path ? url('/storage-access/' . $this->image_path) : null;
+    // }
     public function getImageUrlAttribute()
     {
-        return $this->image_path ? url('/storage-access/' . $this->image_path) : null;
+        if ($this->image_path && Storage::disk('public')->exists($this->image_path)) {
+            return url('storage-access/' . $this->image_path);
+        }
+
+        return url('storage-access/rooms/default.jpg');
     }
 
+    // public function getThumbnailUrlAttribute()
+    // {
+    //     return $this->thumbnail_path ? url('/storage-access/' . $this->thumbnail_path) : $this->image_url;
+    // }
     public function getThumbnailUrlAttribute()
     {
-        return $this->thumbnail_path ? url('/storage-access/' . $this->thumbnail_path) : $this->image_url;
+        if ($this->thumbnail_path && Storage::disk('public')->exists($this->thumbnail_path)) {
+            return url('storage-access/' . $this->thumbnail_path);
+        }
+
+        return url('storage-access/rooms/default.jpg');
     }
 
     protected static function boot()

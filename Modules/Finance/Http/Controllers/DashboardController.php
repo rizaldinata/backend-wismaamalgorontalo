@@ -14,9 +14,12 @@ class DashboardController extends Controller
         private readonly FinanceDashboardService $dashboardService
     ) {}
 
-    public function kpiSummary()
+    public function kpiSummary(\Illuminate\Http\Request $request)
     {
-        $data = $this->dashboardService->getKpiSummary();
+        $month = $request->query('month') ? (int) $request->query('month') : null;
+        $year = $request->query('year') ? (int) $request->query('year') : null;
+
+        $data = $this->dashboardService->getKpiSummary($month, $year);
         return $this->apiSuccess($data, 'Data KPI summary berhasil diambil');
     }
 

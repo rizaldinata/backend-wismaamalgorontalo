@@ -12,6 +12,7 @@ interface RoomRepositoryInterface
     public function create(array $data): Room;
     public function update(Room $room, array $data): Room;
     public function delete(Room $room): void;
+    public function getAllWithSchedules();
 
     // relasi ke gambar kamar
     public function addImage(Room $room, array $imageData): RoomImage;

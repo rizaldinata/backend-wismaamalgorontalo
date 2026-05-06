@@ -20,15 +20,24 @@ class AppServiceProvider extends ServiceProvider
     {
         if ($this->app->environment('production') || $this->app->environment('staging')) {
             URL::forceScheme('https');
+            URL::forceRootUrl(config('app.url'));
         }
 
         Gate::before(function ($user, $ability) {
-            return $user->hasRole('super-admin') ? true : null;
+            if (method_exists($user, 'hasRole')) {
+                return $user->hasRole('super-admin') ? true : null;
+            }
+            return null;
         });
 
         // Mengizinkan akses publik ke dokumentasi API
         Gate::define('viewApiDocs', function ($user = null) {
             return true;
+        });
+
+        // Gate khusus penghuni aktif
+        Gate::define('resident-access', function ($user) {
+            return $user->hasActiveLease();
         });
 
         Scramble::configure()
