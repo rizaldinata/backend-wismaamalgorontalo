@@ -57,6 +57,11 @@ RUN apk add --no-cache \
 COPY --from=build /usr/local/lib/php/extensions /usr/local/lib/php/extensions
 COPY --from=build /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
 
+# Set PHP upload limits
+RUN echo "upload_max_filesize=40M" > /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "post_max_size=40M" >> /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "memory_limit=256M" >> /usr/local/etc/php/conf.d/uploads.ini
+
 WORKDIR /var/www
 
 # Copy application from build stage

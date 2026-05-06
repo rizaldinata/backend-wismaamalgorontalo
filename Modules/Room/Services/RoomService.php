@@ -74,21 +74,33 @@ class RoomService implements RoomAvailabilityService
 
     public function uploadImages(Room $room, array $files): void
     {
+        \Log::info('RoomService: Memulai upload gambar untuk Kamar ID ' . $room->id . '. Jumlah file: ' . count($files));
+
         foreach ($files as $index => $file) {
-            if (!$file instanceof UploadedFile)
+            if (!$file instanceof UploadedFile) {
+                \Log::warning('RoomService: File pada index ' . $index . ' bukan instance dari UploadedFile.');
                 continue;
+            }
+
+            \Log::info('RoomService: Memproses file: ' . $file->getClientOriginalName() . ' (Size: ' . $file->getSize() . ' bytes)');
 
             $folder = "rooms/{$room->id}";
             
-            // Menggunakan global ImageService untuk compress & convert ke WebP
-            $path = $this->imageService->uploadAndCompress($file, $folder);
-            $thumbPath = $this->imageService->createThumbnail($file, $folder);
+            try {
+                // Menggunakan global ImageService untuk compress & convert ke WebP
+                $path = $this->imageService->uploadAndCompress($file, $folder);
+                $thumbPath = $this->imageService->createThumbnail($file, $folder);
 
-            $this->roomRepository->addImage($room, [
-                'image_path' => $path,
-                'thumbnail_path' => $thumbPath,
-                'order' => $index + 1
-            ]);
+                $this->roomRepository->addImage($room, [
+                    'image_path' => $path,
+                    'thumbnail_path' => $thumbPath,
+                    'order' => $index + 1
+                ]);
+
+                \Log::info('RoomService: Berhasil simpan gambar ke database untuk file: ' . $file->getClientOriginalName());
+            } catch (\Exception $e) {
+                \Log::error('RoomService: Gagal upload gambar index ' . $index . '. Error: ' . $e->getMessage());
+            }
         }
     }
 
