@@ -1,0 +1,32 @@
+name: Sync On Demand
+
+on:
+  repository_dispatch:
+    types: [trigger-sync]
+  workflow_dispatch:
+
+jobs:
+  sync-and-push:
+    runs-on: ubuntu-latest
+    if: github.repository == 'ALFIAN-code/backend-wismaamalgorontalo'
+    steps:
+      - name: Checkout Fork
+        uses: actions/checkout@v4
+        with:
+          ref: staging
+          fetch-depth: 0
+          token: ${{ secrets.MY_PAT }}
+
+      - name: Sync from Upstream
+        run: |
+          git config --global user.name "ALFIAN-code"
+          git config --global user.email "allvvnt@gmail.com"
+          
+          git remote add upstream https://github.com/rizaldinata/backend-wismaamalgorontalo.git
+          git fetch upstream staging
+          
+          # Merge perubahan terbaru
+          git merge upstream/staging --no-edit
+          
+          # Push ke repo origin (ini akan memicu deploy.yml Anda)
+          git push origin staging
