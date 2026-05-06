@@ -62,23 +62,28 @@ class RoomDatabaseSeeder extends Seeder
                 if ($roomNumber == '103')
                     $status = 'maintenance';
 
-                $room = Room::create([
-                    'number' => $roomNumber,
-                    'title' => $title,
-                    'price' => $typeData['price'],
-                    'price_daily' => $typeData['price_daily'],
-                    'status' => $status,
-                    'description' => "Kamar {$title} yang dirancang khusus untuk kenyamanan maksimal Anda. Menawarkan suasana tenang dengan pencahayaan alami yang cukup. Dilengkapi dengan fasilitas modern, area kerja yang ergonomis, dan koneksi internet cepat, menjadikannya pilihan ideal baik bagi wisatawan maupun profesional.",
-                    'facilities' => $typeData['facilities'],
-                ]);
+                $room = Room::firstOrCreate(
+                    ['number' => $roomNumber],
+                    [
+                        'title' => $title,
+                        'price' => $typeData['price'],
+                        'price_daily' => $typeData['price_daily'],
+                        'status' => $status,
+                        'description' => "Kamar {$title} yang dirancang khusus untuk kenyamanan maksimal Anda. Menawarkan suasana tenang dengan pencahayaan alami yang cukup. Dilengkapi dengan fasilitas modern, area kerja yang ergonomis, dan koneksi internet cepat, menjadikannya pilihan ideal baik bagi wisatawan maupun profesional.",
+                        'facilities' => $typeData['facilities'],
+                    ]
+                );
 
-                $imagesCount = rand(2, 5);
-                for ($j = 0; $j < $imagesCount; $j++) {
-                    RoomImage::create([
-                        'room_id' => $room->id,
-                        'image_path' => 'rooms/dummy-room-' . $room->number . '-' . ($j + 1) . '.jpg',
-                        'order' => $j,
-                    ]);
+                // Hanya tambah image jika belum ada sama sekali untuk room ini
+                if ($room->images()->count() === 0) {
+                    $imagesCount = rand(2, 5);
+                    for ($j = 0; $j < $imagesCount; $j++) {
+                        RoomImage::create([
+                            'room_id' => $room->id,
+                            'image_path' => 'rooms/dummy-room-' . $room->number . '-' . ($j + 1) . '.jpg',
+                            'order' => $j,
+                        ]);
+                    }
                 }
             }
         }
