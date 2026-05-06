@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             AuthDatabaseSeeder::class,
             SettingDatabaseSeeder::class,
             RoomDatabaseSeeder::class,
+            \Modules\Room\database\seeders\RoomImagePlaceholderSeeder::class,
             ResidentDatabaseSeeder::class,
             RentalDatabaseSeeder::class,
             InventoryDatabaseSeeder::class,
