@@ -57,7 +57,7 @@ class RoomImagePlaceholderSeeder extends Seeder
             mkdir($directory, 0755, true);
         }
 
-        if (function_exists('imagecreatetruecolor')) {
+        if (function_exists('imagecreatetruecolor') && function_exists('imagejpeg')) {
             $img = \imagecreatetruecolor($width, $height);
             $bgColor = \imagecolorallocate($img, 240, 240, 240);
             \imagefill($img, 0, 0, $bgColor);

@@ -56,26 +56,31 @@ class FinanceDatabaseSeeder extends Seeder
                     $paidAt     = $baseDate->copy()->addDays(rand(1, 9));
                     $method     = $this->randomMethod();
 
-                    $invoice = Invoice::create([
-                        'lease_id'       => $lease->id,
-                        'invoice_number' => $this->invoiceNumber($baseDate, $invoiceSeq++),
-                        'amount'         => $amount,
-                        'status'         => InvoiceStatus::PAID->value,
-                        'due_date'       => $dueDate,
-                        'created_at'     => $baseDate,
-                        'updated_at'     => $paidAt,
-                    ]);
+                    $invoiceNumber = $this->invoiceNumber($baseDate, $invoiceSeq++);
+                    $invoice = Invoice::updateOrCreate(
+                        ['invoice_number' => $invoiceNumber],
+                        [
+                            'lease_id'       => $lease->id,
+                            'amount'         => $amount,
+                            'status'         => InvoiceStatus::PAID->value,
+                            'due_date'       => $dueDate,
+                            'created_at'     => $baseDate,
+                            'updated_at'     => $paidAt,
+                        ]
+                    );
 
-                    Payment::create([
-                        'invoice_id'       => $invoice->id,
-                        'payment_method'   => $method,
-                        'transaction_id'   => $this->transactionId($method, $invoice->id),
-                        'payment_proof_path' => $method === 'manual' ? 'proofs/bukti_transfer_sample.jpg' : null,
-                        'status'           => PaymentStatus::VERIFIED->value,
-                        'admin_notes'      => null,
-                        'created_at'       => $paidAt,
-                        'updated_at'       => $paidAt->copy()->addHours(rand(1, 4)),
-                    ]);
+                    Payment::updateOrCreate(
+                        ['invoice_id' => $invoice->id],
+                        [
+                            'payment_method'   => $method,
+                            'transaction_id'   => $this->transactionId($method, $invoice->id),
+                            'payment_proof_path' => $method === 'manual' ? 'proofs/bukti_transfer_sample.jpg' : null,
+                            'status'           => PaymentStatus::VERIFIED->value,
+                            'admin_notes'      => null,
+                            'created_at'       => $paidAt,
+                            'updated_at'       => $paidAt->copy()->addHours(rand(1, 4)),
+                        ]
+                    );
                 }
 
                 // Bulan ini — distribusi realistis:
@@ -94,45 +99,52 @@ class FinanceDatabaseSeeder extends Seeder
                     default     => InvoiceStatus::UNPAID->value, // 20% – belum bayar
                 };
 
-                $invoice = Invoice::create([
-                    'lease_id'       => $lease->id,
-                    'invoice_number' => $this->invoiceNumber($invoiceDate, $invoiceSeq++),
-                    'amount'         => $amount,
-                    'status'         => $invoiceStatus,
-                    'due_date'       => $dueDate,
-                    'created_at'     => $invoiceDate,
-                    'updated_at'     => $invoiceDate,
-                ]);
+                $invoiceNumber = $this->invoiceNumber($invoiceDate, $invoiceSeq++);
+                $invoice = Invoice::updateOrCreate(
+                    ['invoice_number' => $invoiceNumber],
+                    [
+                        'lease_id'       => $lease->id,
+                        'amount'         => $amount,
+                        'status'         => $invoiceStatus,
+                        'due_date'       => $dueDate,
+                        'created_at'     => $invoiceDate,
+                        'updated_at'     => $invoiceDate,
+                    ]
+                );
 
                 if ($roll < 3) {
                     // LUNAS
                     $paidAt = $invoiceDate->copy()->addDays(rand(1, 8));
                     $method = $this->randomMethod();
 
-                    Payment::create([
-                        'invoice_id'       => $invoice->id,
-                        'payment_method'   => $method,
-                        'transaction_id'   => $this->transactionId($method, $invoice->id),
-                        'payment_proof_path' => $method === 'manual' ? 'proofs/bukti_transfer_sample.jpg' : null,
-                        'status'           => PaymentStatus::VERIFIED->value,
-                        'created_at'       => $paidAt,
-                        'updated_at'       => $paidAt->copy()->addHours(2),
-                    ]);
+                    Payment::updateOrCreate(
+                        ['invoice_id' => $invoice->id],
+                        [
+                            'payment_method'   => $method,
+                            'transaction_id'   => $this->transactionId($method, $invoice->id),
+                            'payment_proof_path' => $method === 'manual' ? 'proofs/bukti_transfer_sample.jpg' : null,
+                            'status'           => PaymentStatus::VERIFIED->value,
+                            'created_at'       => $paidAt,
+                            'updated_at'       => $paidAt->copy()->addHours(2),
+                        ]
+                    );
 
                 } elseif ($roll === 3) {
                     // PENDING – sudah upload bukti, belum diverifikasi admin
                     $uploadedAt = $now->copy()->subDays(rand(0, 2));
 
-                    Payment::create([
-                        'invoice_id'         => $invoice->id,
-                        'payment_method'     => 'manual',
-                        'payment_proof_path' => 'proofs/bukti_transfer_pending.jpg',
-                        'transaction_id'     => null,
-                        'status'             => PaymentStatus::PENDING->value,
-                        'admin_notes'        => null,
-                        'created_at'         => $uploadedAt,
-                        'updated_at'         => $uploadedAt,
-                    ]);
+                    Payment::updateOrCreate(
+                        ['invoice_id' => $invoice->id],
+                        [
+                            'payment_method'     => 'manual',
+                            'payment_proof_path' => 'proofs/bukti_transfer_pending.jpg',
+                            'transaction_id'     => null,
+                            'status'             => PaymentStatus::PENDING->value,
+                            'admin_notes'        => null,
+                            'created_at'         => $uploadedAt,
+                            'updated_at'         => $uploadedAt,
+                        ]
+                    );
                 }
                 // $roll === 4: tidak ada payment – overdue jika sudah lewat jatuh tempo
 
@@ -140,26 +152,31 @@ class FinanceDatabaseSeeder extends Seeder
             } elseif ($lease->status->value === 'pending') {
                 $dueDate = $now->copy()->addDays(rand(3, 10));
 
-                $invoice = Invoice::create([
-                    'lease_id'       => $lease->id,
-                    'invoice_number' => $this->invoiceNumber($now, $invoiceSeq++),
-                    'amount'         => $amount,
-                    'status'         => InvoiceStatus::UNPAID->value,
-                    'due_date'       => $dueDate,
-                    'created_at'     => $now->copy()->subDays(rand(1, 3)),
-                    'updated_at'     => $now,
-                ]);
+                $invoiceNumber = $this->invoiceNumber($now, $invoiceSeq++);
+                $invoice = Invoice::updateOrCreate(
+                    ['invoice_number' => $invoiceNumber],
+                    [
+                        'lease_id'       => $lease->id,
+                        'amount'         => $amount,
+                        'status'         => InvoiceStatus::UNPAID->value,
+                        'due_date'       => $dueDate,
+                        'created_at'     => $now->copy()->subDays(rand(1, 3)),
+                        'updated_at'     => $now,
+                    ]
+                );
 
                 // Separuh lease pending sudah upload bukti bayar
                 if ($lease->id % 2 === 0) {
-                    Payment::create([
-                        'invoice_id'         => $invoice->id,
-                        'payment_method'     => 'manual',
-                        'payment_proof_path' => 'proofs/bukti_transfer_pending.jpg',
-                        'status'             => PaymentStatus::PENDING->value,
-                        'created_at'         => $now->copy()->subHours(rand(1, 12)),
-                        'updated_at'         => $now,
-                    ]);
+                    Payment::updateOrCreate(
+                        ['invoice_id' => $invoice->id],
+                        [
+                            'payment_method'     => 'manual',
+                            'payment_proof_path' => 'proofs/bukti_transfer_pending.jpg',
+                            'status'             => PaymentStatus::PENDING->value,
+                            'created_at'         => $now->copy()->subHours(rand(1, 12)),
+                            'updated_at'         => $now,
+                        ]
+                    );
                 }
             }
         }
@@ -168,15 +185,19 @@ class FinanceDatabaseSeeder extends Seeder
         $firstUnpaidInvoice = Invoice::where('status', InvoiceStatus::UNPAID->value)->first();
         if ($firstUnpaidInvoice) {
             $rejectedAt = $now->copy()->subDays(3);
-            Payment::create([
-                'invoice_id'         => $firstUnpaidInvoice->id,
-                'payment_method'     => 'manual',
-                'payment_proof_path' => 'proofs/bukti_blur.jpg',
-                'status'             => PaymentStatus::REJECTED->value,
-                'admin_notes'        => 'Bukti transfer tidak terbaca / buram. Mohon upload ulang bukti yang lebih jelas.',
-                'created_at'         => $rejectedAt,
-                'updated_at'         => $rejectedAt->copy()->addHours(1),
-            ]);
+            Payment::firstOrCreate(
+                [
+                    'invoice_id' => $firstUnpaidInvoice->id,
+                    'status'     => PaymentStatus::REJECTED->value
+                ],
+                [
+                    'payment_method'     => 'manual',
+                    'payment_proof_path' => 'proofs/bukti_blur.jpg',
+                    'admin_notes'        => 'Bukti transfer tidak terbaca / buram. Mohon upload ulang bukti yang lebih jelas.',
+                    'created_at'         => $rejectedAt,
+                    'updated_at'         => $rejectedAt->copy()->addHours(1),
+                ]
+            );
         }
     }
 
@@ -247,16 +268,20 @@ class FinanceDatabaseSeeder extends Seeder
                     $expenseDate = Carbon::now()->subDays(rand(0, 3));
                 }
 
-                Expense::create([
-                    'title'        => $tmpl['title'],
-                    'description'  => $tmpl['desc'],
-                    'amount'       => $amount,
-                    'expense_date' => $expenseDate->toDateString(),
-                    'reference_id' => null,
-                    'reference_type' => null,
-                    'created_at'   => $expenseDate,
-                    'updated_at'   => $expenseDate,
-                ]);
+                Expense::updateOrCreate(
+                    [
+                        'title'        => $tmpl['title'],
+                        'expense_date' => $expenseDate->toDateString(),
+                    ],
+                    [
+                        'description'  => $tmpl['desc'],
+                        'amount'       => $amount,
+                        'reference_id' => null,
+                        'reference_type' => null,
+                        'created_at'   => $expenseDate,
+                        'updated_at'   => $expenseDate,
+                    ]
+                );
 
                 $expenseSeq++;
             }
