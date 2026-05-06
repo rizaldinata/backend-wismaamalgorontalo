@@ -24,6 +24,7 @@ class Lease extends Model
         'start_date',
         'end_date',
         'finished_at',
+        'payment_expires_at',
         'rental_type',
         'status',
     ];
@@ -32,6 +33,7 @@ class Lease extends Model
         'start_date' => 'date',
         'end_date' => 'date',
         'finished_at' => 'datetime',
+        'payment_expires_at' => 'datetime',
         'status' => LeaseStatus::class,
         'rental_type' => RentalType::class,
     ];

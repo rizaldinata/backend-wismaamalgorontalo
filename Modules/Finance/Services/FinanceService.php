@@ -73,6 +73,9 @@ class FinanceService
                 $this->invoiceRepository->updateStatus($payment->invoice, InvoiceStatus::PAID->value);
                 $this->rentalService->activateLease($payment->invoice->lease_id);
                 event(new PaymentSettled($payment));
+            } else {
+                // Tolak pembayaran → batalkan lease dan bebaskan kamar
+                $this->rentalService->cancelLease($payment->invoice->lease_id);
             }
 
             return $payment;

@@ -12,7 +12,12 @@ interface RoomAvailabilityService
     public function isAvailable(int $roomId): bool;
 
     /**
-     * Ubah status kamar menjadi terisi (Occupied)
+     * Ubah status kamar menjadi dipesan/reserved (menunggu verifikasi pembayaran)
+     */
+    public function markAsReserved(int $roomId): void;
+
+    /**
+     * Ubah status kamar menjadi terisi (Occupied) — hanya setelah pembayaran diverifikasi
      */
     public function markAsOccupied(int $roomId): void;
 

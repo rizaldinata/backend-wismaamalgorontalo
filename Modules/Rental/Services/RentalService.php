@@ -47,7 +47,11 @@ class RentalService
             'end_date' => $endDate,
             'rental_type' => $rentalType->value,
             'status' => LeaseStatus::PENDING->value,
+            'payment_expires_at' => now()->addMinutes(5),
         ]);
+
+        // Kunci kamar segera agar tidak bisa dipesan pengguna lain (status reserved = menunggu verifikasi)
+        $this->roomAvailabilityService->markAsReserved($data['room_id']);
 
         $pricePerUnit = $this->roomAvailabilityService->getPrice($data['room_id'], $rentalType);
         $totalAmount = $pricePerUnit * $data['duration'];
@@ -55,7 +59,7 @@ class RentalService
         $financeService = app(FinanceService::class);
         $financeService->generateInvoiceForLease($lease->id, $totalAmount, $startDate);
 
-        return $lease->load('room');
+        return $lease->load(['room', 'latestInvoice']);
     }
 
     public function getMyLeases(int $userId)
@@ -152,6 +156,32 @@ class RentalService
         $financeService->generateInvoiceForLease($newLease->id, $totalAmount, $newStartDate);
 
         return $newLease->load('room');
+    }
+
+    public function cancelMyLease(int $userId, int $leaseId): void
+    {
+        $resident = $this->residentRepository->findByUserId($userId);
+
+        if (!$resident) {
+            throw new NotFoundHttpException('Data penghuni tidak ditemukan.');
+        }
+
+        $lease = $this->leaseRepository->findById($leaseId);
+
+        if (!$lease || $lease->resident_id !== $resident->id) {
+            throw new NotFoundHttpException('Data sewa tidak ditemukan atau bukan milik Anda.');
+        }
+
+        if ($lease->status->value !== LeaseStatus::PENDING->value) {
+            throw new HttpException(422, 'Hanya sewa dengan status menunggu pembayaran yang bisa dibatalkan.');
+        }
+
+        $lease->update([
+            'status' => LeaseStatus::CANCELLED->value,
+            'finished_at' => now(),
+        ]);
+
+        $this->roomAvailabilityService->markAsAvailable($lease->room_id);
     }
 
     public function cancelLease(int $leaseId)

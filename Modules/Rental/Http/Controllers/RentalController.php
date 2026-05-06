@@ -60,4 +60,11 @@ class RentalController extends Controller
 
         return $this->apiSuccess(new LeaseResource($lease), 'Sewa berhasil diperpanjang. Silakan lakukan pembayaran tagihan terbaru.', 201);
     }
+
+    public function cancelMyLease(int $id)
+    {
+        $this->rentalService->cancelMyLease(Auth::id(), $id);
+
+        return $this->apiSuccess(null, 'Pemesanan berhasil dibatalkan. Kamar kembali tersedia.');
+    }
 }
