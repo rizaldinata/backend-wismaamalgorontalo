@@ -17,7 +17,8 @@ use Modules\Rental\Enums\RentalType;
 class RoomService implements RoomAvailabilityService
 {
     public function __construct(
-        private readonly RoomRepositoryInterface $roomRepository
+        private readonly RoomRepositoryInterface $roomRepository,
+        private readonly \App\Services\ImageService $imageService
     ) {
     }
 
@@ -73,30 +74,15 @@ class RoomService implements RoomAvailabilityService
 
     public function uploadImages(Room $room, array $files): void
     {
-        $manager = new ImageManager(new Driver());
-
         foreach ($files as $index => $file) {
             if (!$file instanceof UploadedFile)
                 continue;
 
-            $extension = $file->getClientOriginalExtension();
-            $filename = uniqid('room_') . '.' . $extension;
-
             $folder = "rooms/{$room->id}";
-            $path = "$folder/$filename";
-            $thumbPath = "$folder/thumb_$filename";
-
-            if (!Storage::disk('public')->exists($folder)) {
-                Storage::disk('public')->makeDirectory($folder);
-            }
-
-            $image = $manager->read($file);
-            $image->scaleDown(width: 1200);
-            Storage::disk('public')->put($path, (string) $image->encode());
-
-            $thumb = $manager->read($file);
-            $thumb->cover(300, 300);
-            Storage::disk('public')->put($thumbPath, (string) $thumb->encode());
+            
+            // Menggunakan global ImageService untuk compress & convert ke WebP
+            $path = $this->imageService->uploadAndCompress($file, $folder);
+            $thumbPath = $this->imageService->createThumbnail($file, $folder);
 
             $this->roomRepository->addImage($room, [
                 'image_path' => $path,

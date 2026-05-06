@@ -16,7 +16,8 @@ class DamageReportService
 {
     public function __construct(
         private readonly DamageReportRepositoryInterface $requestRepository,
-        private readonly ResidentRepositoryInterface $residentRepository
+        private readonly ResidentRepositoryInterface $residentRepository,
+        private readonly \App\Services\ImageService $imageService
     ) {}
 
     public function createReport(int $userId, array $data, array $images = []): MaintenanceRequest
@@ -46,7 +47,7 @@ class DamageReportService
         $resident = $this->residentRepository->findByUserId($userId);
 
         if (!$resident) {
-            throw new NotFoundHttpException('Biodata penghuni tidak ditemukan.');
+            return collect([]);
         }
 
         return $this->requestRepository->getByResidentId($resident->id);
@@ -91,7 +92,8 @@ class DamageReportService
         $paths = [];
         foreach ($images as $image) {
             if ($image instanceof UploadedFile) {
-                $paths[] = $image->store($folder, 'public');
+                // Menggunakan global ImageService untuk compress & convert ke WebP
+                $paths[] = $this->imageService->uploadAndCompress($image, $folder);
             }
         }
         return $paths;

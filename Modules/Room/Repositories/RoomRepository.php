@@ -20,7 +20,8 @@ class RoomRepository implements RoomRepositoryInterface
                 $q->where('status', $filters['status']);
             })
             ->with(['images', 'activeLease'])
-            ->paginate(10);
+            ->latest()
+            ->get();
     }
 
     public function findById(int $id): Room
