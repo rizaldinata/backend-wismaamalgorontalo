@@ -11,6 +11,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Resident Routes
     Route::get('rentals/my', [RentalController::class, 'myLeases'])->middleware('permission:view-lease');
     Route::post('rentals', [RentalController::class, 'store'])->middleware('permission:create-lease');
-    Route::post('rentals/{id}/extend', [RentalController::class, 'extend'])->middleware('permission:create-lease');
+    Route::post('rentals/{id}/extend', [RentalController::class, 'extend'])->middleware('permission:extend-lease');
     Route::post('rentals/{id}/cancel', [RentalController::class, 'cancelMyLease'])->middleware('permission:create-lease');
 });

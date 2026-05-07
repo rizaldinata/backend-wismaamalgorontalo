@@ -44,6 +44,7 @@ class RolePermissionSeeder extends Seeder
             'view-lease',
             'approve-lease',
             'create-lease',
+            'extend-lease',
             // Finance
             'finance-dashboard-view',
             'finance-payment-verify',
@@ -75,6 +76,11 @@ class RolePermissionSeeder extends Seeder
             // Setting
             'setting-view',
             'setting-update',
+            // Guest
+            'view-guest',
+            'view-my-guest',
+            'create-guest',
+            'delete-guest',
         ];
 
         // ─── Admin: manajemen operasional, tanpa akses setting sistem ─────
@@ -133,14 +139,22 @@ class RolePermissionSeeder extends Seeder
             // Setting
             'setting-view',
             'setting-update',
+            // Guest
+            'view-guest',
         ];
 
         // ─── Member: tamu terdaftar, belum memiliki kamar ────────────────
+
         $memberPermissions = [
             // Room (browsing kamar)
             'view-room',
-            // Lease (mengajukan sewa baru)
+            // Lease (mengajukan sewa kamar baru, bukan perpanjang)
             'create-lease',
+            // Finance (bayar invoice sewa baru + riwayat keuangan dari sewa sebelumnya)
+            'finance-invoice-create',
+            'finance-me-summary-view',
+            'finance-me-invoice-view',
+            'finance-me-payment-view',
             // Profil (melengkapi biodata KTP sebelum sewa)
             'complete-resident-profile',
         ];
@@ -150,9 +164,10 @@ class RolePermissionSeeder extends Seeder
         $residentPermissions = [
             // Room (masih bisa lihat kamar)
             'view-room',
-            // Lease (melihat sewa sendiri, perpanjang)
+            // Lease (melihat sewa sendiri, buat sewa baru, perpanjang sewa aktif)
             'view-lease',
             'create-lease',
+            'extend-lease',
             // Finance (tagihan & pembayaran sendiri)
             'finance-invoice-create',
             'finance-me-summary-view',
@@ -164,6 +179,10 @@ class RolePermissionSeeder extends Seeder
             'view-my-damage-report',
             // Profil
             'complete-resident-profile',
+            // Guest
+            'view-my-guest',
+            'create-guest',
+            'delete-guest',
         ];
 
         $superAdmin->syncPermissions($superAdminPermissions);

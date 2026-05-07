@@ -58,6 +58,11 @@ class Lease extends Model
         return $this->belongsTo(Room::class, 'room_id');
     }
 
+    public function guests()
+    {
+        return $this->hasMany(\Modules\Guest\Models\Guest::class);
+    }
+
     protected static function newFactory()
     {
         return LeaseFactory::new();

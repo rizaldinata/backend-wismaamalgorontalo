@@ -42,7 +42,8 @@ class PermissionSeeder extends Seeder
             // ─── Lease / Sewa ─────────────────────────────────────────────
             ['name' => 'view-lease',    'target' => 'lease', 'description' => 'Melihat daftar sewa / manajemen reservasi'],
             ['name' => 'approve-lease', 'target' => 'lease', 'description' => 'Menyetujui atau menolak pengajuan sewa'],
-            ['name' => 'create-lease',  'target' => 'lease', 'description' => 'Mengajukan sewa kamar baru (untuk penghuni)'],
+            ['name' => 'create-lease',  'target' => 'lease', 'description' => 'Mengajukan sewa kamar baru'],
+            ['name' => 'extend-lease',  'target' => 'lease', 'description' => 'Memperpanjang sewa aktif (khusus penghuni aktif)'],
 
             // ─── Finance ──────────────────────────────────────────────────
             ['name' => 'finance-dashboard-view',    'target' => 'finance', 'description' => 'Melihat dashboard ringkasan keuangan'],
@@ -83,6 +84,12 @@ class PermissionSeeder extends Seeder
             // ─── Setting ──────────────────────────────────────────────────
             ['name' => 'setting-view',               'target' => 'setting', 'description' => 'Melihat detail pengaturan'],
             ['name' => 'setting-update',             'target' => 'setting', 'description' => 'Menyimpan perubahan pengaturan'],
+
+            // ─── Guest ────────────────────────────────────────────────────
+            ['name' => 'view-guest',    'target' => 'guest', 'description' => 'Melihat semua data tamu (admin)'],
+            ['name' => 'view-my-guest', 'target' => 'guest', 'description' => 'Melihat daftar tamu milik sendiri (penghuni aktif)'],
+            ['name' => 'create-guest',  'target' => 'guest', 'description' => 'Mendaftarkan tamu baru (penghuni aktif)'],
+            ['name' => 'delete-guest',  'target' => 'guest', 'description' => 'Menghapus data tamu milik sendiri (penghuni aktif)'],
         ];
 
         foreach ($permissions as $permission) {
