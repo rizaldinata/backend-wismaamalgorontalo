@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Modules\Finance\Services\FinanceService;
 use Modules\Rental\Enums\LeaseStatus;
 use Modules\Rental\Enums\RentalType;
+use Modules\Rental\Events\LeaseEnded;
 use Modules\Rental\Models\Lease;
 use Modules\Rental\Repositories\Contracts\LeaseRepositoryInterface;
 use Modules\Resident\Repositories\Contracts\ResidentRepositoryInterface;
@@ -87,12 +88,21 @@ class RentalService
             $this->roomAvailabilityService->markAsOccupied($lease->room_id);
         }
 
-        if (in_array($status, [LeaseStatus::CANCELLED->value, LeaseStatus::FINISHED->value]) 
+        $wasActive = $lease->status->value === LeaseStatus::ACTIVE->value;
+
+        if (in_array($status, [LeaseStatus::CANCELLED->value, LeaseStatus::FINISHED->value])
             && in_array($lease->status->value, [LeaseStatus::ACTIVE->value, LeaseStatus::PENDING->value])) {
             $this->roomAvailabilityService->markAsAvailable($lease->room_id);
         }
 
-        return $this->leaseRepository->updateStatus($lease, $status);
+        $updated = $this->leaseRepository->updateStatus($lease, $status);
+
+        // Downgrade ke member jika sewa aktif berakhir
+        if ($wasActive && in_array($status, [LeaseStatus::CANCELLED->value, LeaseStatus::FINISHED->value])) {
+            event(new LeaseEnded($lease));
+        }
+
+        return $updated;
     }
 
     public function activateLease(int $leaseId): void
@@ -216,6 +226,11 @@ class RentalService
                 ->where('id', '!=', $lease->id)
                 ->whereNotIn('status', [LeaseStatus::CANCELLED->value, LeaseStatus::FINISHED->value])
                 ->update(['status' => LeaseStatus::CANCELLED->value]);
+
+            // Downgrade ke member jika sewa aktif yang berakhir
+            if ($originalStatus === LeaseStatus::ACTIVE->value) {
+                event(new LeaseEnded($lease));
+            }
         }
     }
 }

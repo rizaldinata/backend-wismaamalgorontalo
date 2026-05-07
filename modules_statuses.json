@@ -8,5 +8,6 @@
     "Inventory": true,
     "Setting": true,
     "Rental": true,
-    "Notification": true
+    "Notification": true,
+    "Guest": true
 }

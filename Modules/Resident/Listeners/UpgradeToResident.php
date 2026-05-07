@@ -30,7 +30,10 @@ class UpgradeToResident
             Role::create(['name' => 'resident', 'guard_name' => 'api']);
         }
 
-        // Assign role resident
+        // Lepas role member, assign resident
+        if ($user->hasRole('member')) {
+            $user->removeRole('member');
+        }
         if (!$user->hasRole('resident')) {
             $user->assignRole('resident');
         }

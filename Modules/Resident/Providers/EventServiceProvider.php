@@ -15,6 +15,9 @@ class EventServiceProvider extends ServiceProvider
         \Modules\Finance\Events\PaymentSettled::class => [
             \Modules\Resident\Listeners\UpgradeToResident::class,
         ],
+        \Modules\Rental\Events\LeaseEnded::class => [
+            \Modules\Resident\Listeners\DowngradeToMember::class,
+        ],
     ];
 
     /**
