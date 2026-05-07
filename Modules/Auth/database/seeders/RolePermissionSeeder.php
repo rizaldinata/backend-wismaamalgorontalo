@@ -135,14 +135,25 @@ class RolePermissionSeeder extends Seeder
             'setting-update',
         ];
 
-        // ─── Member / Penghuni: akses fitur sebagai penghuni ─────────────
+        // ─── Member: tamu terdaftar, belum memiliki kamar ────────────────
         $memberPermissions = [
-            // Room (publik)
+            // Room (browsing kamar)
             'view-room',
-            // Lease (mengajukan sewa)
+            // Lease (mengajukan sewa baru)
             'create-lease',
+            // Profil (melengkapi biodata KTP sebelum sewa)
+            'complete-resident-profile',
+        ];
+
+        // ─── Resident: penghuni aktif dengan sewa yang sudah dibayar ─────
+        $resident = Role::firstOrCreate(['name' => 'resident', 'guard_name' => 'api']);
+        $residentPermissions = [
+            // Room (masih bisa lihat kamar)
+            'view-room',
+            // Lease (melihat sewa sendiri, perpanjang)
             'view-lease',
-            // Finance (tagihan sendiri)
+            'create-lease',
+            // Finance (tagihan & pembayaran sendiri)
             'finance-invoice-create',
             'finance-me-summary-view',
             'finance-me-invoice-view',
@@ -158,6 +169,7 @@ class RolePermissionSeeder extends Seeder
         $superAdmin->syncPermissions($superAdminPermissions);
         $admin->syncPermissions($adminPermissions);
         $member->syncPermissions($memberPermissions);
+        $resident->syncPermissions($residentPermissions);
 
         $this->command->info('Relasi Role dan Permission berhasil disinkronkan!');
     }
