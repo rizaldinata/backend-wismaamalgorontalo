@@ -30,10 +30,10 @@ class RoomImagePlaceholderSeeder extends Seeder
                     $image->update(['thumbnail_path' => 'rooms/thumbs/' . $filename]);
                 }
 
-                // Skip jika file gambar utama sudah ada
-                if (file_exists($path)) {
+                // Skip jika file gambar utama sudah ada dan tidak kosong (0 bytes)
+                if (file_exists($path) && filesize($path) > 0) {
                     // Cek thumbnail juga
-                    if (!file_exists($thumbPath)) {
+                    if (!file_exists($thumbPath) || filesize($thumbPath) == 0) {
                         $this->generatePlaceholder($thumbPath, $room->number, "Thumb", 400, 300);
                     }
                     continue;
@@ -57,15 +57,20 @@ class RoomImagePlaceholderSeeder extends Seeder
             mkdir($directory, 0755, true);
         }
 
-        $img = imagecreatetruecolor($width, $height);
-        $bgColor = imagecolorallocate($img, 240, 240, 240);
-        imagefill($img, 0, 0, $bgColor);
-        $textColor = imagecolorallocate($img, 100, 100, 100);
+        if (function_exists('imagecreatetruecolor') && function_exists('imagejpeg')) {
+            $img = \imagecreatetruecolor($width, $height);
+            $bgColor = \imagecolorallocate($img, 240, 240, 240);
+            \imagefill($img, 0, 0, $bgColor);
+            $textColor = \imagecolorallocate($img, 100, 100, 100);
 
-        imagestring($img, 5, ($width / 2) - 50, ($height / 2) - 20, "Room " . $text1, $textColor);
-        imagestring($img, 4, ($width / 2) - 40, ($height / 2) + 10, $text2, $textColor);
+            \imagestring($img, 5, ($width / 2) - 50, ($height / 2) - 20, "Room " . $text1, $textColor);
+            \imagestring($img, 4, ($width / 2) - 40, ($height / 2) + 10, $text2, $textColor);
 
-        imagejpeg($img, $path, 80);
-        imagedestroy($img);
+            \imagejpeg($img, $path, 80);
+            \imagedestroy($img);
+        } else {
+            // Fallback if GD is not installed
+            file_put_contents($path, "");
+        }
     }
 }

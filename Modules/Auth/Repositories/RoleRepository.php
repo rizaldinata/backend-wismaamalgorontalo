@@ -9,12 +9,12 @@ class RoleRepository implements RoleRepositoryInterface
 {
     public function getAll()
     {
-        return Role::with('permissions:id,name')->get();
+        return Role::with('permissions:id,name,target,description')->get();
     }
 
     public function getAllExceptPermission(string $permissionName)
     {
-        return Role::with('permissions:id,name')
+        return Role::with('permissions:id,name,target,description')
             ->whereDoesntHave('permissions', function ($q) use ($permissionName) {
                 $q->where('name', $permissionName);
             })->get();
@@ -22,7 +22,7 @@ class RoleRepository implements RoleRepositoryInterface
 
     public function findById(int $id)
     {
-        return Role::with('permissions:id,name')->findOrFail($id);
+        return Role::with('permissions:id,name,target,description')->findOrFail($id);
     }
 
     public function create(array $data)

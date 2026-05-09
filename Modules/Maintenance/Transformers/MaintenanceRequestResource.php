@@ -24,7 +24,7 @@ class MaintenanceRequestResource extends JsonResource
             'description' => $this->description,
             'status' => $this->status ? $this->status->value : null,
             'reported_at' => $this->reported_at ? $this->reported_at->toIso8601String() : null,
-            'images' => $this->images ? $this->images->map(fn($img) => Storage::url($img->image_path)) : [],
+            'images' => $this->images ? $this->images->map(fn($img) => url("api/maintenance/media/{$img->image_path}")) : [],
             'timeline' => MaintenanceRequestUpdateResource::collection($this->whenLoaded('updates')),
             'created_at' => $this->created_at->toIso8601String(),
         ];

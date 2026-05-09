@@ -8,14 +8,23 @@ use Illuminate\Support\Facades\DB;
 use Modules\Rental\Enums\LeaseStatus;
 use Modules\Rental\Models\Lease;
 use Modules\Room\Contracts\RoomAvailabilityService;
+use Modules\Rental\Repositories\LeaseRepositoryInterface;
+use App\Services\ImageService;
 
 class LeaseService
 {
     protected $roomService;
+    protected $imageService;
+    protected $leaseRepository;
 
-    public function __construct(RoomAvailabilityService $roomService)
-    {
+    public function __construct(
+        LeaseRepositoryInterface $leaseRepository,
+        RoomAvailabilityService $roomService,
+        ImageService $imageService
+    ) {
+        $this->leaseRepository = $leaseRepository;
         $this->roomService = $roomService;
+        $this->imageService = $imageService;
     }
 
     public function createLeaseRequest($user, array $data, $paymentProof = null): Lease
@@ -34,7 +43,8 @@ class LeaseService
 
             $proofPath = null;
             if ($paymentProof) {
-                $proofPath = $paymentProof->store('payment_proofs', 'public');
+                // Menggunakan ImageService untuk compress bukti bayar
+                $proofPath = $this->imageService->uploadAndCompress($paymentProof, 'payment_proofs');
             }
 
             $lease = Lease::create([

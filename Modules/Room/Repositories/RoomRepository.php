@@ -11,8 +11,8 @@ class RoomRepository implements RoomRepositoryInterface
     public function getAllPaginated(array $filters = [])
     {
         return Room::query()
-            ->when(isset($filters['type']), function ($q) use ($filters) {
-                $q->where('title', 'like', '%' . $filters['saerch'] . '%')
+            ->when(isset($filters['search']), function ($q) use ($filters) {
+                $q->where('title', 'like', '%' . $filters['search'] . '%')
                     ->orWhere('description', 'like', '%' . $filters['search'] . '$')
                     ->orWhere('number', 'like', '%' . $filters['search'] . '%');
             })
@@ -20,7 +20,8 @@ class RoomRepository implements RoomRepositoryInterface
                 $q->where('status', $filters['status']);
             })
             ->with(['images', 'activeLease'])
-            ->paginate(10);
+            ->latest()
+            ->get();
     }
 
     public function findById(int $id): Room
@@ -37,6 +38,21 @@ class RoomRepository implements RoomRepositoryInterface
     {
         $room->update($data);
         return $room;
+    }
+
+    public function getAllWithSchedules()
+    {
+        return Room::with([
+            'leases' => function ($query) {
+                $query->whereIn('status', [
+                    'pending',
+                    'active',
+                    'finished',
+                ]);
+            },
+
+            'leases.resident.user',
+        ])->get();
     }
 
     public function delete(Room $room): void

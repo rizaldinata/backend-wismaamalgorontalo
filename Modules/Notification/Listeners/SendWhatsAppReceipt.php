@@ -5,28 +5,25 @@ namespace Modules\Notification\Listeners;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Modules\Finance\Events\PaymentSettled;
-use Modules\Notification\Services\FonnteService;
+use Modules\Notification\Services\NotificationService;
+use Modules\Setting\Services\SettingService;
 
 class SendWhatsAppReceipt implements ShouldQueue
 {
     use InteractsWithQueue;
 
     public function __construct(
-        private readonly FonnteService $fonnteService
+        private readonly NotificationService $notificationService,
+        private readonly SettingService $settingService,
     ) {}
 
     public function handle(PaymentSettled $event): void
     {
-        $payment = $event->payment;
-        $payment->loadMissing('invoice.lease.resident.user');
-        
-        $resident = $payment->invoice->lease->resident;
-        $user = $resident->user;
-        $phone = $resident->phone_number;
-        $amount = number_format($payment->invoice->amount, 0, ',', '.');
-        
-        $message = "Halo {$user->name},\n\nTerima kasih, pembayaran sejumlah Rp{$amount} untuk tagihan {$payment->invoice->invoice_number} telah berhasil.\n\nSebuah tanda terima resmi telah dikirim ke akun Anda.";
-        
-        $this->fonnteService->sendMessage($phone, $message);
+        // Hanya kirim jika fitur notifikasi WA struk diaktifkan admin
+        if (!$this->settingService->isFeatureEnabled('feature_whatsapp_receipt')) {
+            return;
+        }
+
+        $this->notificationService->sendPaymentReceiptMessage($event->payment);
     }
 }

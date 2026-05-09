@@ -12,16 +12,24 @@ use Modules\Room\Enums\RoomStatus;
 use Modules\Room\Models\Room;
 use Modules\Room\Models\RoomImage;
 use Modules\Room\Repositories\Contracts\RoomRepositoryInterface;
+use Modules\Rental\Enums\RentalType;
 
 class RoomService implements RoomAvailabilityService
 {
     public function __construct(
-        private readonly RoomRepositoryInterface $roomRepository
-    ) {}
+        private readonly RoomRepositoryInterface $roomRepository,
+        private readonly \App\Services\ImageService $imageService
+    ) {
+    }
 
     public function getAllRooms(array $filters = [])
     {
         return $this->roomRepository->getAllPaginated($filters);
+    }
+
+    public function getRoomSchedules()
+    {
+        return $this->roomRepository->getAllWithSchedules();
     }
 
     public function getRoomDetails(int $id): Room
@@ -66,35 +74,33 @@ class RoomService implements RoomAvailabilityService
 
     public function uploadImages(Room $room, array $files): void
     {
-        $manager = new ImageManager(new Driver());
+        \Log::info('RoomService: Memulai upload gambar untuk Kamar ID ' . $room->id . '. Jumlah file: ' . count($files));
 
         foreach ($files as $index => $file) {
-            if (!$file instanceof UploadedFile) continue;
-
-            $extension = $file->getClientOriginalExtension();
-            $filename = uniqid('room_') . '.' . $extension;
-
-            $folder = "rooms/{$room->id}";
-            $path = "$folder/$filename";
-            $thumbPath = "$folder/thumb_$filename";
-
-            if (!Storage::disk('public')->exists($folder)) {
-                Storage::disk('public')->makeDirectory($folder);
+            if (!$file instanceof UploadedFile) {
+                \Log::warning('RoomService: File pada index ' . $index . ' bukan instance dari UploadedFile.');
+                continue;
             }
 
-            $image = $manager->read($file);
-            $image->scaleDown(width: 1200);
-            Storage::disk('public')->put($path, (string) $image->encode());
+            \Log::info('RoomService: Memproses file: ' . $file->getClientOriginalName() . ' (Size: ' . $file->getSize() . ' bytes)');
 
-            $thumb = $manager->read($file);
-            $thumb->cover(300, 300);
-            Storage::disk('public')->put($thumbPath, (string) $thumb->encode());
+            $folder = "rooms/{$room->id}";
+            
+            try {
+                // Menggunakan global ImageService untuk compress & convert ke WebP
+                $path = $this->imageService->uploadAndCompress($file, $folder);
+                $thumbPath = $this->imageService->createThumbnail($file, $folder);
 
-            $this->roomRepository->addImage($room, [
-                'image_path' => $path,
-                'thumbnail_path' => $thumbPath,
-                'order' => $index + 1
-            ]);
+                $this->roomRepository->addImage($room, [
+                    'image_path' => $path,
+                    'thumbnail_path' => $thumbPath,
+                    'order' => $index + 1
+                ]);
+
+                \Log::info('RoomService: Berhasil simpan gambar ke database untuk file: ' . $file->getClientOriginalName());
+            } catch (\Exception $e) {
+                \Log::error('RoomService: Gagal upload gambar index ' . $index . '. Error: ' . $e->getMessage());
+            }
         }
     }
 
@@ -106,13 +112,20 @@ class RoomService implements RoomAvailabilityService
 
     public function isAvailable(int $roomId): bool
     {
-        $room = $this->roomRepository->findByid($roomId);
-        return $room && $room->status === RoomStatus::AVAILABLE;
+        $room = $this->roomRepository->findById($roomId);
+
+        return $room->status === RoomStatus::AVAILABLE;
+    }
+
+    public function markAsReserved(int $roomId): void
+    {
+        $room = $this->roomRepository->findById($roomId);
+        $this->roomRepository->update($room, ['status' => RoomStatus::RESERVED]);
     }
 
     public function markAsOccupied(int $roomId): void
     {
-        $room  = $this->roomRepository->findById($roomId);
+        $room = $this->roomRepository->findById($roomId);
         $this->roomRepository->update($room, ['status' => RoomStatus::OCCUPIED]);
     }
 
@@ -122,9 +135,10 @@ class RoomService implements RoomAvailabilityService
         $this->roomRepository->update($room, ['status' => RoomStatus::AVAILABLE]);
     }
 
-    public function getPrice(int $roomId): float
+    public function getPrice(int $roomId, RentalType $type = RentalType::MONTHLY): float
     {
-        return $this->roomRepository->findById($roomId)->price;
+        $room = $this->roomRepository->findById($roomId);
+        return $type === RentalType::DAILY ? (float) $room->price_daily : (float) $room->price;
     }
 
     public function getName(int $roomId): string

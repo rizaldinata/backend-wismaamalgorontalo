@@ -2,6 +2,8 @@
 
 namespace Modules\Room\Contracts;
 
+use Modules\Rental\Enums\RentalType;
+
 interface RoomAvailabilityService
 {
     /**
@@ -10,7 +12,12 @@ interface RoomAvailabilityService
     public function isAvailable(int $roomId): bool;
 
     /**
-     * Ubah status kamar menjadi terisi (Occupied)
+     * Ubah status kamar menjadi dipesan/reserved (menunggu verifikasi pembayaran)
+     */
+    public function markAsReserved(int $roomId): void;
+
+    /**
+     * Ubah status kamar menjadi terisi (Occupied) — hanya setelah pembayaran diverifikasi
      */
     public function markAsOccupied(int $roomId): void;
 
@@ -22,7 +29,7 @@ interface RoomAvailabilityService
     /**
      * Ambil harga kamar (penting untuk perhitungan sewa)
      */
-    public function getPrice(int $roomId): float;
+    public function getPrice(int $roomId, RentalType $type = RentalType::MONTHLY): float;
 
     /**
      * Ambil nama kamar (untuk invoice/display)

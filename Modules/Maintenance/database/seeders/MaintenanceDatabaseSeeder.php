@@ -13,6 +13,7 @@ class MaintenanceDatabaseSeeder extends Seeder
     {
         $this->call([
             MaintenanceRequestSeeder::class,
+            MaintenanceScheduleSeeder::class,
         ]);
     }
 }

@@ -9,6 +9,9 @@ use Modules\Rental\database\seeders\RentalDatabaseSeeder;
 use Modules\Resident\database\seeders\ResidentDatabaseSeeder;
 use Modules\Room\database\seeders\RoomDatabaseSeeder;
 use Modules\Setting\database\seeders\SettingDatabaseSeeder;
+use Modules\Inventory\database\seeders\InventoryDatabaseSeeder;
+use Modules\Maintenance\database\seeders\MaintenanceDatabaseSeeder;
+use Modules\Guest\database\seeders\GuestDatabaseSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,8 +21,12 @@ class DatabaseSeeder extends Seeder
             AuthDatabaseSeeder::class,
             SettingDatabaseSeeder::class,
             RoomDatabaseSeeder::class,
+            \Modules\Room\database\seeders\RoomImagePlaceholderSeeder::class,
             ResidentDatabaseSeeder::class,
             RentalDatabaseSeeder::class,
+            GuestDatabaseSeeder::class,
+            InventoryDatabaseSeeder::class,
+            MaintenanceDatabaseSeeder::class,
             FinanceDatabaseSeeder::class,
         ]);
     }

@@ -15,7 +15,17 @@ class Resident extends Model
 
     public function user()
     {
-        return  $this->belongsTo(User::class);
+        return $this->belongsTo(User::class);
+    }
+
+    public function leases()
+    {
+        return $this->hasMany(\Modules\Rental\Models\Lease::class);
+    }
+
+    public function getActiveLeaseAttribute()
+    {
+        return $this->leases()->where('status', \Modules\Rental\Enums\LeaseStatus::ACTIVE)->first();
     }
 
     protected static function newFactory()

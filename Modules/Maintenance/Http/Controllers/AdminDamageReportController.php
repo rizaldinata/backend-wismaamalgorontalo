@@ -6,17 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Auth;
 use Modules\Maintenance\Http\Requests\StoreMaintenanceUpdate;
-use Modules\Maintenance\Services\MaintenanceService;
+use Modules\Maintenance\Services\DamageReportService;
 use Modules\Maintenance\Transformers\MaintenanceRequestResource;
 
 use Modules\Maintenance\Transformers\MaintenanceRequestUpdateResource;
 
-class AdminMaintenanceController extends Controller
+class AdminDamageReportController extends Controller
 {
     use ApiResponse;
 
     public function __construct(
-        private readonly MaintenanceService $maintenanceService
+        private readonly DamageReportService $maintenanceService
     ) {}
 
     public function index()

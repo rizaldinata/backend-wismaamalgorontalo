@@ -93,12 +93,23 @@ Digunakan untuk menangani pembayaran sewa. Logikanya terintegrasi di dalam `Modu
 ### 6.3 Scramble (Auto API Docs)
 API didokumentasikan secara otomatis. Anda dapat mengaksesnya di endpoint `/docs/api` (jika diaktifkan). Dokumentasi ini membaca *type-hint* dan *doc-blocks* dari Controller dan Model.
 
-### 6.4 Pelaporan Kerusakan (Maintenance Module)
-Fitur sentralisasi pelaporan kerusakan untuk `Resident` yang berada sepenuhnya di modul `Maintenance`. 
+### 6.4 Modul Pemeliharaan (Maintenance Module)
+Fitur sentralisasi pelaporan kerusakan dan penjadwalan pembersihan/perawatan rutin.
+
+#### 6.4.1 Laporan Kerusakan (Damage Reports)
+Endpoint: `/api/v1/damage-reports`
 Logika kuncinya:
-- *Resident* dapat melaporkan kerusakan dengan multi-foto. 
+- *Resident* dapat melaporkan kerusakan dengan multi-foto.
 - *Admin* / *Super-Admin* dapat merespons ("timeline reply") termasuk menambah foto dan merubah status laporan.
 - Laporan bebas (`nullable`) dari ikatan kamar jika kerusakan ada di fasilitas umum.
+
+#### 6.4.2 Jadwal Pemeliharaan (Maintenance Schedules)
+Endpoint: `/api/v1/schedules`
+Fitur ini menangani *Preventive Maintenance* seperti jadwal pembersihan rutin dan perawatan aset (AC, lift, dll).
+Logika kuncinya:
+- Pencatatan teknisi, lokasi, tipe (pembersihan/perawatan), dan sub-tipe (rutin, darurat, dll).
+- Pelacakan waktu mulai dan selesai untuk audit performa OB/Teknisi.
+- Status progres: `in_progress`, `done`, `cancelled`.
 
 **Data Seeding**:
 Modul ini menyertakan `MaintenanceRequestSeeder` yang menghasilkan data dummy untuk:
@@ -109,6 +120,13 @@ Modul ini menyertakan `MaintenanceRequestSeeder` yang menghasilkan data dummy un
 
 > [!NOTE]
 > Selalu gunakan `Modules\Auth\Models\User` daripada `App\Models\User` (default Laravel) di dalam modul untuk menjaga konsistensi dengan sistem Auth modular.
+
+### 6.5 Manajemen Inventaris (Inventory Module)
+Modul ini menangani pencatatan aset barang di Wisma. 
+Logika kuncinya:
+- **Otomatisasi Finansial**: Setiap penambahan barang dengan `purchase_price` akan otomatis memanggil `FinanceService@recordExpense` untuk mencatat pengeluaran di laporan keuangan.
+- **Sinkronisasi Revisi**: Update pada harga beli barang akan melakukan *sync* terhadap data pengeluaran terkait di modul Finance menggunakan mekanisme `ByReference`.
+- **Enum-based Condition**: Menggunakan Enum `ItemCondition` (good, fair, broken, lost) untuk validasi status barang yang konsisten antara Database dan UI.
 
 ---
 

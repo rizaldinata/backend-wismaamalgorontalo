@@ -12,13 +12,15 @@ use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
 class ManualPaymentStrategy implements PaymentStrategyInterface
 {
     public function __construct(
-        private readonly PaymentRepositoryInterface $paymentRepository
+        private readonly PaymentRepositoryInterface $paymentRepository,
+        private readonly \App\Services\ImageService $imageService
     ) {}
 
     public function process(Invoice $invoice, array $data): Payment
     {
         $file = $data['payment_proof'];
-        $path = $file->store('payments/manual', 'public');
+        // Menggunakan ImageService untuk compress bukti bayar manual
+        $path = $this->imageService->uploadAndCompress($file, 'payments/manual');
 
         return $this->paymentRepository->create([
             'invoice_id'         => $invoice->id,

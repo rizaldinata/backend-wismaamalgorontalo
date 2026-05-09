@@ -16,11 +16,23 @@ class AuthService
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => Hash::make($data['password']),
+                'phone_number' => $data['phone_number'] ?? null,
             ]);
 
             $user->assignRole('member');
 
-            return $user;
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            // return [
+            //     'user' => $user,
+            //     'token' => $token,
+            //     'role' => 'member',
+            // ];
+            return [
+                'user' => $user->load('roles'),
+                'token' => $token,
+                'role' => 'member',
+            ];
         });
     }
 

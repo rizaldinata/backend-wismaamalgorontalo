@@ -26,6 +26,7 @@ class UpdateRoomRequest extends FormRequest
                 Rule::unique('rooms', 'number')->ignore($roomId),
             ],
             'price' => 'required|numeric|min:0',
+            'price_daily' => 'nullable|numeric|min:0',
             'status' => ['required', Rule::enum(RoomStatus::class)],
             'description' => 'nullable|string',
             'facilities' => 'nullable|array',

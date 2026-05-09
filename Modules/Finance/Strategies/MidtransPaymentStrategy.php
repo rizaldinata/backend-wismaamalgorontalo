@@ -9,6 +9,7 @@ use Modules\Finance\Enums\PaymentStatus;
 use Modules\Finance\Models\Invoice;
 use Modules\Finance\Models\Payment;
 use Midtrans\Config;
+use Midtrans\CoreApi;
 use Midtrans\Snap;
 use Exception;
 
@@ -17,16 +18,15 @@ class MidtransPaymentStrategy implements PaymentStrategyInterface
     public function __construct(
         private readonly PaymentRepositoryInterface $paymentRepository
     ) {
-        Config::$serverKey = config('finance.midtrans.server_key');
-        Config::$isProduction = config('finance.midtrans.is_production');
-        Config::$isSanitized = true;
-        Config::$is3ds = true;
+        Config::$serverKey    = config('finance.midtrans.server_key');
+        Config::$isProduction = config('finance.midtrans.is_production', false);
+        Config::$isSanitized  = true;
+        Config::$is3ds        = true;
         Config::$overrideNotifUrl = config('finance.midtrans.notification_url');
     }
 
     public function process(Invoice $invoice, array $data): Payment
     {
-        // 1. Catat data pembayaran awal di database dengan status PENDING
         $transactionId = 'TRX-' . time() . '-' . $invoice->id;
 
         $payment = $this->paymentRepository->create([
@@ -36,12 +36,11 @@ class MidtransPaymentStrategy implements PaymentStrategyInterface
             'transaction_id' => $transactionId,
         ]);
 
-        // 2. Siapkan parameter untuk Midtrans
         $invoice->loadMissing('lease.resident.user');
         $resident = $invoice->lease->resident;
         $user     = $resident->user;
 
-        $params = [
+        $baseParams = [
             'transaction_details' => [
                 'order_id'     => $payment->transaction_id,
                 'gross_amount' => (int) $invoice->amount,
@@ -51,34 +50,113 @@ class MidtransPaymentStrategy implements PaymentStrategyInterface
                 'email'      => $user->email,
                 'phone'      => $resident->phone_number,
             ],
-            'item_details' => [
-                [
-                    'id'       => $invoice->id,
-                    'price'    => (int) $invoice->amount,
-                    'quantity' => 1,
-                    'name'     => 'Pembayaran Tagihan #' . $invoice->invoice_number,
-                ]
-            ]
+            'item_details' => [[
+                'id'       => $invoice->id,
+                'price'    => (int) $invoice->amount,
+                'quantity' => 1,
+                'name'     => 'Pembayaran Tagihan #' . $invoice->invoice_number,
+            ]],
         ];
 
-        try {
-            // 3. Dapatkan Snap Token dari Midtrans
-            $snapToken = Snap::getSnapToken($params);
+        $paymentType = $data['payment_type'] ?? null;
+        $coreApiExtra = $paymentType ? $this->resolveCoreApiParams($paymentType) : null;
 
-            // 4. Update data payment dengan snap_token yang didapat (sesuai nama kolom di DB)
-            $this->paymentRepository->update($payment, [
-                'snap_token' => $snapToken
-            ]);
+        try {
+            if ($coreApiExtra !== null) {
+                // ── Core API: langsung charge dengan metode spesifik ──────────
+                $params = array_merge($baseParams, $coreApiExtra);
+                $response = CoreApi::charge($params);
+                // Konversi stdClass ke array; model cast 'array' akan handle JSON encoding
+                $paymentData = json_decode(json_encode($response), true);
+
+                $this->paymentRepository->update($payment, [
+                    'payment_data' => $paymentData,
+                ]);
+            } else {
+                // ── Snap: fallback untuk metode yang tidak didukung Core API ──
+                $enabledPayments = config('finance.midtrans.enabled_payments', []);
+                $snapParams = $baseParams;
+                if (!empty($enabledPayments)) {
+                    $snapParams['enabled_payments'] = $enabledPayments;
+                }
+
+                $snapToken = Snap::getSnapToken($snapParams);
+                $this->paymentRepository->update($payment, [
+                    'snap_token' => $snapToken,
+                ]);
+            }
 
             return $payment;
         } catch (Exception $e) {
-            // Jika gagal menghubungi Midtrans, ubah status jadi failed
             $this->paymentRepository->update($payment, [
                 'status'      => PaymentStatus::FAILED->value,
                 'admin_notes' => 'Midtrans Error: ' . $e->getMessage(),
             ]);
 
-            throw new \DomainException('Gagal menghubungi server pembayaran: ' . $e->getMessage());
+            throw new \DomainException('Gagal memproses metode pembayaran. Silakan coba kembali beberapa saat lagi.');
         }
+    }
+
+    /**
+     * Map kode metode dari form ke parameter Core API.
+     * Kembalikan null jika metode tidak didukung Core API (→ gunakan Snap).
+     */
+    private function resolveCoreApiParams(string $method): ?array
+    {
+        return match ($method) {
+            'qris' => [
+                'payment_type' => 'qris',
+                'qris'         => ['acquirer' => 'gopay'],
+            ],
+            'gopay' => [
+                'payment_type' => 'gopay',
+                'gopay'        => ['enable_callback' => false],
+            ],
+            'shopeepay' => [
+                'payment_type' => 'shopeepay',
+                'shopeepay'    => ['callback_url' => ''],
+            ],
+            'bca_va' => [
+                'payment_type'  => 'bank_transfer',
+                'bank_transfer' => ['bank' => 'bca'],
+            ],
+            'bni_va' => [
+                'payment_type'  => 'bank_transfer',
+                'bank_transfer' => ['bank' => 'bni'],
+            ],
+            'bri_va' => [
+                'payment_type'  => 'bank_transfer',
+                'bank_transfer' => ['bank' => 'bri'],
+            ],
+            'permata_va' => [
+                'payment_type'  => 'bank_transfer',
+                'bank_transfer' => ['bank' => 'permata'],
+            ],
+            'other_va' => [
+                'payment_type'  => 'bank_transfer',
+                'bank_transfer' => ['bank' => 'bca'],
+            ],
+            'mandiri_va', 'echannel' => [
+                'payment_type' => 'echannel',
+                'echannel'     => [
+                    'bill_info1' => 'Pembayaran Tagihan',
+                    'bill_info2' => 'Wisma Amal',
+                ],
+            ],
+            'alfamart' => [
+                'payment_type' => 'cstore',
+                'cstore'       => ['store' => 'Alfamart'],
+            ],
+            'indomaret' => [
+                'payment_type' => 'cstore',
+                'cstore'       => ['store' => 'Indomaret'],
+            ],
+            'credit_card' => [
+                'payment_type' => 'credit_card',
+                'credit_card'  => ['secure' => true],
+            ],
+            // DANA, OVO, LinkAja tidak didukung Core API → gunakan Snap
+            default => null,
+        };
     }
 }

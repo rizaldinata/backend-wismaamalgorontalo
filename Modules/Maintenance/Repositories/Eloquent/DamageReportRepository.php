@@ -5,9 +5,9 @@ namespace Modules\Maintenance\Repositories\Eloquent;
 use Illuminate\Database\Eloquent\Collection;
 use Modules\Maintenance\Models\MaintenanceRequest;
 use Modules\Maintenance\Models\MaintenanceRequestUpdate;
-use Modules\Maintenance\Repositories\Contracts\MaintenanceRequestRepositoryInterface;
+use Modules\Maintenance\Repositories\Contracts\DamageReportRepositoryInterface;
 
-class MaintenanceRequestRepository implements MaintenanceRequestRepositoryInterface
+class DamageReportRepository implements DamageReportRepositoryInterface
 {
     public function createRequest(array $data): MaintenanceRequest
     {

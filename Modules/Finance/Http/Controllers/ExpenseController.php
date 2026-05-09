@@ -23,8 +23,11 @@ class ExpenseController extends Controller
 
     public function index(Request $request)
     {
-        $perPage = (int) $request->query('per_page', 15);
-        $perPage = $perPage > 50 ? 50 : $perPage;
+        $request->validate([
+            'per_page' => 'nullable|integer|min:1|max:200'
+        ]);
+
+        $perPage = (int) $request->query('per_page', 50);
 
         $expenses = $this->expenseService->getAllExpenses($perPage);
 
@@ -56,29 +59,15 @@ class ExpenseController extends Controller
     {
         $expense = $this->expenseRepository->findOrFail($id);
 
-        try {
-            $updatedExpense = $this->expenseService->updateManualExpense($expense, $request->validated());
-            return $this->apiSuccess(new ExpenseResource($updatedExpense), 'Data pengeluaran berhasil diperbarui');
-        } catch (DomainException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 403);
-        }
+        $updatedExpense = $this->expenseService->updateManualExpense($expense, $request->validated());
+        return $this->apiSuccess(new ExpenseResource($updatedExpense), 'Data pengeluaran berhasil diperbarui');
     }
 
     public function destroy(int $id)
     {
         $expense = $this->expenseRepository->findOrFail($id);
 
-        try {
-            $this->expenseService->deleteManualExpense($expense);
-            return $this->apiSuccess(null, 'Data pengeluaran berhasil dihapus');
-        } catch (DomainException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 403);
-        }
+        $this->expenseService->deleteManualExpense($expense);
+        return $this->apiSuccess(null, 'Data pengeluaran berhasil dihapus');
     }
 }

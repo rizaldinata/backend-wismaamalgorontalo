@@ -15,6 +15,8 @@ Route::get('/permissions', [AuthController::class, 'myPermissions']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
+    Route::put('/change-password', [AuthController::class, 'changePassword']);
 
     Route::prefix('admin')->group(function () {
         // route crud permission

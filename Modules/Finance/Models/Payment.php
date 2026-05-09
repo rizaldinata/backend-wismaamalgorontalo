@@ -19,10 +19,12 @@ class Payment extends Model
         'status',
         'admin_notes',
         'snap_token',
+        'payment_data',
     ];
 
     protected $casts = [
-        'status' => PaymentStatus::class,
+        'status'       => PaymentStatus::class,
+        'payment_data' => 'array',
     ];
 
     public function invoice()

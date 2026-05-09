@@ -20,6 +20,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone_number',
     ];
 
     protected $hidden = [
@@ -38,6 +39,22 @@ class User extends Authenticatable
     public function resident()
     {
         return $this->hasOne(Resident::class);
+    }
+
+    public function leases()
+    {
+        return $this->hasManyThrough(\Modules\Rental\Models\Lease::class, Resident::class);
+    }
+
+    public function hasActiveLease(): bool
+    {
+        return $this->leases()
+            ->where('status', \Modules\Rental\Enums\LeaseStatus::ACTIVE->value)
+            ->where(function ($query) {
+                $query->whereNull('end_date')
+                    ->orWhere('end_date', '>=', now()->startOfDay());
+            })
+            ->exists();
     }
 
     protected static function newFactory()

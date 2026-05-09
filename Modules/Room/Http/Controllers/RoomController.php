@@ -27,6 +27,15 @@ class RoomController extends Controller
         );
     }
 
+    public function schedules()
+    {
+        $rooms = $this->roomService->getRoomSchedules();
+        return $this->apiSuccess(
+            RoomResource::collection($rooms),
+            'Jadwal kamar berhasil diambil'
+        );
+    }
+
     public function store(StoreRoomRequest $request)
     {
         $room = $this->roomService->createRoom(

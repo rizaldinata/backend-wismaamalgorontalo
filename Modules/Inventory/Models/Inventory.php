@@ -18,7 +18,7 @@ class Inventory extends Model
         'purchase_price',
     ];
 
-    protected $cast = [
+    protected $casts = [
         'condition' => ItemCondition::class,
         'purchase_price' => 'decimal:2',
     ];

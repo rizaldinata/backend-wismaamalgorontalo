@@ -19,6 +19,7 @@ class StoreRoomRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'],
             'number' => ['required', 'string', 'unique:rooms,number'],
             'price' => ['required', 'numeric', 'min:0'],
+            'price_daily' => ['nullable', 'numeric', 'min:0'],
             'status' => ['required', Rule::enum(RoomStatus::class)],
             'description' => ['nullable', 'string'],
             'facilities' => ['nullable', 'array'],

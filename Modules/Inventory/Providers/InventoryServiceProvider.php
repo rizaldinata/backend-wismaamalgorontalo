@@ -36,6 +36,11 @@ class InventoryServiceProvider extends ServiceProvider
     {
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
+
+        $this->app->bind(
+            \Modules\Inventory\Repositories\Contracts\InventoryRepositoryInterface::class,
+            \Modules\Inventory\Repositories\InventoryRepository::class
+        );
     }
 
     /**

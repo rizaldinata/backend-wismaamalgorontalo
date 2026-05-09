@@ -2,8 +2,10 @@
 
 namespace Modules\Rental\Providers;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Modules\Rental\Console\Commands\ExpirePendingLeases;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -48,7 +50,9 @@ class RentalServiceProvider extends ServiceProvider
      */
     protected function registerCommands(): void
     {
-        // $this->commands([]);
+        $this->commands([
+            ExpirePendingLeases::class,
+        ]);
     }
 
     /**
@@ -56,10 +60,11 @@ class RentalServiceProvider extends ServiceProvider
      */
     protected function registerCommandSchedules(): void
     {
-        // $this->app->booted(function () {
-        //     $schedule = $this->app->make(Schedule::class);
-        //     $schedule->command('inspire')->hourly();
-        // });
+        $this->app->booted(function () {
+            $schedule = $this->app->make(Schedule::class);
+            // Jalankan setiap menit untuk membatalkan lease yang melewati batas waktu 5 menit
+            $schedule->command('rental:expire-pending-leases')->everyMinute();
+        });
     }
 
     /**
