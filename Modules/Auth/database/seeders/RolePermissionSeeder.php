@@ -48,6 +48,7 @@ class RolePermissionSeeder extends Seeder
             // Finance
             'finance-dashboard-view',
             'finance-payment-verify',
+            'finance-payment-view',
             'finance-invoice-view',
             'finance-invoice-create',
             'finance-expense-view',
@@ -117,6 +118,7 @@ class RolePermissionSeeder extends Seeder
             'finance-dashboard-view',
             'finance-payment-view',
             'finance-payment-verify',
+            'finance-payment-view',
             'finance-invoice-view',
             'finance-expense-view',
             'finance-expense-create',
