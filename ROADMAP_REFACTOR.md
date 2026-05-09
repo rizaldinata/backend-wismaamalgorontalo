@@ -1,0 +1,585 @@
+# Roadmap Refactor: Menuju Modular Monolith
+
+> Dokumen ini adalah panduan dan progress tracker refactor backend Wisma Amal Gorontalo.
+> Update status task dengan mengganti `[ ]` menjadi `[x]` ketika selesai.
+
+---
+
+## Cara Menggunakan Dokumen Ini
+
+> Bagian ini berisi kalimat-kalimat yang bisa langsung diucapkan ke Claude Code. Tidak perlu mengingat apapun secara manual.
+
+### Persiapan Sekali Saja (Sebelum Mulai Pertama Kali)
+
+Ucapkan ke Claude Code, satu per satu:
+
+```
+"Update CLAUDE.md, tambahkan referensi ke ROADMAP_REFACTOR.md dan CATATAN_ARSITEKTUR.md"
+```
+```
+"Baca ROADMAP_REFACTOR.md, kita mulai dari Fase 0"
+```
+
+---
+
+### Setiap Kali Mulai Sesi Refactor
+
+Ucapkan ke Claude Code:
+
+```
+"Lanjut refactor. Baca ROADMAP_REFACTOR.md dan lanjutkan dari task yang belum selesai."
+```
+
+Claude akan baca file, lihat task mana yang masih `[ ]`, dan langsung tahu harus mulai dari mana.
+
+---
+
+### Setelah Satu Task Selesai
+
+Ucapkan ke Claude Code secara berurutan:
+
+**1. Update checkbox:**
+```
+"Task [nomor task] sudah selesai, update checkboxnya di ROADMAP_REFACTOR.md"
+```
+Contoh: `"Task 1.2 sudah selesai, update checkboxnya di ROADMAP_REFACTOR.md"`
+
+**2. Commit perubahan:**
+```
+"Commit semua perubahan termasuk ROADMAP_REFACTOR.md dengan pesan: refactor: selesai task [nomor] - [nama task]"
+```
+Contoh: `"Commit semua perubahan termasuk ROADMAP_REFACTOR.md dengan pesan: refactor: selesai task 1.2 - buat event class JadwalDibuat"`
+
+**3a. Kalau mau lanjut task berikutnya:**
+```
+"Lanjut ke task berikutnya"
+```
+
+**3b. Kalau mau berhenti untuk hari ini:**
+```
+"Saya mau berhenti dulu, pastikan semua sudah tersimpan dan tidak ada kode yang rusak"
+```
+
+---
+
+### Jika Ada Error di Tengah Task
+
+Ucapkan ke Claude Code:
+
+```
+"Ada error, task [nomor] belum selesai. Tolong bantu perbaiki tanpa melanjutkan ke task berikutnya"
+```
+
+Kalau error tidak bisa diselesaikan dan ingin disimpan dulu:
+
+```
+"Task ini belum selesai dan belum bisa diperbaiki sekarang. Simpan progress di branch tanpa merusak kode yang sudah stabil"
+```
+
+---
+
+### Jika Ingin Tahu Progress Saat Ini
+
+Ucapkan ke Claude Code:
+
+```
+"Baca ROADMAP_REFACTOR.md dan tunjukkan task mana yang sudah selesai dan mana yang belum"
+```
+
+---
+
+### Jika Ingin Update Progress Table di Bagian Atas
+
+Ucapkan ke Claude Code:
+
+```
+"Update tabel progress keseluruhan di ROADMAP_REFACTOR.md sesuai dengan task yang sudah selesai"
+```
+
+---
+
+## Target Akhir Arsitektur
+
+```
+INFRASTRUKTUR (selalu aktif, bukan modul bisnis)
+  └── Auth, Setting
+
+INTI (selalu aktif, tidak bisa dimatikan)
+  ├── Kamar (Room)     → data fisik kamar
+  └── Jadwal (Schedule) → semua penggunaan kamar dalam waktu tertentu
+                          menggantikan modul Rental + Resident
+
+MODUL BISNIS (bisa ON/OFF per klien)
+  ├── Finance      → tagihan & pembayaran
+  ├── Maintenance  → laporan kerusakan & jadwal perawatan
+  ├── Guest        → manajemen tamu penghuni
+  ├── Inventory    → pencatatan aset per kamar
+  └── Notification → notifikasi WA/SMS otomatis
+```
+
+---
+
+## Aturan Wajib Selama Refactor
+
+Aturan ini **tidak boleh dilanggar** selama proses refactor:
+
+1. **Satu fase = satu branch git** — jangan gabung perubahan dari dua fase berbeda
+2. **API tidak boleh berubah** — response endpoint yang dipakai Flutter harus tetap sama sampai semua fase selesai
+3. **Database additive** — tambah tabel/kolom baru dulu, jangan hapus yang lama sebelum data berhasil dipindahkan dan diverifikasi
+4. **Selalu test di staging sebelum merge ke main**
+5. **Jalankan `php artisan test` setelah setiap task selesai**
+6. **Tidak ada direct service call antar modul** — komunikasi hanya via Event
+
+---
+
+## Progress Keseluruhan
+
+| Fase | Nama | Status |
+|---|---|---|
+| 0 | Persiapan | Belum |
+| 1 | Infrastruktur Event | Belum |
+| 2 | Notification → Event-Driven | Belum |
+| 3 | Inventory → Standalone Penuh | Belum |
+| 4 | Guest → Lepas dari Rental | Belum |
+| 5 | Maintenance → Lepas dari Resident | Belum |
+| 6 | Finance → Hapus Circular Dependency | Belum |
+| 7 | Bangun Inti Jadwal (Schedule Core) | Belum |
+| 8 | Migrasi Data Rental → Jadwal | Belum |
+| 9 | Migrasi Data Resident → Jadwal | Belum |
+| 10 | Hapus Modul Lama | Belum |
+| 11 | Cleanup & Verifikasi Final | Belum |
+
+---
+
+## Fase 0: Persiapan
+
+> Tujuan: Pastikan kondisi awal aman sebelum mulai menyentuh kode apapun.
+
+- [ ] **0.1** Backup database production secara manual
+- [ ] **0.2** Jalankan `php artisan test` — pastikan semua test yang ada saat ini lulus
+- [ ] **0.3** Catat semua API endpoint yang digunakan Flutter (buat daftar di bawah ini)
+- [ ] **0.4** Pastikan branch `staging` up-to-date dengan kondisi production
+- [ ] **0.5** Sepakati dengan tim: siapa yang mengerjakan fase mana
+
+**Daftar endpoint Flutter (isi manual):**
+```
+- GET  /api/v1/...
+- POST /api/v1/...
+- (lengkapi sendiri)
+```
+
+---
+
+## Fase 1: Infrastruktur Event
+
+> Tujuan: Siapkan fondasi sistem event di Laravel. Fase ini tidak mengubah logika bisnis apapun, hanya menambah file baru.
+> Branch: `refactor/phase-1-event-infrastructure`
+
+### Setup
+
+- [ ] **1.1** Buat branch `refactor/phase-1-event-infrastructure` dari `staging`
+
+### Buat Event Classes
+
+- [ ] **1.2** Buat event class `App\Events\Jadwal\JadwalDibuat`
+- [ ] **1.3** Buat event class `App\Events\Jadwal\JadwalSewaAktif`
+- [ ] **1.4** Buat event class `App\Events\Jadwal\JadwalSewaSelesai`
+- [ ] **1.5** Buat event class `App\Events\Jadwal\JadwalBatal`
+- [ ] **1.6** Buat event class `App\Events\Jadwal\StatusKamarBerubah`
+- [ ] **1.7** Buat event class `App\Events\Finance\PembayaranDiterima`
+- [ ] **1.8** Buat event class `App\Events\Finance\PembayaranDiverifikasi`
+- [ ] **1.9** Buat event class `App\Events\Maintenance\LaporanKerusakanMasuk`
+
+### Registrasi & Verifikasi
+
+- [ ] **1.10** Daftarkan semua event di `EventServiceProvider`
+- [ ] **1.11** Buat temporary route `/test-event` di file routes lokal — route ini mem-fire satu event dan return "OK" (hanya untuk verifikasi, **jangan push ke production**)
+- [ ] **1.12** Akses route `/test-event`, pastikan response OK dan tidak ada error di log
+- [ ] **1.13** Hapus route `/test-event` setelah verifikasi selesai
+- [ ] **1.14** Jalankan `php artisan test` — pastikan semua test masih lulus
+- [ ] **1.15** Merge branch ke `staging`, deploy, test di staging
+- [ ] **1.16** Merge ke `main` jika staging aman
+
+---
+
+## Fase 2: Notification Module → Event-Driven
+
+> Tujuan: Notification berhenti dipanggil langsung oleh modul lain. Notification hanya bereaksi terhadap event.
+> Branch: `refactor/phase-2-notification-event-driven`
+
+### Identifikasi
+
+- [ ] **2.1** Buat branch `refactor/phase-2-notification-event-driven` dari `staging`
+- [ ] **2.2** Catat semua tempat di kode yang memanggil `NotificationService` secara langsung dari modul lain
+
+### Buat Listeners
+
+- [ ] **2.3** Buat listener `Modules\Notification\Listeners\KirimNotifikasiJadwalDibuat`
+- [ ] **2.4** Buat listener `Modules\Notification\Listeners\KirimNotifikasiJadwalSewaAktif`
+- [ ] **2.5** Buat listener `Modules\Notification\Listeners\KirimNotifikasiJadwalSewaSelesai`
+- [ ] **2.6** Buat listener `Modules\Notification\Listeners\KirimNotifikasiJadwalBatal`
+- [ ] **2.7** Buat listener `Modules\Notification\Listeners\KirimNotifikasiPembayaranDiterima`
+- [ ] **2.8** Daftarkan semua listener ke `EventServiceProvider`
+
+### Hapus Pemanggilan Langsung
+
+- [ ] **2.9** Hapus pemanggilan `NotificationService` langsung dari `RentalService`
+- [ ] **2.10** Hapus pemanggilan `NotificationService` langsung dari `FinanceService`
+- [ ] **2.11** Hapus pemanggilan `NotificationService` langsung dari modul lain (jika ada)
+- [ ] **2.12** Hapus injection `NotificationService` dari constructor modul lain
+
+### Verifikasi
+
+- [ ] **2.13** Test manual: buat lease baru → verifikasi notifikasi tetap terkirim
+- [ ] **2.14** Test manual: lakukan pembayaran → verifikasi notifikasi tetap terkirim
+- [ ] **2.15** Jalankan `php artisan test` — pastikan semua test masih lulus
+- [ ] **2.16** Merge ke `staging`, deploy, test di staging
+- [ ] **2.17** Merge ke `main` jika staging aman
+
+---
+
+## Fase 3: Inventory Module → Standalone Penuh
+
+> Tujuan: Pastikan Inventory tidak punya ketergantungan keluar, dan tambahkan reaksi terhadap event jadwal selesai.
+> Branch: `refactor/phase-3-inventory-standalone`
+
+- [ ] **3.1** Buat branch `refactor/phase-3-inventory-standalone` dari `staging`
+- [ ] **3.2** Periksa: apakah ada FK constraint dari tabel `inventories` ke tabel modul lain? Jika ada, catat
+- [ ] **3.3** Periksa: apakah `InventoryService` inject repository dari modul lain? Jika ada, hapus
+- [ ] **3.4** Buat listener `Modules\Inventory\Listeners\BuatChecklistInventarisSetelahSewaSelesai`
+- [ ] **3.5** Daftarkan listener ke `EventServiceProvider`
+- [ ] **3.6** Test: fitur inventaris masih berfungsi normal
+- [ ] **3.7** Test: matikan modul Inventory di `modules_statuses.json` → sistem lain tidak error
+- [ ] **3.8** Jalankan `php artisan test`
+- [ ] **3.9** Merge ke `staging`, deploy, test di staging
+- [ ] **3.10** Merge ke `main` jika staging aman
+
+---
+
+## Fase 4: Guest Module → Lepas dari Rental
+
+> Tujuan: Guest tidak lagi inject `LeaseRepositoryInterface` dari modul Rental. Komunikasi via event.
+> Branch: `refactor/phase-4-guest-event-driven`
+
+### Persiapan Database
+
+- [ ] **4.1** Buat branch `refactor/phase-4-guest-event-driven` dari `staging`
+- [ ] **4.2** Buat migration: tambah kolom `schedule_reference_id` di tabel `guests` (nullable, tanpa FK constraint)
+- [ ] **4.3** Jalankan migration di lokal, verifikasi tabel tidak rusak
+
+### Buat Listeners
+
+- [ ] **4.4** Buat listener `Modules\Guest\Listeners\AktifkanFiturTamuSetelahSewaAktif`
+- [ ] **4.5** Buat listener `Modules\Guest\Listeners\NonaktifkanFiturTamuSetelahSewaSelesai`
+- [ ] **4.6** Daftarkan listeners ke `EventServiceProvider`
+
+### Hapus Ketergantungan
+
+- [ ] **4.7** Hapus `LeaseRepositoryInterface` dari constructor `GuestService`
+- [ ] **4.8** Ubah `GuestService`: data lease yang dibutuhkan diambil dari payload event, bukan dari repository
+- [ ] **4.9** Hapus binding `LeaseRepositoryInterface` di `GuestServiceProvider` (jika ada)
+
+### Verifikasi
+
+- [ ] **4.10** Test manual: daftarkan tamu → verifikasi tamu tersimpan dengan benar
+- [ ] **4.11** Test manual: matikan modul Rental → verifikasi modul Guest tidak error saat boot
+- [ ] **4.12** Jalankan `php artisan test`
+- [ ] **4.13** Merge ke `staging`, deploy, test di staging
+- [ ] **4.14** Merge ke `main` jika staging aman
+
+---
+
+## Fase 5: Maintenance Module → Lepas dari Resident
+
+> Tujuan: Maintenance tidak lagi inject `ResidentRepositoryInterface` dari modul Resident.
+> Branch: `refactor/phase-5-maintenance-event-driven`
+
+- [ ] **5.1** Buat branch `refactor/phase-5-maintenance-event-driven` dari `staging`
+- [ ] **5.2** Hapus `ResidentRepositoryInterface` dari constructor `DamageReportService`
+- [ ] **5.3** Ubah `DamageReportService`: data resident yang dibutuhkan diterima via parameter request, bukan dari repository
+- [ ] **5.4** Setelah laporan kerusakan dibuat, fire event `LaporanKerusakanMasuk`
+- [ ] **5.5** Hapus binding `ResidentRepositoryInterface` di `MaintenanceServiceProvider` (jika ada)
+- [ ] **5.6** Test manual: buat laporan kerusakan → verifikasi laporan tersimpan dengan benar
+- [ ] **5.7** Test manual: matikan modul Resident → verifikasi modul Maintenance tidak error saat boot
+- [ ] **5.8** Jalankan `php artisan test`
+- [ ] **5.9** Merge ke `staging`, deploy, test di staging
+- [ ] **5.10** Merge ke `main` jika staging aman
+
+---
+
+## Fase 6: Finance → Hapus Circular Dependency
+
+> Tujuan: Hapus ketergantungan melingkar antara Finance dan Rental. Ini adalah fase paling kritis sejauh ini.
+> Branch: `refactor/phase-6-finance-break-circular`
+
+### Arah Baru Alur Pembayaran
+
+```
+SEKARANG (melingkar):
+  RentalService → FinanceService → buat invoice
+  FinanceService → RentalService → aktifkan lease
+
+SEHARUSNYA (event-driven):
+  RentalService → fire event JadwalDibuat
+  Finance listen JadwalDibuat → buat invoice → fire event PembayaranDiverifikasi
+  Rental listen PembayaranDiverifikasi → aktifkan lease
+```
+
+### Implementasi
+
+> Pola yang dipakai: **tambah dulu, test, baru hapus yang lama**. Jangan pernah hapus sebelum jalur baru terbukti bekerja.
+
+- [ ] **6.1** Buat branch `refactor/phase-6-finance-break-circular` dari `staging`
+
+#### Langkah A: Lepas RentalService dari FinanceService (alur: buat lease → buat invoice)
+
+- [ ] **6.2** Buat listener `Modules\Finance\Listeners\BuatInvoiceSetelahJadwalDibuat`
+- [ ] **6.3** Daftarkan listener `BuatInvoiceSetelahJadwalDibuat` ke `EventServiceProvider`
+- [ ] **6.4** Di `RentalService`: TAMBAHKAN fire event `JadwalDibuat` — **jangan hapus pemanggilan `FinanceService` langsung dulu**
+- [ ] **6.5** Test: buat lease baru → verifikasi event `JadwalDibuat` terfire (cek log) DAN invoice terbuat — dua jalur berjalan bersamaan
+- [ ] **6.6** Hapus pemanggilan `FinanceService` langsung dari `RentalService` (hanya setelah 6.5 terbukti aman)
+- [ ] **6.7** Hapus injection `FinanceService` dari constructor `RentalService`
+- [ ] **6.8** Test: buat lease baru → verifikasi invoice masih terbuat hanya via event (jalur langsung sudah tidak ada)
+
+#### Langkah B: Lepas FinanceService dari RentalService (alur: bayar → aktifkan lease)
+
+- [ ] **6.9** Buat listener `Modules\Rental\Listeners\AktifkanLeaseSetelahPembayaranDiverifikasi`
+- [ ] **6.10** Daftarkan listener ke `EventServiceProvider`
+- [ ] **6.11** Di `FinanceService`: TAMBAHKAN fire event `PembayaranDiverifikasi` — **jangan hapus pemanggilan `RentalService` langsung dulu**
+- [ ] **6.12** Test: verifikasi pembayaran → event `PembayaranDiverifikasi` terfire (cek log) DAN lease aktif — dua jalur berjalan bersamaan
+- [ ] **6.13** Hapus pemanggilan `RentalService` langsung dari `FinanceService` (hanya setelah 6.12 terbukti aman)
+- [ ] **6.14** Hapus injection `RentalService` dari constructor `FinanceService`
+- [ ] **6.15** Hapus penggunaan `app(FinanceService::class)` di `RentalService`
+- [ ] **6.16** Test: verifikasi pembayaran → lease masih aktif hanya via event
+
+### Verifikasi
+
+- [ ] **6.17** Test end-to-end: buat lease baru → verifikasi invoice terbuat otomatis
+- [ ] **6.18** Test end-to-end: verifikasi pembayaran → verifikasi lease aktif
+- [ ] **6.19** Test end-to-end: batalkan lease → verifikasi invoice dibatalkan
+- [ ] **6.20** Test: matikan modul Finance → verifikasi lease tetap bisa dibuat tanpa error
+- [ ] **6.21** Jalankan `php artisan test`
+- [ ] **6.22** Merge ke `staging`, deploy, test intensif di staging
+- [ ] **6.23** Merge ke `main` jika staging aman
+
+---
+
+## Fase 7: Bangun Inti Jadwal (Schedule Core)
+
+> Tujuan: Buat struktur Jadwal sebagai inti sistem, di samping modul Rental yang lama (belum dihapus).
+> Branch: `refactor/phase-7-build-schedule-core`
+
+### Database
+
+- [ ] **7.1** Buat branch `refactor/phase-7-build-schedule-core` dari `staging`
+- [ ] **7.2** Buat migration: tabel `room_schedules` dengan kolom:
+  - `id`, `room_id`, `type` (enum: sewa/maintenance/kebersihan/blokir)
+  - `start_date`, `end_date`, `status`
+  - `created_by`, `timestamps`
+- [ ] **7.3** Buat migration: tambah kolom data penghuni ke `room_schedules` (khusus tipe `sewa`):
+  - `tenant_name`, `tenant_id_number`, `tenant_phone`, `tenant_id_photo`
+  - `agreed_price`
+- [ ] **7.4** Jalankan migration di lokal, verifikasi tabel terbuat dengan benar
+
+### Kode
+
+- [ ] **7.5** Buat model `Modules\Schedule\Models\Schedule`
+- [ ] **7.6** Buat `Modules\Schedule\Repositories\Contracts\ScheduleRepositoryInterface`
+- [ ] **7.7** Buat `Modules\Schedule\Repositories\Eloquent\ScheduleRepository`
+- [ ] **7.8** Buat `Modules\Schedule\Services\ScheduleService` dengan method:
+  - `buatJadwal(array $data)`
+  - `aktifkanJadwal(int $scheduleId)`
+  - `selesaikanJadwal(int $scheduleId)`
+  - `batalkanJadwal(int $scheduleId)`
+  - `ambilJadwalAktifKamar(int $roomId)`
+- [ ] **7.9** Buat `Modules\Schedule\Http\Controllers\ScheduleController`
+- [ ] **7.10** Buat routes untuk Schedule (endpoint baru, belum menggantikan endpoint Rental)
+- [ ] **7.11** Daftarkan binding di `ScheduleServiceProvider`
+- [ ] **7.12** Aktifkan modul Schedule di `modules_statuses.json`
+
+### Verifikasi
+
+- [ ] **7.13** Test: CRUD jadwal via endpoint baru berfungsi
+- [ ] **7.14** Test: modul Rental lama masih berfungsi normal (belum dihapus)
+- [ ] **7.15** Jalankan `php artisan test`
+- [ ] **7.16** Merge ke `staging`, deploy, test di staging
+- [ ] **7.17** Merge ke `main` jika staging aman
+
+---
+
+## Fase 8: Migrasi Data Rental → Jadwal
+
+> Tujuan: Pindahkan semua data dari tabel `leases` ke tabel `room_schedules`. Ini fase paling berisiko untuk database.
+> Branch: `refactor/phase-8-migrate-rental-data`
+
+### Persiapan (Wajib sebelum mulai)
+
+- [ ] **8.1** Backup database production (lakukan ulang sebelum fase ini)
+- [ ] **8.2** Buat copy database production di staging
+- [ ] **8.3** Buat branch `refactor/phase-8-migrate-rental-data` dari `staging`
+
+### Script Migrasi Data
+
+- [ ] **8.4** Buat seeder/command `MigrasiDataRentalKeJadwal` yang menyalin:
+  - Setiap record `leases` → satu record `room_schedules` dengan tipe `sewa`
+  - Salin: `room_id`, `start_date`, `end_date`, `status`, `created_at`
+  - Salin data penghuni dari tabel `residents` yang terkait
+- [ ] **8.5** Jalankan script di lokal, verifikasi jumlah record di `room_schedules` = jumlah record di `leases`
+- [ ] **8.6** Verifikasi tidak ada data yang hilang atau corrupt
+- [ ] **8.7** Jalankan script di staging (dengan copy data production), verifikasi ulang
+
+### Update Referensi di Kode
+
+- [ ] **8.8** Update `FinanceService`: gunakan `schedule_id` dari `room_schedules` (bukan `lease_id` dari `leases`)
+- [ ] **8.9** Update `GuestService`: gunakan `schedule_id` dari `room_schedules`
+- [ ] **8.10** Update `MaintenanceService`: gunakan `schedule_id` dari `room_schedules`
+- [ ] **8.11** Update semua listener yang menerima payload event: gunakan `schedule_id`
+
+### Update API (Internal saja, response tetap sama)
+
+> Pola yang dipakai: bangun endpoint baru dulu, bandingkan hasilnya, baru alihkan endpoint lama.
+
+- [ ] **8.12** Buat `ScheduleController` dengan endpoint sementara `/api/v1/schedules` yang mengambil data dari `ScheduleService`
+- [ ] **8.13** Test endpoint `/api/v1/schedules` → verifikasi data yang dikembalikan benar dan lengkap
+- [ ] **8.14** Bandingkan struktur response `/api/v1/leases` (lama) vs `/api/v1/schedules` (baru) — harus identik field-by-field
+- [ ] **8.15** Update `RentalController`: secara internal alihkan ke `ScheduleService` — route dan response tidak boleh berubah
+- [ ] **8.16** Test: semua endpoint `/api/v1/leases/...` return response yang sama persis seperti sebelumnya
+
+### Eksekusi di Production
+
+- [ ] **8.17** Jalankan script migrasi data di production
+- [ ] **8.18** Verifikasi data di production: jumlah record benar, tidak ada data hilang
+
+### Verifikasi
+
+- [ ] **8.19** Test: semua endpoint Flutter yang sudah dicatat di Fase 0 masih berfungsi
+- [ ] **8.20** Test: Finance masih bisa buat invoice berdasarkan jadwal
+- [ ] **8.21** Test: Guest masih bisa daftarkan tamu
+- [ ] **8.22** Jalankan `php artisan test`
+- [ ] **8.23** Merge ke `staging`, test intensif minimal 1-2 hari
+- [ ] **8.24** Merge ke `main` jika staging aman
+
+---
+
+## Fase 9: Migrasi Data Resident → Jadwal
+
+> Tujuan: Data penghuni pindah ke tabel `room_schedules`. Modul Resident siap dihapus.
+> Branch: `refactor/phase-9-migrate-resident-data`
+
+### Persiapan
+
+- [ ] **9.1** Backup database production (lakukan ulang)
+- [ ] **9.2** Buat branch `refactor/phase-9-migrate-resident-data` dari `staging`
+- [ ] **9.3** Verifikasi kolom data penghuni di `room_schedules` sudah ada (dari Fase 7)
+
+### Script Migrasi Data
+
+- [ ] **9.4** Buat command `MigrasiDataResidentKeJadwal` yang mengisi kolom penghuni di `room_schedules`
+  - Join `room_schedules` dengan `leases` dengan `residents`
+  - Salin `name`, `id_number`, `phone`, `photo` penghuni ke kolom yang sesuai di `room_schedules`
+- [ ] **9.5** Jalankan di lokal, verifikasi semua record jadwal tipe `sewa` punya data penghuni
+- [ ] **9.6** Jalankan di staging (copy production), verifikasi ulang
+- [ ] **9.7** Jalankan di production, verifikasi ulang
+
+### Update Kode
+
+- [ ] **9.8** Update semua tempat yang ambil data penghuni via `ResidentService` atau `ResidentRepository` → ambil dari `Schedule`
+- [ ] **9.9** Update endpoint yang return data penghuni → ambil dari `room_schedules`, bukan dari `residents`
+- [ ] **9.10** Pastikan response JSON tetap sama persis
+
+### Verifikasi
+
+- [ ] **9.11** Test: data penghuni masih tampil dengan benar di semua endpoint
+- [ ] **9.12** Test: matikan modul Resident → sistem tidak error
+- [ ] **9.13** Jalankan `php artisan test`
+- [ ] **9.14** Merge ke `staging`, test intensif
+- [ ] **9.15** Merge ke `main` jika staging aman
+
+---
+
+## Fase 10: Hapus Modul Lama
+
+> Tujuan: Hapus modul Rental dan Resident yang sudah tidak diperlukan. Hapus FK constraint lintas modul.
+> Branch: `refactor/phase-10-remove-old-modules`
+
+### Hapus Modul Rental
+
+- [ ] **10.1** Buat branch `refactor/phase-10-remove-old-modules` dari `staging`
+- [ ] **10.2** Cari semua `use Modules\Rental\...` di seluruh codebase — pastikan sudah kosong
+- [ ] **10.3** Set `"Rental": false` di `modules_statuses.json`
+- [ ] **10.4** Jalankan `php artisan test` — pastikan tidak ada error
+- [ ] **10.5** Hapus folder `Modules/Rental`
+- [ ] **10.6** Jalankan `php artisan test` — pastikan tidak ada error
+
+### Hapus Modul Resident
+
+- [ ] **10.7** Cari semua `use Modules\Resident\...` di seluruh codebase — pastikan sudah kosong
+- [ ] **10.8** Set `"Resident": false` di `modules_statuses.json`
+- [ ] **10.9** Jalankan `php artisan test` — pastikan tidak ada error
+- [ ] **10.10** Hapus folder `Modules/Resident`
+- [ ] **10.11** Jalankan `php artisan test` — pastikan tidak ada error
+
+### Bersihkan Database
+
+- [ ] **10.12** Buat migration: hapus FK constraint `invoices.lease_id → leases.id`
+- [ ] **10.13** Buat migration: hapus FK constraint `guests.lease_id → leases.id`
+- [ ] **10.14** Buat migration: hapus FK constraint `maintenance_requests.resident_id → residents.id`
+- [ ] **10.15** Jalankan migration di lokal, verifikasi tidak ada error
+- [ ] **10.16** Jalankan migration di staging
+- [ ] **10.17** Setelah minimal 1 minggu berjalan aman → buat migration: hapus kolom `lease_id` dari `invoices`
+- [ ] **10.18** Setelah minimal 1 minggu berjalan aman → buat migration: hapus tabel `leases`
+- [ ] **10.19** Setelah minimal 1 minggu berjalan aman → buat migration: hapus tabel `residents`
+- [ ] **10.20** Jalankan semua migration di production
+
+### Verifikasi
+
+- [ ] **10.21** Test: semua endpoint Flutter masih berfungsi
+- [ ] **10.22** Jalankan `php artisan test`
+- [ ] **10.23** Merge ke `staging`, test intensif
+- [ ] **10.24** Merge ke `main` jika staging aman
+
+---
+
+## Fase 11: Cleanup & Verifikasi Final
+
+> Tujuan: Pastikan arsitektur benar-benar bersih dan semua modul bisa di-toggle secara independen.
+> Branch: `refactor/phase-11-cleanup`
+
+### Bersihkan Code Smells
+
+- [ ] **11.1** Buat branch `refactor/phase-11-cleanup` dari `staging`
+- [ ] **11.2** Cari dan hapus semua penggunaan `app(ServiceClass::class)` (service locator) → ganti dengan constructor injection
+- [ ] **11.3** Pastikan tidak ada lagi direct service call antar modul di seluruh codebase
+- [ ] **11.4** Jalankan `./vendor/bin/pint` untuk format kode
+- [ ] **11.5** Jalankan `php artisan test`
+
+### Uji Toggle Modul
+
+- [ ] **11.6** Test: matikan Finance → buat jadwal sewa → tidak ada error, tidak ada invoice (normal)
+- [ ] **11.7** Test: matikan Maintenance → sistem inti tetap jalan normal
+- [ ] **11.8** Test: matikan Guest → sistem inti tetap jalan normal
+- [ ] **11.9** Test: matikan Inventory → sistem inti tetap jalan normal
+- [ ] **11.10** Test: matikan Notification → sistem inti tetap jalan normal
+- [ ] **11.11** Test: nyalakan semua modul → semua fitur berfungsi normal
+
+### Update Dokumentasi
+
+- [ ] **11.12** Update `CLAUDE.md` dengan arsitektur baru
+- [ ] **11.13** Update `CATATAN_ARSITEKTUR.md` — tandai bagian mana yang sudah berubah
+- [ ] **11.14** Update `README.md` jika ada
+
+### Selesai
+
+- [ ] **11.15** Merge ke `staging`, test final menyeluruh
+- [ ] **11.16** Demo ke dosen (jika diperlukan)
+- [ ] **11.17** Merge ke `main`
+
+---
+
+## Catatan Tim
+
+> Gunakan bagian ini untuk mencatat keputusan, hambatan, atau hal penting yang ditemukan selama refactor.
+
+| Tanggal | Catatan |
+|---|---|
+| | |
