@@ -67,6 +67,29 @@ readonly class NotificationService
         return $isSent;
     }
 
+    public function sendReceiptFromPrimitives(
+        string $tenantName,
+        string $tenantPhone,
+        string $invoiceNumber,
+        string $roomTitle,
+        string $roomNumber,
+        string $periode,
+        float $amount,
+        ?string $pdfLink = null
+    ): bool {
+        $message = $this->formatReceiptMessage(
+            $tenantName,
+            $invoiceNumber,
+            $roomTitle,
+            $roomNumber,
+            $periode,
+            number_format($amount, 0, ',', '.'),
+            $pdfLink
+        );
+
+        return $this->sendNotification(NotificationType::PAYMENT_RECEIPT, $tenantPhone, $message);
+    }
+
     public function sendCustomNotification(string $target, string $message): bool
     {
         return $this->sendNotification(NotificationType::MANUAL_BROADCAST, $target, $message);

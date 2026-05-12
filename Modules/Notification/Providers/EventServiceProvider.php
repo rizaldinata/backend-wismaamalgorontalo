@@ -2,30 +2,44 @@
 
 namespace Modules\Notification\Providers;
 
+use App\Events\Finance\PembayaranDiterima;
+use App\Events\Finance\PembayaranDiverifikasi;
+use App\Events\Jadwal\JadwalBatal;
+use App\Events\Jadwal\JadwalDibuat;
+use App\Events\Jadwal\JadwalSewaAktif;
+use App\Events\Jadwal\JadwalSewaSelesai;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Modules\Notification\Listeners\KirimNotifikasiJadwalBatal;
+use Modules\Notification\Listeners\KirimNotifikasiJadwalDibuat;
+use Modules\Notification\Listeners\KirimNotifikasiJadwalSewaAktif;
+use Modules\Notification\Listeners\KirimNotifikasiJadwalSewaSelesai;
+use Modules\Notification\Listeners\KirimNotifikasiPembayaranDiterima;
+use Modules\Notification\Listeners\SendWhatsAppReceipt;
 
 class EventServiceProvider extends ServiceProvider
 {
-    /**
-     * The event handler mappings for the application.
-     *
-     * @var array<string, array<int, string>>
-     */
     protected $listen = [
-        \Modules\Finance\Events\PaymentSettled::class => [
-            \Modules\Notification\Listeners\SendWhatsAppReceipt::class,
-        ]
+        JadwalDibuat::class => [
+            KirimNotifikasiJadwalDibuat::class,
+        ],
+        JadwalSewaAktif::class => [
+            KirimNotifikasiJadwalSewaAktif::class,
+        ],
+        JadwalSewaSelesai::class => [
+            KirimNotifikasiJadwalSewaSelesai::class,
+        ],
+        JadwalBatal::class => [
+            KirimNotifikasiJadwalBatal::class,
+        ],
+        PembayaranDiterima::class => [
+            KirimNotifikasiPembayaranDiterima::class,
+        ],
+        PembayaranDiverifikasi::class => [
+            SendWhatsAppReceipt::class,
+        ],
     ];
 
-    /**
-     * Indicates if events should be discovered.
-     *
-     * @var bool
-     */
-    protected static $shouldDiscoverEvents = true;
+    protected static $shouldDiscoverEvents = false;
 
-    /**
-     * Configure the proper event listeners for email verification.
-     */
     protected function configureEmailVerification(): void {}
 }
