@@ -139,7 +139,7 @@ Aturan ini **tidak boleh dilanggar** selama proses refactor:
 | 0 | Persiapan | ✅ Selesai |
 | 1 | Infrastruktur Event | ✅ Selesai |
 | 2 | Notification → Event-Driven | ✅ Selesai |
-| 3 | Inventory → Standalone Penuh | Belum |
+| 3 | Inventory → Standalone Penuh | ✅ Selesai |
 | 4 | Guest → Lepas dari Rental | Belum |
 | 5 | Maintenance → Lepas dari Resident | Belum |
 | 6 | Finance → Hapus Circular Dependency | Belum |
@@ -377,8 +377,8 @@ POST   /api/v1/settings/update-bulk
 - [x] **3.6** Test: fitur inventaris masih berfungsi normal → automated: 9 test di `InventoryServiceTest` (create/update/delete + event dispatch)
 - [x] **3.7** Test: InventoryService tidak butuh Finance module → automated: reflection test + instantiasi tanpa ExpenseService berhasil
 - [x] **3.8** Jalankan `php artisan test` — 64 passed
-- [ ] **3.9** Merge ke `staging`, deploy, test di staging
-- [ ] **3.10** Merge ke `main` jika staging aman
+- [x] **3.9** Merge ke `staging`
+- [x] **3.10** Merge ke `main`
 
 ---
 
