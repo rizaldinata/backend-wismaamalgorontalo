@@ -4,6 +4,9 @@ namespace App\Providers;
 
 use App\Events\Finance\PembayaranDiterima;
 use App\Events\Finance\PembayaranDiverifikasi;
+use App\Events\Inventory\InventariBaru;
+use App\Events\Inventory\InventarisDihapus;
+use App\Events\Inventory\InventarisDiperbarui;
 use App\Events\Jadwal\JadwalBatal;
 use App\Events\Jadwal\JadwalDibuat;
 use App\Events\Jadwal\JadwalSewaAktif;
@@ -23,6 +26,7 @@ class EventServiceProvider extends ServiceProvider
         ],
         JadwalSewaSelesai::class => [
             \Modules\Notification\Listeners\KirimNotifikasiJadwalSewaSelesai::class,
+            \Modules\Inventory\Listeners\BuatChecklistInventarisSetelahSewaSelesai::class,
         ],
         JadwalBatal::class => [
             \Modules\Notification\Listeners\KirimNotifikasiJadwalBatal::class,
@@ -35,5 +39,15 @@ class EventServiceProvider extends ServiceProvider
             \Modules\Notification\Listeners\SendWhatsAppReceipt::class,
         ],
         LaporanKerusakanMasuk::class => [],
+
+        InventariBaru::class => [
+            \Modules\Finance\Listeners\CatatPengeluaranInventariBaru::class,
+        ],
+        InventarisDiperbarui::class => [
+            \Modules\Finance\Listeners\SinkronisasiPengeluaranInventaris::class,
+        ],
+        InventarisDihapus::class => [
+            \Modules\Finance\Listeners\HapusPengeluaranInventaris::class,
+        ],
     ];
 }
