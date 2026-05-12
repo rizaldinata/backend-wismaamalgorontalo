@@ -11,6 +11,9 @@ class MaintenanceDatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // $this->call([]);
+        $this->call([
+            MaintenanceRequestSeeder::class,
+            MaintenanceScheduleSeeder::class,
+        ]);
     }
 }

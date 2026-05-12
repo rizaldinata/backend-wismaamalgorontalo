@@ -1,0 +1,42 @@
+name: Deploy to Azure Staging
+
+# Kapan robot ini bekerja? Saat ada push ke branch 'staging'
+on:
+  push:
+    branches: ["staging"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploying to Server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            # 1. Masuk ke folder project
+            cd /var/www/backend-wismaamalgorontalo
+
+            # 2. Tarik kodingan terbaru
+            git pull origin staging
+
+            # 3. Install library baru (jika ada)
+            export COMPOSER_ALLOW_SUPERUSER=1
+            composer install --no-dev --optimize-autoloader
+
+            # 4. Update database (jika ada migrasi baru)
+            php artisan migrate --force
+
+            # 5. Bersihkan cache agar perubahan config/route terbaca
+            php artisan optimize:clear
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+
+            # 6. Pastikan permission storage aman (Jaga-jaga)
+            sudo chmod -R 775 storage bootstrap/cache
+
+            echo "🚀 DEPLOYMENT SUCCESSFUL!"

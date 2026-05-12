@@ -3,54 +3,43 @@
 namespace Modules\Resident\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Traits\ApiResponse;
+use Exception;
+use Illuminate\Support\Facades\Auth;
+use Modules\Resident\Http\Requests\StoreResidentProfileRequest;
+use Modules\Resident\Services\ResidentService;
+use Modules\Resident\Transformers\ResidentResource;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ResidentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    use ApiResponse;
+
+    public function __construct(
+        private readonly ResidentService $residentService
+    ) {}
+
+    public function show()
     {
-        return view('resident::index');
+        try {
+            $resident = $this->residentService->getProfileByUserId(Auth::id());
+
+            return $this->apiSuccess(new ResidentResource($resident), 'Data profile penghuni berhasil diambil');
+        } catch (NotFoundHttpException $e) {
+            return $this->apiError($e->getMessage(), 404);
+        } catch (Exception $e) {
+            return $this->apiError('Terjadi kesalahan sistem', 500);
+        }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function store(StoreResidentProfileRequest $request)
     {
-        return view('resident::create');
+        $resident = $this->residentService->updateProfile(
+            Auth::id(),
+            $request->validated(),
+            $request->file('ktp_photo')
+        );
+
+        return $this->apiSuccess(new ResidentResource($resident), 'Biodata berhasil disimpan');
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('resident::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('resident::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
 }

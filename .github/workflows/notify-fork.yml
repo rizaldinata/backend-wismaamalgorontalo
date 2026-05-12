@@ -1,0 +1,18 @@
+name: Notify Fork
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    if: github.repository == 'rizaldinata/backend-wismaamalgorontalo'
+    steps:
+      - name: Send Trigger to Fork
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.FORK_TOKEN }}
+          repository: ALFIAN-code/backend-wismaamalgorontalo
+          event-type: trigger-sync

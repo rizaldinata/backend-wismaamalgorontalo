@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Finance\Http\Controllers\FinanceController;
+use Modules\Finance\Http\Controllers\InvoiceController;
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('finances', FinanceController::class)->names('finance');
-});
+Route::get('/finance/invoices/{id}/print', [InvoiceController::class, 'printPdf'])
+    ->name('finance.invoice.print')
+    ->middleware('signed');
