@@ -369,14 +369,14 @@ POST   /api/v1/settings/update-bulk
 > Tujuan: Pastikan Inventory tidak punya ketergantungan keluar, dan tambahkan reaksi terhadap event jadwal selesai.
 > Branch: `refactor/phase-3-inventory-standalone`
 
-- [ ] **3.1** Buat branch `refactor/phase-3-inventory-standalone` dari `staging`
-- [ ] **3.2** Periksa: apakah ada FK constraint dari tabel `inventories` ke tabel modul lain? Jika ada, catat
-- [ ] **3.3** Periksa: apakah `InventoryService` inject repository dari modul lain? Jika ada, hapus
-- [ ] **3.4** Buat listener `Modules\Inventory\Listeners\BuatChecklistInventarisSetelahSewaSelesai`
-- [ ] **3.5** Daftarkan listener ke `EventServiceProvider`
+- [x] **3.1** Buat branch `refactor/phase-3-inventory-standalone` dari `staging`
+- [x] **3.2** Periksa: apakah ada FK constraint dari tabel `inventories` ke tabel modul lain? → N/A, tidak ada FK constraint
+- [x] **3.3** Periksa: apakah `InventoryService` inject repository dari modul lain? → Ya, inject `ExpenseService` dari Finance. Dihapus — ganti dengan event `InventariBaru`, `InventarisDiperbarui`, `InventarisDihapus`. Finance kini punya 3 listener untuk mencatat/sinkronisasi/hapus pengeluaran.
+- [x] **3.4** Buat listener `Modules\Inventory\Listeners\BuatChecklistInventarisSetelahSewaSelesai`
+- [x] **3.5** Daftarkan semua listener (Finance ×3 + Inventory ×1) ke `EventServiceProvider`
 - [ ] **3.6** Test: fitur inventaris masih berfungsi normal
 - [ ] **3.7** Test: matikan modul Inventory di `modules_statuses.json` → sistem lain tidak error
-- [ ] **3.8** Jalankan `php artisan test`
+- [x] **3.8** Jalankan `php artisan test` — 48 passed
 - [ ] **3.9** Merge ke `staging`, deploy, test di staging
 - [ ] **3.10** Merge ke `main` jika staging aman
 

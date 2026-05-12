@@ -2,16 +2,17 @@
 
 namespace Modules\Inventory\Services;
 
+use App\Events\Inventory\InventariBaru;
+use App\Events\Inventory\InventarisDihapus;
+use App\Events\Inventory\InventarisDiperbarui;
 use Illuminate\Support\Facades\DB;
 use Modules\Inventory\Models\Inventory;
 use Modules\Inventory\Repositories\Contracts\InventoryRepositoryInterface;
-use Modules\Finance\Services\ExpenseService;
 
 class InventoryService
 {
     public function __construct(
         private readonly InventoryRepositoryInterface $inventoryRepository,
-        private readonly ExpenseService $expenseService
     ) {}
 
     public function createInventory(array $data): Inventory
@@ -20,14 +21,12 @@ class InventoryService
             $inventory = $this->inventoryRepository->create($data);
 
             if (!empty($data['purchase_price']) && $data['purchase_price'] > 0) {
-                $this->expenseService->recordExpense([
-                    'title' => "Pembelian Barang: {$inventory->name}",
-                    'description' => "Pembelian {$inventory->quantity} unit {$inventory->name}",
-                    'amount' => $data['purchase_price'],
-                    'expense_date' => now(),
-                    'reference_id' => $inventory->id,
-                    'reference_type' => Inventory::class,
-                ]);
+                InventariBaru::dispatch(
+                    $inventory->id,
+                    $inventory->name,
+                    $inventory->quantity,
+                    (float) $data['purchase_price'],
+                );
             }
 
             return $inventory;
@@ -40,13 +39,10 @@ class InventoryService
             $updatedInventory = $this->inventoryRepository->update($inventory, $data);
 
             if (array_key_exists('purchase_price', $data)) {
-                $this->expenseService->syncExpenseByReference(
+                InventarisDiperbarui::dispatch(
                     $inventory->id,
-                    Inventory::class,
-                    [
-                        'title' => "Revisi Pembelian: {$updatedInventory->name}",
-                        'amount' => $data['purchase_price']
-                    ]
+                    $updatedInventory->name,
+                    (float) ($data['purchase_price'] ?? 0),
                 );
             }
 
@@ -57,9 +53,14 @@ class InventoryService
     public function deleteInventory(Inventory $inventory): bool
     {
         return DB::transaction(function () use ($inventory) {
-            $this->expenseService->removeExpenseByReference($inventory->id, Inventory::class);
+            $id = $inventory->id;
+            $deleted = $this->inventoryRepository->delete($inventory);
 
-            return $this->inventoryRepository->delete($inventory);
+            if ($deleted) {
+                InventarisDihapus::dispatch($id);
+            }
+
+            return $deleted;
         });
     }
 }
