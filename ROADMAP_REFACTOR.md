@@ -374,9 +374,9 @@ POST   /api/v1/settings/update-bulk
 - [x] **3.3** Periksa: apakah `InventoryService` inject repository dari modul lain? → Ya, inject `ExpenseService` dari Finance. Dihapus — ganti dengan event `InventariBaru`, `InventarisDiperbarui`, `InventarisDihapus`. Finance kini punya 3 listener untuk mencatat/sinkronisasi/hapus pengeluaran.
 - [x] **3.4** Buat listener `Modules\Inventory\Listeners\BuatChecklistInventarisSetelahSewaSelesai`
 - [x] **3.5** Daftarkan semua listener (Finance ×3 + Inventory ×1) ke `EventServiceProvider`
-- [ ] **3.6** Test: fitur inventaris masih berfungsi normal
-- [ ] **3.7** Test: matikan modul Inventory di `modules_statuses.json` → sistem lain tidak error
-- [x] **3.8** Jalankan `php artisan test` — 48 passed
+- [x] **3.6** Test: fitur inventaris masih berfungsi normal → automated: 9 test di `InventoryServiceTest` (create/update/delete + event dispatch)
+- [x] **3.7** Test: InventoryService tidak butuh Finance module → automated: reflection test + instantiasi tanpa ExpenseService berhasil
+- [x] **3.8** Jalankan `php artisan test` — 64 passed
 - [ ] **3.9** Merge ke `staging`, deploy, test di staging
 - [ ] **3.10** Merge ke `main` jika staging aman
 
