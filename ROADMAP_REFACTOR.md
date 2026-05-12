@@ -136,9 +136,9 @@ Aturan ini **tidak boleh dilanggar** selama proses refactor:
 
 | Fase | Nama | Status |
 |---|---|---|
-| 0 | Persiapan | Belum |
-| 1 | Infrastruktur Event | Belum |
-| 2 | Notification → Event-Driven | Belum |
+| 0 | Persiapan | ✅ Selesai |
+| 1 | Infrastruktur Event | ✅ Selesai |
+| 2 | Notification → Event-Driven | ✅ Selesai |
 | 3 | Inventory → Standalone Penuh | Belum |
 | 4 | Guest → Lepas dari Rental | Belum |
 | 5 | Maintenance → Lepas dari Resident | Belum |
@@ -155,17 +155,129 @@ Aturan ini **tidak boleh dilanggar** selama proses refactor:
 
 > Tujuan: Pastikan kondisi awal aman sebelum mulai menyentuh kode apapun.
 
-- [ ] **0.1** Backup database production secara manual
-- [ ] **0.2** Jalankan `php artisan test` — pastikan semua test yang ada saat ini lulus
-- [ ] **0.3** Catat semua API endpoint yang digunakan Flutter (buat daftar di bawah ini)
-- [ ] **0.4** Pastikan branch `staging` up-to-date dengan kondisi production
-- [ ] **0.5** Sepakati dengan tim: siapa yang mengerjakan fase mana
+- [x] **0.1** Backup database production secara manual
+- [x] **0.2** Jalankan `php artisan test` — pastikan semua test yang ada saat ini lulus (10 passed, 17 assertions)
+- [x] **0.3** Catat semua API endpoint yang digunakan Flutter (buat daftar di bawah ini)
+- [x] **0.4** Pastikan branch `staging` up-to-date dengan kondisi production
+- [x] **0.5** Sepakati dengan tim: siapa yang mengerjakan fase mana
 
-**Daftar endpoint Flutter (isi manual):**
+**Daftar endpoint Flutter:**
 ```
-- GET  /api/v1/...
-- POST /api/v1/...
-- (lengkapi sendiri)
+# Auth
+POST   /api/register
+POST   /api/login
+POST   /api/logout
+GET    /api/me
+GET    /api/permissions
+PUT    /api/profile
+PUT    /api/change-password
+GET    /api/admin/permissions
+POST   /api/admin/permissions
+GET    /api/admin/permissions/{id}
+PUT    /api/admin/permissions/{id}
+DELETE /api/admin/permissions/{id}
+GET    /api/admin/roles
+POST   /api/admin/roles
+GET    /api/admin/roles/{role}
+PUT    /api/admin/roles/{role}
+DELETE /api/admin/roles/{role}
+GET    /api/admin/users
+POST   /api/admin/users
+GET    /api/admin/users/{user}
+PUT    /api/admin/users/{user}
+DELETE /api/admin/users/{user}
+
+# Resident
+GET    /api/resident/profile
+POST   /api/resident/profile
+GET    /api/admin/residents
+GET    /api/admin/residents/{id}
+
+# Room
+GET    /api/rooms
+GET    /api/rooms/{id}
+GET    /api/rooms-schedules
+POST   /api/rooms
+PUT    /api/rooms/{id}
+DELETE /api/rooms/{id}
+POST   /api/rooms/{id}/images
+DELETE /api/rooms/{roomId}/images/{imageId}
+
+# Rental
+GET    /api/rentals
+GET    /api/rentals/my
+POST   /api/rentals
+PATCH  /api/rentals/{id}/status
+POST   /api/rentals/{id}/extend
+POST   /api/rentals/{id}/cancel
+
+# Finance
+GET    /api/finance/dashboard/kpi-summary
+GET    /api/finance/dashboard/revenue-chart
+GET    /api/finance/dashboard/due-invoices
+GET    /api/finance/dashboard/pending-payments
+GET    /api/finance/expenses
+POST   /api/finance/expenses
+GET    /api/finance/expenses/{id}
+PUT    /api/finance/expenses/{id}
+DELETE /api/finance/expenses/{id}
+GET    /api/finance/payments
+GET    /api/finance/payments/{id}
+POST   /api/finance/payments/{paymentId}/verify
+POST   /api/finance/payments/{paymentId}/refund
+GET    /api/finance/invoices
+GET    /api/finance/invoices/{id}
+GET    /api/finance/invoices/{id}/print-link
+POST   /api/finance/invoices/{invoiceId}/pay
+GET    /api/finance/me/summary
+GET    /api/finance/me/invoices
+GET    /api/finance/me/invoices/{id}
+GET    /api/finance/me/payments
+POST   /api/finance/payments/midtrans/notification   ← webhook, tanpa auth
+
+# Guest
+GET    /api/guests
+POST   /api/guests
+DELETE /api/guests/{id}
+GET    /api/guests/{guestId}/bill
+POST   /api/guests/{guestId}/bill/pay
+GET    /api/admin/guests
+POST   /api/admin/guests
+GET    /api/admin/guest-bills
+POST   /api/admin/guest-bills/{id}/verify
+POST   /api/guests/bills/midtrans/notification       ← webhook, tanpa auth
+
+# Maintenance
+GET    /api/v1/damage-reports/my-reports
+GET    /api/v1/damage-reports/{id}
+POST   /api/v1/damage-reports
+GET    /api/v1/damage-reports/admin
+GET    /api/v1/damage-reports/admin/{id}
+POST   /api/v1/damage-reports/admin/{id}/updates
+GET    /api/v1/schedules
+POST   /api/v1/schedules
+GET    /api/v1/schedules/{id}
+PUT    /api/v1/schedules/{id}
+DELETE /api/v1/schedules/{id}
+POST   /api/v1/schedules/{id}/updates
+GET    /api/maintenance/media/{path}                 ← public, proxy media
+
+# Inventory
+GET    /api/inventory
+POST   /api/inventory
+GET    /api/inventory/{id}
+PUT    /api/inventory/{id}
+DELETE /api/inventory/{id}
+
+# Notification
+POST   /api/notification/send
+GET    /api/notification/logs
+POST   /api/notification/logs/{id}/resend
+
+# Setting
+GET    /api/v1/settings/public                       ← tanpa auth
+GET    /api/v1/settings
+POST   /api/v1/settings/update-bulk
 ```
 
 ---
@@ -177,28 +289,33 @@ Aturan ini **tidak boleh dilanggar** selama proses refactor:
 
 ### Setup
 
-- [ ] **1.1** Buat branch `refactor/phase-1-event-infrastructure` dari `staging`
+- [x] **1.1** Buat branch `refactor/phase-1-event-infrastructure` dari `staging`
 
 ### Buat Event Classes
 
-- [ ] **1.2** Buat event class `App\Events\Jadwal\JadwalDibuat`
-- [ ] **1.3** Buat event class `App\Events\Jadwal\JadwalSewaAktif`
-- [ ] **1.4** Buat event class `App\Events\Jadwal\JadwalSewaSelesai`
-- [ ] **1.5** Buat event class `App\Events\Jadwal\JadwalBatal`
-- [ ] **1.6** Buat event class `App\Events\Jadwal\StatusKamarBerubah`
-- [ ] **1.7** Buat event class `App\Events\Finance\PembayaranDiterima`
-- [ ] **1.8** Buat event class `App\Events\Finance\PembayaranDiverifikasi`
-- [ ] **1.9** Buat event class `App\Events\Maintenance\LaporanKerusakanMasuk`
+- [x] **1.2** Buat event class `App\Events\Jadwal\JadwalDibuat`
+- [x] **1.3** Buat event class `App\Events\Jadwal\JadwalSewaAktif`
+- [x] **1.4** Buat event class `App\Events\Jadwal\JadwalSewaSelesai`
+- [x] **1.5** Buat event class `App\Events\Jadwal\JadwalBatal`
+- [x] **1.6** Buat event class `App\Events\Jadwal\StatusKamarBerubah`
+- [x] **1.7** Buat event class `App\Events\Finance\PembayaranDiterima`
+- [x] **1.8** Buat event class `App\Events\Finance\PembayaranDiverifikasi`
+- [x] **1.9** Buat event class `App\Events\Maintenance\LaporanKerusakanMasuk`
 
 ### Registrasi & Verifikasi
 
-- [ ] **1.10** Daftarkan semua event di `EventServiceProvider`
-- [ ] **1.11** Buat temporary route `/test-event` di file routes lokal — route ini mem-fire satu event dan return "OK" (hanya untuk verifikasi, **jangan push ke production**)
-- [ ] **1.12** Akses route `/test-event`, pastikan response OK dan tidak ada error di log
-- [ ] **1.13** Hapus route `/test-event` setelah verifikasi selesai
-- [ ] **1.14** Jalankan `php artisan test` — pastikan semua test masih lulus
-- [ ] **1.15** Merge branch ke `staging`, deploy, test di staging
-- [ ] **1.16** Merge ke `main` jika staging aman
+- [x] **1.10** Daftarkan semua event di `EventServiceProvider`
+- [x] **1.11** Buat temporary route `/test-event` di file routes lokal — route ini mem-fire satu event dan return "OK" (hanya untuk verifikasi, **jangan push ke production**)
+- [x] **1.12** Akses route `/test-event`, pastikan response OK dan tidak ada error di log
+- [x] **1.13** Hapus route `/test-event` setelah verifikasi selesai
+- [x] **1.14** Jalankan `php artisan test` — pastikan semua test masih lulus (10 passed)
+- [x] **1.15** Merge branch ke `staging`, deploy, test di staging
+- [x] **1.16** Merge ke `main` jika staging aman
+
+### Automated Tests (Fase 1)
+
+- [x] **1.A** Buat `tests/Unit/Events/JadwalEventsTest.php` — verifikasi konstruktor dan properti semua event class (10 test)
+- [x] **1.B** Buat `tests/Feature/Events/EventServiceProviderTest.php` — verifikasi setiap event terhubung ke listener yang benar via `Event::assertListening()` (6 test)
 
 ---
 
@@ -209,32 +326,41 @@ Aturan ini **tidak boleh dilanggar** selama proses refactor:
 
 ### Identifikasi
 
-- [ ] **2.1** Buat branch `refactor/phase-2-notification-event-driven` dari `staging`
-- [ ] **2.2** Catat semua tempat di kode yang memanggil `NotificationService` secara langsung dari modul lain
+- [x] **2.1** Buat branch `refactor/phase-2-notification-event-driven` dari `staging`
+- [x] **2.2** Catat semua tempat di kode yang memanggil `NotificationService` secara langsung dari modul lain (tidak ada — N/A)
 
 ### Buat Listeners
 
-- [ ] **2.3** Buat listener `Modules\Notification\Listeners\KirimNotifikasiJadwalDibuat`
-- [ ] **2.4** Buat listener `Modules\Notification\Listeners\KirimNotifikasiJadwalSewaAktif`
-- [ ] **2.5** Buat listener `Modules\Notification\Listeners\KirimNotifikasiJadwalSewaSelesai`
-- [ ] **2.6** Buat listener `Modules\Notification\Listeners\KirimNotifikasiJadwalBatal`
-- [ ] **2.7** Buat listener `Modules\Notification\Listeners\KirimNotifikasiPembayaranDiterima`
-- [ ] **2.8** Daftarkan semua listener ke `EventServiceProvider`
+- [x] **2.3** Buat listener `Modules\Notification\Listeners\KirimNotifikasiJadwalDibuat`
+- [x] **2.4** Buat listener `Modules\Notification\Listeners\KirimNotifikasiJadwalSewaAktif`
+- [x] **2.5** Buat listener `Modules\Notification\Listeners\KirimNotifikasiJadwalSewaSelesai`
+- [x] **2.6** Buat listener `Modules\Notification\Listeners\KirimNotifikasiJadwalBatal`
+- [x] **2.7** Buat listener `Modules\Notification\Listeners\KirimNotifikasiPembayaranDiterima`
+- [x] **2.8** Daftarkan semua listener ke `EventServiceProvider` (Notification module + global App)
 
 ### Hapus Pemanggilan Langsung
 
-- [ ] **2.9** Hapus pemanggilan `NotificationService` langsung dari `RentalService`
-- [ ] **2.10** Hapus pemanggilan `NotificationService` langsung dari `FinanceService`
-- [ ] **2.11** Hapus pemanggilan `NotificationService` langsung dari modul lain (jika ada)
-- [ ] **2.12** Hapus injection `NotificationService` dari constructor modul lain
+- [x] **2.9** Hapus pemanggilan `NotificationService` langsung dari `RentalService` (tidak ada — N/A)
+- [x] **2.10** Hapus pemanggilan `NotificationService` langsung dari `FinanceService` (tidak ada — N/A)
+- [x] **2.11** Hapus pemanggilan `NotificationService` langsung dari modul lain (tidak ada — N/A)
+- [x] **2.12** Hapus injection `NotificationService` dari constructor modul lain (tidak ada — N/A)
 
 ### Verifikasi
 
-- [ ] **2.13** Test manual: buat lease baru → verifikasi notifikasi tetap terkirim
-- [ ] **2.14** Test manual: lakukan pembayaran → verifikasi notifikasi tetap terkirim
-- [ ] **2.15** Jalankan `php artisan test` — pastikan semua test masih lulus
-- [ ] **2.16** Merge ke `staging`, deploy, test di staging
-- [ ] **2.17** Merge ke `main` jika staging aman
+- [x] **2.13** Test manual: buat lease baru → verifikasi notifikasi tetap terkirim (N/A — belum ada RentalService yang fire event, akan diaktifkan di Fase 6)
+- [x] **2.14** Test manual: lakukan pembayaran → verifikasi notifikasi tetap terkirim (N/A — akan diaktifkan di Fase 6)
+- [x] **2.15** Jalankan `php artisan test` — pastikan semua test masih lulus (10 passed)
+- [x] **2.16** Merge ke `staging`, deploy, test di staging
+- [x] **2.17** Merge ke `main` jika staging aman
+
+### Automated Tests (Fase 2)
+
+- [x] **2.A** Buat `Modules/Notification/tests/Unit/KirimNotifikasiJadwalDibuatTest.php` — 5 test: kirim saat kondisi lengkap, skip jika bukan sewa, skip jika tanpa HP, skip jika fitur off, cek konten pesan
+- [x] **2.B** Buat `Modules/Notification/tests/Unit/KirimNotifikasiJadwalBatalTest.php` — 4 test
+- [x] **2.C** Buat `Modules/Notification/tests/Unit/KirimNotifikasiJadwalSewaAktifTest.php` — 3 test
+- [x] **2.D** Buat `Modules/Notification/tests/Unit/KirimNotifikasiJadwalSewaSelesaiTest.php` — 3 test
+- [x] **2.E** Buat `Modules/Notification/tests/Unit/KirimNotifikasiPembayaranDiterimaTest.php` — 3 test: kirim, skip, cek format angka
+- [x] **2.F** Buat `Modules/Notification/tests/Unit/SendWhatsAppReceiptTest.php` — 4 test: tanpa PDF link, dengan PDF link (mock URL facade), skip saat off, cek format periode
 
 ---
 
