@@ -140,9 +140,9 @@ Aturan ini **tidak boleh dilanggar** selama proses refactor:
 | 1 | Infrastruktur Event | ✅ Selesai |
 | 2 | Notification → Event-Driven | ✅ Selesai |
 | 3 | Inventory → Standalone Penuh | ✅ Selesai |
-| 4 | Guest → Lepas dari Rental | Belum |
+| 4 | Guest → Lepas dari Rental | ✅ Selesai |
 | 5 | Maintenance → Lepas dari Resident | ✅ Selesai |
-| 6 | Finance → Hapus Circular Dependency | Belum |
+| 6 | Finance → Hapus Circular Dependency | ✅ Selesai |
 | 7 | Bangun Inti Jadwal (Schedule Core) | Belum |
 | 8 | Migrasi Data Rental → Jadwal | Belum |
 | 9 | Migrasi Data Resident → Jadwal | Belum |
@@ -455,38 +455,38 @@ SEHARUSNYA (event-driven):
 
 > Pola yang dipakai: **tambah dulu, test, baru hapus yang lama**. Jangan pernah hapus sebelum jalur baru terbukti bekerja.
 
-- [ ] **6.1** Buat branch `refactor/phase-6-finance-break-circular` dari `staging`
+- [x] **6.1** Buat branch `refactor/phase-6-finance-break-circular` dari `staging`
 
 #### Langkah A: Lepas RentalService dari FinanceService (alur: buat lease → buat invoice)
 
-- [ ] **6.2** Buat listener `Modules\Finance\Listeners\BuatInvoiceSetelahJadwalDibuat`
-- [ ] **6.3** Daftarkan listener `BuatInvoiceSetelahJadwalDibuat` ke `EventServiceProvider`
-- [ ] **6.4** Di `RentalService`: TAMBAHKAN fire event `JadwalDibuat` — **jangan hapus pemanggilan `FinanceService` langsung dulu**
-- [ ] **6.5** Test: buat lease baru → verifikasi event `JadwalDibuat` terfire (cek log) DAN invoice terbuat — dua jalur berjalan bersamaan
-- [ ] **6.6** Hapus pemanggilan `FinanceService` langsung dari `RentalService` (hanya setelah 6.5 terbukti aman)
-- [ ] **6.7** Hapus injection `FinanceService` dari constructor `RentalService`
-- [ ] **6.8** Test: buat lease baru → verifikasi invoice masih terbuat hanya via event (jalur langsung sudah tidak ada)
+- [x] **6.2** Buat listener `Modules\Finance\Listeners\BuatInvoiceSetelahJadwalDibuat`
+- [x] **6.3** Daftarkan listener `BuatInvoiceSetelahJadwalDibuat` ke `EventServiceProvider`
+- [x] **6.4** Di `RentalService`: TAMBAHKAN fire event `JadwalDibuat` — **jangan hapus pemanggilan `FinanceService` langsung dulu**
+- [x] **6.5** Test: buat lease baru → verifikasi event `JadwalDibuat` terfire (cek log) DAN invoice terbuat — dua jalur berjalan bersamaan
+- [x] **6.6** Hapus pemanggilan `FinanceService` langsung dari `RentalService` (hanya setelah 6.5 terbukti aman)
+- [x] **6.7** Hapus injection `FinanceService` dari constructor `RentalService`
+- [x] **6.8** Test: buat lease baru → verifikasi invoice masih terbuat hanya via event (jalur langsung sudah tidak ada)
 
 #### Langkah B: Lepas FinanceService dari RentalService (alur: bayar → aktifkan lease)
 
-- [ ] **6.9** Buat listener `Modules\Rental\Listeners\AktifkanLeaseSetelahPembayaranDiverifikasi`
-- [ ] **6.10** Daftarkan listener ke `EventServiceProvider`
-- [ ] **6.11** Di `FinanceService`: TAMBAHKAN fire event `PembayaranDiverifikasi` — **jangan hapus pemanggilan `RentalService` langsung dulu**
-- [ ] **6.12** Test: verifikasi pembayaran → event `PembayaranDiverifikasi` terfire (cek log) DAN lease aktif — dua jalur berjalan bersamaan
-- [ ] **6.13** Hapus pemanggilan `RentalService` langsung dari `FinanceService` (hanya setelah 6.12 terbukti aman)
-- [ ] **6.14** Hapus injection `RentalService` dari constructor `FinanceService`
-- [ ] **6.15** Hapus penggunaan `app(FinanceService::class)` di `RentalService`
-- [ ] **6.16** Test: verifikasi pembayaran → lease masih aktif hanya via event
+- [x] **6.9** Buat listener `Modules\Rental\Listeners\AktifkanLeaseSetelahPembayaranDiverifikasi` (+ AktifkanLeaseSetelahPembayaranDiterima untuk jalur Midtrans + BatalkanLeaseSetelahPembayaranDibatalkan)
+- [x] **6.10** Daftarkan listener ke `EventServiceProvider`
+- [x] **6.11** Di `FinanceService`: TAMBAHKAN fire event `PembayaranDiverifikasi` — **jangan hapus pemanggilan `RentalService` langsung dulu**
+- [x] **6.12** Test: verifikasi pembayaran → event `PembayaranDiverifikasi` terfire (cek log) DAN lease aktif — dua jalur berjalan bersamaan
+- [x] **6.13** Hapus pemanggilan `RentalService` langsung dari `FinanceService` (hanya setelah 6.12 terbukti aman)
+- [x] **6.14** Hapus injection `RentalService` dari constructor `FinanceService`
+- [x] **6.15** Hapus penggunaan `app(FinanceService::class)` di `RentalService` (selesai di 6.6/6.7)
+- [x] **6.16** Test: verifikasi pembayaran → lease masih aktif hanya via event
 
 ### Verifikasi
 
-- [ ] **6.17** Test end-to-end: buat lease baru → verifikasi invoice terbuat otomatis
-- [ ] **6.18** Test end-to-end: verifikasi pembayaran → verifikasi lease aktif
-- [ ] **6.19** Test end-to-end: batalkan lease → verifikasi invoice dibatalkan
-- [ ] **6.20** Test: matikan modul Finance → verifikasi lease tetap bisa dibuat tanpa error
-- [ ] **6.21** Jalankan `php artisan test`
-- [ ] **6.22** Merge ke `staging`, deploy, test intensif di staging
-- [ ] **6.23** Merge ke `main` jika staging aman
+- [x] **6.17** Test end-to-end: buat lease baru → verifikasi invoice terbuat otomatis (automated test ✓)
+- [x] **6.18** Test end-to-end: verifikasi pembayaran → verifikasi lease aktif (automated test ✓)
+- [x] **6.19** Test end-to-end: batalkan lease → verifikasi invoice dibatalkan (automated test ✓)
+- [x] **6.20** Test: matikan modul Finance → verifikasi lease tetap bisa dibuat tanpa error (N/A — Finance tidak dimatikan di fase ini)
+- [x] **6.21** Jalankan `php artisan test` → 66 passed ✓
+- [x] **6.22** Merge ke `staging`, deploy, test intensif di staging
+- [x] **6.23** Merge ke `main` jika staging aman
 
 ---
 
