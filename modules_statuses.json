@@ -9,5 +9,6 @@
     "Setting": true,
     "Rental": true,
     "Notification": true,
-    "Guest": true
+    "Guest": true,
+    "Schedule": true
 }
