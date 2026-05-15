@@ -23,10 +23,12 @@ class EventServiceProvider extends ServiceProvider
         ],
         JadwalSewaAktif::class => [
             \Modules\Notification\Listeners\KirimNotifikasiJadwalSewaAktif::class,
+            \Modules\Guest\Listeners\AktifkanFiturTamuSetelahSewaAktif::class,
         ],
         JadwalSewaSelesai::class => [
             \Modules\Notification\Listeners\KirimNotifikasiJadwalSewaSelesai::class,
             \Modules\Inventory\Listeners\BuatChecklistInventarisSetelahSewaSelesai::class,
+            \Modules\Guest\Listeners\NonaktifkanFiturTamuSetelahSewaSelesai::class,
         ],
         JadwalBatal::class => [
             \Modules\Notification\Listeners\KirimNotifikasiJadwalBatal::class,

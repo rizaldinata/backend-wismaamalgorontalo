@@ -13,6 +13,11 @@ class Guest extends Model
 
     protected $fillable = [
         'lease_id',
+        'user_id',
+        'schedule_reference_id',
+        'tenant_name',
+        'tenant_email',
+        'tenant_phone',
         'name',
         'check_in_at',
         'check_out_at',
