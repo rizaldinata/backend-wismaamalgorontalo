@@ -89,11 +89,33 @@ class JadwalEventsTest extends TestCase
             tenantName: 'Ahmad Fauzi',
             tenantPhone: '08111111111',
             startDate: '2025-02-01',
+            userId: 42,
+            roomPrice: 1500000.0,
+            tenantEmail: 'ahmad@example.com',
         );
 
         $this->assertEquals(3, $event->scheduleId);
         $this->assertEquals('Ahmad Fauzi', $event->tenantName);
         $this->assertEquals('2025-02-01', $event->startDate);
+        $this->assertEquals(42, $event->userId);
+        $this->assertEquals(1500000.0, $event->roomPrice);
+        $this->assertEquals('ahmad@example.com', $event->tenantEmail);
+    }
+
+    public function test_jadwal_sewa_aktif_properti_opsional_boleh_null(): void
+    {
+        $event = new JadwalSewaAktif(
+            scheduleId: 3,
+            roomId: 10,
+            roomNumber: '101',
+            tenantName: 'Ahmad Fauzi',
+            tenantPhone: '08111111111',
+            startDate: '2025-02-01',
+        );
+
+        $this->assertNull($event->userId);
+        $this->assertNull($event->roomPrice);
+        $this->assertNull($event->tenantEmail);
     }
 
     public function test_jadwal_sewa_selesai_menyimpan_semua_properti(): void
@@ -105,11 +127,27 @@ class JadwalEventsTest extends TestCase
             tenantName: 'Ahmad Fauzi',
             tenantPhone: '08111111111',
             endDate: '2025-07-01',
+            userId: 42,
         );
 
         $this->assertEquals(4, $event->scheduleId);
         $this->assertEquals('Ahmad Fauzi', $event->tenantName);
         $this->assertEquals('2025-07-01', $event->endDate);
+        $this->assertEquals(42, $event->userId);
+    }
+
+    public function test_jadwal_sewa_selesai_user_id_opsional_boleh_null(): void
+    {
+        $event = new JadwalSewaSelesai(
+            scheduleId: 4,
+            roomId: 10,
+            roomNumber: '101',
+            tenantName: 'Ahmad Fauzi',
+            tenantPhone: '08111111111',
+            endDate: '2025-07-01',
+        );
+
+        $this->assertNull($event->userId);
     }
 
     public function test_pembayaran_diterima_menyimpan_semua_properti(): void

@@ -11,7 +11,6 @@ use Modules\Guest\Enums\GuestBillStatus;
 use Modules\Guest\Models\Guest;
 use Modules\Guest\Models\GuestBill;
 use Modules\Guest\Repositories\Contracts\GuestBillRepositoryInterface;
-use Modules\Rental\Models\Lease;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -27,7 +26,7 @@ class GuestBillingService
      *
      * @return array{total_days: int, billable_days: int, charge_amount: float}
      */
-    public function calculateBilling(Lease $lease, string $checkIn, string $checkOut): array
+    public function calculateBilling(float $roomPrice, string $checkIn, string $checkOut): array
     {
         $checkInDt  = new \DateTime($checkIn);
         $checkOutDt = new \DateTime($checkOut);
@@ -36,8 +35,6 @@ class GuestBillingService
         $totalDays = (int) ceil($diffHours / 24);
 
         $billableDays = max(0, $totalDays - 2);
-
-        $roomPrice    = (float) ($lease->room?->price ?? 0);
         $chargeAmount = $billableDays * ($roomPrice * 0.05);
 
         return [
@@ -118,10 +115,14 @@ class GuestBillingService
         Config::$is3ds        = true;
         Config::$overrideNotifUrl = url('/api/guests/bills/midtrans/notification');
 
-        // Load customer details
-        $bill->load('guest.lease.resident.user');
-        $resident = $bill->guest->lease->resident;
-        $user     = $resident->user;
+        // Ambil data customer dari kolom snapshot di tabel guests
+        $bill->loadMissing('guest');
+        $guest = $bill->guest;
+
+        // Fallback ke relasi Rental untuk records lama (sebelum Fase 4) yang belum punya tenant_*
+        $tenantName  = $guest->tenant_name  ?? $guest->lease?->resident?->user?->name  ?? 'Unknown';
+        $tenantEmail = $guest->tenant_email ?? $guest->lease?->resident?->user?->email  ?? '';
+        $tenantPhone = $guest->tenant_phone ?? $guest->lease?->resident?->phone_number  ?? '';
 
         $params = [
             'transaction_details' => [
@@ -129,9 +130,9 @@ class GuestBillingService
                 'gross_amount' => (int) $bill->amount,
             ],
             'customer_details' => [
-                'first_name' => $user->name,
-                'email'      => $user->email,
-                'phone'      => $resident->phone_number,
+                'first_name' => $tenantName,
+                'email'      => $tenantEmail,
+                'phone'      => $tenantPhone,
             ],
             'item_details' => [
                 [
@@ -232,16 +233,16 @@ class GuestBillingService
      */
     private function resolveOwnedGuest(int $guestId, int $userId): Guest
     {
-        $guest = Guest::with('lease')->find($guestId);
+        $guest = Guest::find($guestId);
 
         if (!$guest) {
             throw new NotFoundHttpException('Data tamu tidak ditemukan.');
         }
 
-        // Verify ownership: the guest's lease must belong to this user's resident
-        $lease = $guest->lease;
+        // Verifikasi kepemilikan via user_id (data baru) atau via relasi lease (data lama, sebelum Fase 4)
+        $ownerId = $guest->user_id ?? $guest->lease?->resident?->user_id;
 
-        if (!$lease || !$lease->resident || $lease->resident->user_id !== $userId) {
+        if ($ownerId !== $userId) {
             throw new HttpException(403, 'Anda tidak memiliki akses ke data tamu ini.');
         }
 
