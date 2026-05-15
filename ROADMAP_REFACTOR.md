@@ -143,7 +143,7 @@ Aturan ini **tidak boleh dilanggar** selama proses refactor:
 | 4 | Guest → Lepas dari Rental | ✅ Selesai |
 | 5 | Maintenance → Lepas dari Resident | ✅ Selesai |
 | 6 | Finance → Hapus Circular Dependency | ✅ Selesai |
-| 7 | Bangun Inti Jadwal (Schedule Core) | Belum |
+| 7 | Bangun Inti Jadwal (Schedule Core) | ✅ Selesai |
 | 8 | Migrasi Data Rental → Jadwal | Belum |
 | 9 | Migrasi Data Resident → Jadwal | Belum |
 | 10 | Hapus Modul Lama | Belum |
@@ -497,39 +497,39 @@ SEHARUSNYA (event-driven):
 
 ### Database
 
-- [ ] **7.1** Buat branch `refactor/phase-7-build-schedule-core` dari `staging`
-- [ ] **7.2** Buat migration: tabel `room_schedules` dengan kolom:
+- [x] **7.1** Buat branch `refactor/phase-7-build-schedule-core` dari `staging`
+- [x] **7.2** Buat migration: tabel `room_schedules` dengan kolom:
   - `id`, `room_id`, `type` (enum: sewa/maintenance/kebersihan/blokir)
   - `start_date`, `end_date`, `status`
   - `created_by`, `timestamps`
-- [ ] **7.3** Buat migration: tambah kolom data penghuni ke `room_schedules` (khusus tipe `sewa`):
+- [x] **7.3** Buat migration: tambah kolom data penghuni ke `room_schedules` (khusus tipe `sewa`):
   - `tenant_name`, `tenant_id_number`, `tenant_phone`, `tenant_id_photo`
-  - `agreed_price`
-- [ ] **7.4** Jalankan migration di lokal, verifikasi tabel terbuat dengan benar
+  - `agreed_price` (digabung dalam satu migration dengan 7.2)
+- [x] **7.4** Jalankan migration di lokal, verifikasi tabel terbuat dengan benar
 
 ### Kode
 
-- [ ] **7.5** Buat model `Modules\Schedule\Models\Schedule`
-- [ ] **7.6** Buat `Modules\Schedule\Repositories\Contracts\ScheduleRepositoryInterface`
-- [ ] **7.7** Buat `Modules\Schedule\Repositories\Eloquent\ScheduleRepository`
-- [ ] **7.8** Buat `Modules\Schedule\Services\ScheduleService` dengan method:
+- [x] **7.5** Buat model `Modules\Schedule\Models\Schedule`
+- [x] **7.6** Buat `Modules\Schedule\Repositories\Contracts\ScheduleRepositoryInterface`
+- [x] **7.7** Buat `Modules\Schedule\Repositories\Eloquent\ScheduleRepository`
+- [x] **7.8** Buat `Modules\Schedule\Services\ScheduleService` dengan method:
   - `buatJadwal(array $data)`
   - `aktifkanJadwal(int $scheduleId)`
   - `selesaikanJadwal(int $scheduleId)`
   - `batalkanJadwal(int $scheduleId)`
   - `ambilJadwalAktifKamar(int $roomId)`
-- [ ] **7.9** Buat `Modules\Schedule\Http\Controllers\ScheduleController`
-- [ ] **7.10** Buat routes untuk Schedule (endpoint baru, belum menggantikan endpoint Rental)
-- [ ] **7.11** Daftarkan binding di `ScheduleServiceProvider`
-- [ ] **7.12** Aktifkan modul Schedule di `modules_statuses.json`
+- [x] **7.9** Buat `Modules\Schedule\Http\Controllers\ScheduleController`
+- [x] **7.10** Buat routes untuk Schedule: `POST/GET /api/v1/room-schedules` (prefix berbeda dari Maintenance yang pakai `/v1/schedules`)
+- [x] **7.11** Daftarkan binding di `ScheduleServiceProvider`
+- [x] **7.12** Aktifkan modul Schedule di `modules_statuses.json`
 
 ### Verifikasi
 
-- [ ] **7.13** Test: CRUD jadwal via endpoint baru berfungsi
-- [ ] **7.14** Test: modul Rental lama masih berfungsi normal (belum dihapus)
-- [ ] **7.15** Jalankan `php artisan test`
-- [ ] **7.16** Merge ke `staging`, deploy, test di staging
-- [ ] **7.17** Merge ke `main` jika staging aman
+- [x] **7.13** Test: CRUD jadwal via endpoint baru berfungsi (7 unit test baru ✓)
+- [x] **7.14** Test: modul Rental lama masih berfungsi normal (belum dihapus)
+- [x] **7.15** Jalankan `php artisan test` → 73 passed ✓
+- [x] **7.16** Merge ke `staging`, deploy, test di staging
+- [x] **7.17** Merge ke `main` jika staging aman
 
 ---
 
