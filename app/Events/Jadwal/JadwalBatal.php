@@ -15,5 +15,6 @@ class JadwalBatal
         public readonly string $roomNumber,
         public readonly ?string $tenantName = null,
         public readonly ?string $tenantPhone = null,
+        public readonly ?string $tipeJadwal = null,
     ) {}
 }
