@@ -46,6 +46,20 @@ class ScheduleRepository implements ScheduleRepositoryInterface
             ->first();
     }
 
+    public function getByTenantUserId(int $userId): iterable
+    {
+        return Schedule::where('tenant_user_id', $userId)
+            ->orderByDesc('start_date')
+            ->get();
+    }
+
+    public function getActiveByTenantUserId(int $userId): ?Schedule
+    {
+        return Schedule::where('tenant_user_id', $userId)
+            ->where('status', ScheduleStatus::ACTIVE->value)
+            ->first();
+    }
+
     public function getAllPaginated(array $filters = []): mixed
     {
         $query = Schedule::query();

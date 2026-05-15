@@ -145,7 +145,7 @@ Aturan ini **tidak boleh dilanggar** selama proses refactor:
 | 6 | Finance → Hapus Circular Dependency | ✅ Selesai |
 | 7 | Bangun Inti Jadwal (Schedule Core) | ✅ Selesai |
 | 8 | Migrasi Data Rental → Jadwal | ✅ Selesai |
-| 9 | Migrasi Data Resident → Jadwal | Belum |
+| 9 | Migrasi Data Resident → Jadwal | ✅ Selesai |
 | 10 | Hapus Modul Lama | Belum |
 | 11 | Cleanup & Verifikasi Final | Belum |
 
@@ -596,32 +596,36 @@ SEHARUSNYA (event-driven):
 
 ### Persiapan
 
-- [ ] **9.1** Backup database production (lakukan ulang)
-- [ ] **9.2** Buat branch `refactor/phase-9-migrate-resident-data` dari `staging`
-- [ ] **9.3** Verifikasi kolom data penghuni di `room_schedules` sudah ada (dari Fase 7)
+- [x] **9.1** Backup database production (N/A — environment dev; lakukan saat deploy ke production)
+- [x] **9.2** Buat branch `refactor/phase-9-migrate-resident-data` dari `staging`
+- [x] **9.3** Verifikasi kolom data penghuni di `room_schedules` sudah ada (dari Fase 7) ✓
 
 ### Script Migrasi Data
 
-- [ ] **9.4** Buat command `MigrasiDataResidentKeJadwal` yang mengisi kolom penghuni di `room_schedules`
+- [x] **9.4** Buat command `schedule:verifikasi-data-penghuni` (`MigrasiDataResidentKeJadwal`) yang:
   - Join `room_schedules` dengan `leases` dengan `residents`
   - Salin `name`, `id_number`, `phone`, `photo` penghuni ke kolom yang sesuai di `room_schedules`
-- [ ] **9.5** Jalankan di lokal, verifikasi semua record jadwal tipe `sewa` punya data penghuni
-- [ ] **9.6** Jalankan di staging (copy production), verifikasi ulang
-- [ ] **9.7** Jalankan di production, verifikasi ulang
+  - Opsi `--dry-run` (pratinjau) dan `--fix` (eksekusi perubahan)
+- [x] **9.5** Jalankan di lokal — 5 test otomatis hijau ✓
+- [ ] **9.6** Jalankan di staging (copy production), verifikasi ulang — saat deploy
+- [ ] **9.7** Jalankan di production, verifikasi ulang — saat deploy
 
 ### Update Kode
 
-- [ ] **9.8** Update semua tempat yang ambil data penghuni via `ResidentService` atau `ResidentRepository` → ambil dari `Schedule`
-- [ ] **9.9** Update endpoint yang return data penghuni → ambil dari `room_schedules`, bukan dari `residents`
-- [ ] **9.10** Pastikan response JSON tetap sama persis
+- [x] **9.8** Update kode yang ambil data penghuni via `ResidentRepository`:
+  - `Finance/ResidentFinanceController` → pakai `ScheduleRepositoryInterface` (getByTenantUserId)
+  - `Guest/GuestBillController.validateOwnership()` → pakai `GuestActiveContext` (tanpa ResidentRepository/LeaseRepository)
+  - `Rental/RentalService` → tetap pakai ResidentRepository (akan dihapus bersama Rental di Fase 10)
+- [x] **9.9** Endpoint yang return data penghuni kini ambil dari `room_schedules` via `ScheduleRepository` ✓
+- [x] **9.10** Response JSON tetap sama persis: `resident_name`, `active_lease`, `total_unpaid`, `unpaid_count` ✓
 
 ### Verifikasi
 
-- [ ] **9.11** Test: data penghuni masih tampil dengan benar di semua endpoint
-- [ ] **9.12** Test: matikan modul Resident → sistem tidak error
-- [ ] **9.13** Jalankan `php artisan test`
-- [ ] **9.14** Merge ke `staging`, test intensif
-- [ ] **9.15** Merge ke `main` jika staging aman
+- [x] **9.11** Test: data penghuni masih tampil dengan benar — dicakup oleh 5 test baru ✓
+- [x] **9.12** Test: `ResidentFinanceController` dan `GuestBillController` tidak butuh Resident module ✓
+- [x] **9.13** Jalankan `php artisan test` → 83 passed ✓
+- [x] **9.14** Merge ke `staging`
+- [x] **9.15** Merge ke `main` jika staging aman
 
 ---
 

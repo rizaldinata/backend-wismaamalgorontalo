@@ -49,6 +49,7 @@ class ScheduleServiceProvider extends ServiceProvider
     {
         $this->commands([
             \Modules\Schedule\Console\Commands\MigrasiDataRentalKeJadwal::class,
+            \Modules\Schedule\Console\Commands\MigrasiDataResidentKeJadwal::class,
         ]);
     }
 
