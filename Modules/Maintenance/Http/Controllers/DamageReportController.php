@@ -37,8 +37,9 @@ class DamageReportController extends Controller
     {
         $report = $this->maintenanceService->getReportById($id);
         
-        // Prevent seeing other resident's report
-        if ($report->resident->user_id !== Auth::id()) {
+        // Verifikasi kepemilikan via reporter_user_id (data baru) atau relasi resident (data lama)
+        $ownerId = $report->reporter_user_id ?? $report->resident?->user_id;
+        if ($ownerId !== Auth::id()) {
             return $this->apiError('Anda tidak memiliki akses ke laporan ini.', 403);
         }
 

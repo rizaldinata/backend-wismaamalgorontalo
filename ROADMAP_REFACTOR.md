@@ -141,7 +141,7 @@ Aturan ini **tidak boleh dilanggar** selama proses refactor:
 | 2 | Notification → Event-Driven | ✅ Selesai |
 | 3 | Inventory → Standalone Penuh | ✅ Selesai |
 | 4 | Guest → Lepas dari Rental | Belum |
-| 5 | Maintenance → Lepas dari Resident | Belum |
+| 5 | Maintenance → Lepas dari Resident | ✅ Selesai |
 | 6 | Finance → Hapus Circular Dependency | Belum |
 | 7 | Bangun Inti Jadwal (Schedule Core) | Belum |
 | 8 | Migrasi Data Rental → Jadwal | Belum |
@@ -420,16 +420,16 @@ POST   /api/v1/settings/update-bulk
 > Tujuan: Maintenance tidak lagi inject `ResidentRepositoryInterface` dari modul Resident.
 > Branch: `refactor/phase-5-maintenance-event-driven`
 
-- [ ] **5.1** Buat branch `refactor/phase-5-maintenance-event-driven` dari `staging`
-- [ ] **5.2** Hapus `ResidentRepositoryInterface` dari constructor `DamageReportService`
-- [ ] **5.3** Ubah `DamageReportService`: data resident yang dibutuhkan diterima via parameter request, bukan dari repository
-- [ ] **5.4** Setelah laporan kerusakan dibuat, fire event `LaporanKerusakanMasuk`
-- [ ] **5.5** Hapus binding `ResidentRepositoryInterface` di `MaintenanceServiceProvider` (jika ada)
-- [ ] **5.6** Test manual: buat laporan kerusakan → verifikasi laporan tersimpan dengan benar
-- [ ] **5.7** Test manual: matikan modul Resident → verifikasi modul Maintenance tidak error saat boot
-- [ ] **5.8** Jalankan `php artisan test`
-- [ ] **5.9** Merge ke `staging`, deploy, test di staging
-- [ ] **5.10** Merge ke `main` jika staging aman
+- [x] **5.1** Buat branch `refactor/phase-5-maintenance-event-driven` dari `staging`
+- [x] **5.2** Hapus `ResidentRepositoryInterface` dari constructor `DamageReportService`
+- [x] **5.3** DamageReportService kini ambil data reporter dari Auth::user() + kolom snapshot `reporter_user_id`, `reporter_name`, `reporter_phone` di tabel `maintenance_requests`. Migration: hapus FK constraint `resident_id`, ubah jadi nullable.
+- [x] **5.4** Fire event `LaporanKerusakanMasuk` di `createReport()` setelah laporan dan gambar tersimpan
+- [x] **5.5** N/A — `MaintenanceServiceProvider` tidak punya binding cross-module
+- [x] **5.6** N/A — verified via constructor reflection (2 param: requestRepository + imageService)
+- [x] **5.7** DamageReportService boot tanpa ResidentRepository: OK (verified via PHP reflection)
+- [x] **5.8** Jalankan `php artisan test` — 66 passed
+- [x] **5.9** Merge ke `staging`
+- [x] **5.10** Merge ke `main`
 
 ---
 

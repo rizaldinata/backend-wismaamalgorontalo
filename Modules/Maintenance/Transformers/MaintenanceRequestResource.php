@@ -12,9 +12,9 @@ class MaintenanceRequestResource extends JsonResource
         return [
             'id' => $this->id,
             'resident' => [
-                'id' => $this->resident->id ?? null,
-                'name' => $this->resident->user->name ?? 'Unknown',
-                'phone' => $this->resident->phone_number ?? null,
+                'id'    => $this->reporter_user_id ?? $this->resident_id,
+                'name'  => $this->reporter_name ?? $this->resident?->user?->name ?? 'Unknown',
+                'phone' => $this->reporter_phone ?? $this->resident?->phone_number ?? null,
             ],
             'room' => $this->room ? [
                 'id' => $this->room->id,
