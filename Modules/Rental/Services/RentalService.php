@@ -2,8 +2,8 @@
 
 namespace Modules\Rental\Services;
 
+use App\Events\Jadwal\JadwalDibuat;
 use Carbon\Carbon;
-use Modules\Finance\Services\FinanceService;
 use Modules\Rental\Enums\LeaseStatus;
 use Modules\Rental\Enums\RentalType;
 use Modules\Rental\Events\LeaseEnded;
@@ -57,8 +57,19 @@ class RentalService
         $pricePerUnit = $this->roomAvailabilityService->getPrice($data['room_id'], $rentalType);
         $totalAmount = $pricePerUnit * $data['duration'];
 
-        $financeService = app(FinanceService::class);
-        $financeService->generateInvoiceForLease($lease->id, $totalAmount, $startDate);
+        // Buat invoice via event — Finance listener mendengarkan JadwalDibuat
+        $lease->loadMissing('room');
+        JadwalDibuat::dispatch(
+            scheduleId: $lease->id,
+            roomId:     $lease->room_id,
+            roomNumber: $lease->room?->number ?? '',
+            tipeJadwal: 'sewa',
+            startDate:  $startDate->toDateString(),
+            endDate:    $endDate->toDateString(),
+            tenantName: $resident->user?->name ?? '',
+            tenantPhone: $resident->phone_number ?? '',
+            agreedPrice: $totalAmount,
+        );
 
         return $lease->load(['room', 'latestInvoice']);
     }
@@ -162,8 +173,19 @@ class RentalService
         $pricePerUnit = $this->roomAvailabilityService->getPrice($oldLease->room_id, RentalType::MONTHLY);
         $totalAmount = $pricePerUnit * $durationMonths;
 
-        $financeService = app(FinanceService::class);
-        $financeService->generateInvoiceForLease($newLease->id, $totalAmount, $newStartDate);
+        // Fire event (jalur baru)
+        $newLease->loadMissing('room');
+        JadwalDibuat::dispatch(
+            scheduleId: $newLease->id,
+            roomId:     $newLease->room_id,
+            roomNumber: $newLease->room?->number ?? '',
+            tipeJadwal: 'sewa',
+            startDate:  $newStartDate->toDateString(),
+            endDate:    $newEndDate->toDateString(),
+            tenantName: $resident->user?->name ?? '',
+            tenantPhone: $resident->phone_number ?? '',
+            agreedPrice: $totalAmount,
+        );
 
         return $newLease->load('room');
     }

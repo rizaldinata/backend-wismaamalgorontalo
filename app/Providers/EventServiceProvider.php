@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Events\Finance\PembayaranDibatalkan;
 use App\Events\Finance\PembayaranDiterima;
 use App\Events\Finance\PembayaranDiverifikasi;
 use App\Events\Inventory\InventariBaru;
@@ -20,6 +21,7 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         JadwalDibuat::class => [
             \Modules\Notification\Listeners\KirimNotifikasiJadwalDibuat::class,
+            \Modules\Finance\Listeners\BuatInvoiceSetelahJadwalDibuat::class,
         ],
         JadwalSewaAktif::class => [
             \Modules\Notification\Listeners\KirimNotifikasiJadwalSewaAktif::class,
@@ -36,9 +38,14 @@ class EventServiceProvider extends ServiceProvider
         StatusKamarBerubah::class => [],
         PembayaranDiterima::class => [
             \Modules\Notification\Listeners\KirimNotifikasiPembayaranDiterima::class,
+            \Modules\Rental\Listeners\AktifkanLeaseSetelahPembayaranDiterima::class,
         ],
         PembayaranDiverifikasi::class => [
             \Modules\Notification\Listeners\SendWhatsAppReceipt::class,
+            \Modules\Rental\Listeners\AktifkanLeaseSetelahPembayaranDiverifikasi::class,
+        ],
+        PembayaranDibatalkan::class => [
+            \Modules\Rental\Listeners\BatalkanLeaseSetelahPembayaranDibatalkan::class,
         ],
         LaporanKerusakanMasuk::class => [],
 
