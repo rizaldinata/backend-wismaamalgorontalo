@@ -24,6 +24,10 @@ class InvoiceRepository implements InvoiceRepositoryInterface
             });
         }
 
+        if (!empty($filters['schedule_ids'])) {
+            $query->whereIn('schedule_id', $filters['schedule_ids']);
+        }
+
         return $query->paginate($perPage);
     }
     public function findById(int $id): ?Invoice

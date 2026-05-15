@@ -9,12 +9,11 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Modules\Guest\Http\Requests\PayGuestBillRequest;
+use Modules\Guest\Models\Guest;
+use Modules\Guest\Models\GuestActiveContext;
 use Modules\Guest\Repositories\Contracts\GuestBillRepositoryInterface;
 use Modules\Guest\Services\GuestBillingService;
 use Modules\Guest\Transformers\GuestBillResource;
-use Modules\Rental\Repositories\Contracts\LeaseRepositoryInterface;
-use Modules\Rental\Enums\LeaseStatus;
-use Modules\Resident\Repositories\Contracts\ResidentRepositoryInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -25,17 +24,11 @@ class GuestBillController extends Controller
     public function __construct(
         private readonly GuestBillingService $billingService,
         private readonly GuestBillRepositoryInterface $billRepository,
-        private readonly ResidentRepositoryInterface $residentRepository,
-        private readonly LeaseRepositoryInterface $leaseRepository,
     ) {}
 
-    /**
-     * Get the bill for a specific guest (validates ownership).
-     */
     public function show(int $guestId)
     {
         try {
-            // Validate ownership first
             $this->validateOwnership($guestId);
 
             $bill = $this->billRepository->findByGuestId($guestId);
@@ -52,9 +45,6 @@ class GuestBillController extends Controller
         }
     }
 
-    /**
-     * Process payment for a guest bill.
-     */
     public function pay(PayGuestBillRequest $request, int $guestId)
     {
         try {
@@ -79,9 +69,6 @@ class GuestBillController extends Controller
         }
     }
 
-    /**
-     * Handle Midtrans webhook notification (no auth required).
-     */
     public function midtransNotification(Request $request)
     {
         try {
@@ -93,29 +80,24 @@ class GuestBillController extends Controller
         }
     }
 
-    /**
-     * Validate that the authenticated user owns the guest record.
-     */
     private function validateOwnership(int $guestId): void
     {
-        $userId   = Auth::id();
-        $resident = $this->residentRepository->findByUserId($userId);
+        $userId  = Auth::id();
+        $context = GuestActiveContext::where('user_id', $userId)
+            ->where('is_active', true)
+            ->first();
 
-        if (!$resident) {
-            throw new HttpException(403, 'Anda belum melengkapi biodata penghuni.');
-        }
-
-        $lease = $this->leaseRepository->getByResidentId($resident->id)
-            ->firstWhere('status', LeaseStatus::ACTIVE);
-
-        if (!$lease) {
+        if (!$context) {
             throw new HttpException(403, 'Anda tidak memiliki sewa aktif.');
         }
 
-        // Check that the guest belongs to this lease
-        $guest = \Modules\Guest\Models\Guest::find($guestId);
+        $guest = Guest::find($guestId);
 
-        if (!$guest || $guest->lease_id !== $lease->id) {
+        // Support both legacy (lease_id) and new (schedule_reference_id) linkage
+        $belongsToUser = ($context->schedule_id && $guest?->schedule_reference_id === $context->schedule_id)
+            || ($context->lease_id && $guest?->lease_id === $context->lease_id);
+
+        if (!$guest || !$belongsToUser) {
             throw new HttpException(403, 'Anda tidak memiliki akses ke data tamu ini.');
         }
     }

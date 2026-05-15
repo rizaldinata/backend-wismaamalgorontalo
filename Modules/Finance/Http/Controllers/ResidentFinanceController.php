@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
 use Modules\Finance\Transformers\InvoiceResource;
 use Modules\Finance\Transformers\PaymentResource;
-use Modules\Resident\Repositories\Contracts\ResidentRepositoryInterface;
-use Modules\Rental\Repositories\Contracts\LeaseRepositoryInterface;
+use Modules\Schedule\Enums\ScheduleStatus;
+use Modules\Schedule\Repositories\Contracts\ScheduleRepositoryInterface;
 
 class ResidentFinanceController extends Controller
 {
@@ -20,79 +21,93 @@ class ResidentFinanceController extends Controller
     public function __construct(
         private readonly InvoiceRepositoryInterface $invoiceRepository,
         private readonly PaymentRepositoryInterface $paymentRepository,
-        private readonly ResidentRepositoryInterface $residentRepository,
-        private readonly LeaseRepositoryInterface $leaseRepository
+        private readonly ScheduleRepositoryInterface $scheduleRepository,
     ) {}
 
-    /**
-     * Get financial summary for the logged-in resident.
-     */
     public function summary()
     {
-        $resident = $this->residentRepository->findByUserId(Auth::id());
-        
-        if (!$resident) {
-            return $this->apiError('Data penghuni tidak ditemukan. Pastikan Anda sudah melengkapi profil.', 404);
+        $userId    = Auth::id();
+        $schedules = collect($this->scheduleRepository->getByTenantUserId($userId));
+
+        if ($schedules->isEmpty()) {
+            return $this->apiSuccess([
+                'resident_name' => Auth::user()->name,
+                'active_lease'  => null,
+                'total_unpaid'  => 0.0,
+                'unpaid_count'  => 0,
+            ], 'Ringkasan keuangan berhasil diambil');
         }
 
-        $activeLease = $resident->active_lease;
-        
-        // Get all unpaid invoices for this resident
+        $scheduleIds    = $schedules->pluck('id')->toArray();
+        $activeSchedule = $schedules->first(fn ($s) => $s->status === ScheduleStatus::ACTIVE);
+
         $unpaidInvoices = $this->invoiceRepository->getPaginated(100, [
-            'resident_id' => $resident->id,
-            'status' => 'unpaid'
+            'schedule_ids' => $scheduleIds,
+            'status'       => 'unpaid',
         ]);
 
         $totalUnpaid = collect($unpaidInvoices->items())->sum('amount');
-        
+
+        $activeLease = null;
+        if ($activeSchedule) {
+            $rentalType = 'monthly';
+            if ($activeSchedule->legacy_lease_id) {
+                $rentalType = DB::table('leases')
+                    ->where('id', $activeSchedule->legacy_lease_id)
+                    ->value('rental_type') ?? 'monthly';
+            }
+
+            $room = DB::table('rooms')->where('id', $activeSchedule->room_id)->first();
+
+            $activeLease = [
+                'id'          => $activeSchedule->id,
+                'room_number' => $room?->number ?? '-',
+                'end_date'    => $activeSchedule->end_date->format('Y-m-d'),
+                'rental_type' => $rentalType,
+            ];
+        }
+
         return $this->apiSuccess([
-            'resident_name' => $resident->user->name ?? null,
-            'active_lease' => $activeLease ? [
-                'id' => $activeLease->id,
-                'room_number' => $activeLease->room->room_number ?? '-',
-                'end_date' => $activeLease->end_date->format('Y-m-d'),
-                'rental_type' => is_object($activeLease->rental_type) ? $activeLease->rental_type->value : $activeLease->rental_type,
-            ] : null,
-            'total_unpaid' => (float) $totalUnpaid,
-            'unpaid_count' => $unpaidInvoices->total(),
+            'resident_name' => Auth::user()->name,
+            'active_lease'  => $activeLease,
+            'total_unpaid'  => (float) $totalUnpaid,
+            'unpaid_count'  => $unpaidInvoices->total(),
         ], 'Ringkasan keuangan berhasil diambil');
     }
 
-    /**
-     * Get paginated invoices for the logged-in resident.
-     */
     public function invoices(Request $request)
     {
-        $resident = $this->residentRepository->findByUserId(Auth::id());
-        if (!$resident) {
+        $userId      = Auth::id();
+        $scheduleIds = collect($this->scheduleRepository->getByTenantUserId($userId))
+            ->pluck('id')
+            ->toArray();
+
+        if (empty($scheduleIds)) {
             return $this->apiError('Data penghuni tidak ditemukan.', 404);
         }
 
         $perPage = (int) $request->query('per_page', 15);
         $filters = $request->only(['status']);
-        $filters['resident_id'] = $resident->id;
+        $filters['schedule_ids'] = $scheduleIds;
 
         $invoices = $this->invoiceRepository->getPaginated($perPage, $filters);
 
         return InvoiceResource::collection($invoices)->additional([
             'success' => true,
-            'message' => 'Daftar tagihan Anda berhasil diambil'
+            'message' => 'Daftar tagihan Anda berhasil diambil',
         ]);
     }
 
-    /**
-     * Get a single invoice by ID, verified to belong to the logged-in resident.
-     */
     public function showInvoice(int $id)
     {
-        $resident = $this->residentRepository->findByUserId(Auth::id());
-        if (!$resident) {
-            return $this->apiError('Data penghuni tidak ditemukan.', 404);
-        }
+        $userId      = Auth::id();
+        $scheduleIds = collect($this->scheduleRepository->getByTenantUserId($userId))
+            ->pluck('id')
+            ->toArray();
 
         $invoice = $this->invoiceRepository->findById($id);
 
-        if (!$invoice || $invoice->lease->resident_id !== $resident->id) {
+        if (!$invoice || !in_array($invoice->schedule_id, $scheduleIds)) {
             return $this->apiError('Invoice tidak ditemukan.', 404);
         }
 
@@ -102,25 +117,26 @@ class ResidentFinanceController extends Controller
         ]);
     }
 
-    /**
-     * Get paginated payment history for the logged-in resident.
-     */
     public function payments(Request $request)
     {
-        $resident = $this->residentRepository->findByUserId(Auth::id());
-        if (!$resident) {
+        $userId      = Auth::id();
+        $scheduleIds = collect($this->scheduleRepository->getByTenantUserId($userId))
+            ->pluck('id')
+            ->toArray();
+
+        if (empty($scheduleIds)) {
             return $this->apiError('Data penghuni tidak ditemukan.', 404);
         }
 
         $perPage = (int) $request->query('per_page', 15);
         $filters = $request->only(['status', 'payment_method']);
-        $filters['resident_id'] = $resident->id;
+        $filters['schedule_ids'] = $scheduleIds;
 
         $payments = $this->paymentRepository->getPaginated($perPage, $filters);
 
         return PaymentResource::collection($payments)->additional([
             'success' => true,
-            'message' => 'Riwayat pembayaran Anda berhasil diambil'
+            'message' => 'Riwayat pembayaran Anda berhasil diambil',
         ]);
     }
 }

@@ -28,6 +28,12 @@ class PaymentRepository implements PaymentRepositoryInterface
             });
         }
 
+        if (!empty($filters['schedule_ids'])) {
+            $query->whereHas('invoice', function ($q) use ($filters) {
+                $q->whereIn('schedule_id', $filters['schedule_ids']);
+            });
+        }
+
         return $query->paginate($perPage);
     }
     public function findOrFail(int $id): Payment
