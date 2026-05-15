@@ -2,35 +2,29 @@
 
 namespace Modules\Maintenance\Services;
 
-use Carbon\Carbon;
+use App\Events\Maintenance\LaporanKerusakanMasuk;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use Modules\Maintenance\Enums\MaintenanceStatus;
 use Modules\Maintenance\Models\MaintenanceRequest;
 use Modules\Maintenance\Repositories\Contracts\DamageReportRepositoryInterface;
-use Modules\Resident\Repositories\Contracts\ResidentRepositoryInterface;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class DamageReportService
 {
     public function __construct(
         private readonly DamageReportRepositoryInterface $requestRepository,
-        private readonly ResidentRepositoryInterface $residentRepository,
         private readonly \App\Services\ImageService $imageService
     ) {}
 
     public function createReport(int $userId, array $data, array $images = []): MaintenanceRequest
     {
-        $resident = $this->residentRepository->findByUserId($userId);
+        $user = Auth::user() ?? \Modules\Auth\Models\User::find($userId);
 
-        if (!$resident) {
-            throw new HttpException(403, 'Hanya penghuni yang dapat membuat laporan kerusakan.');
-        }
-
-        $data['resident_id'] = $resident->id;
-        $data['status'] = MaintenanceStatus::PENDING->value;
-        $data['reported_at'] = now();
+        $data['reporter_user_id'] = $userId;
+        $data['reporter_name']    = $user?->name ?? 'Unknown';
+        $data['reporter_phone']   = $data['reporter_phone'] ?? null;
+        $data['status']           = MaintenanceStatus::PENDING->value;
+        $data['reported_at']      = now();
 
         $request = $this->requestRepository->createRequest($data);
 
@@ -39,25 +33,30 @@ class DamageReportService
             $this->requestRepository->addRequestImages($request, $imagePaths);
         }
 
-        return $request->load('images');
+        $request->load(['images', 'room']);
+
+        LaporanKerusakanMasuk::dispatch(
+            reportId:     $request->id,
+            reporterName: $request->reporter_name,
+            reporterPhone: $request->reporter_phone ?? '',
+            description:  $request->description,
+            roomId:       $request->room_id,
+            roomNumber:   $request->room?->number,
+        );
+
+        return $request;
     }
 
     public function getResidentReports(int $userId)
     {
-        $resident = $this->residentRepository->findByUserId($userId);
-
-        if (!$resident) {
-            return collect([]);
-        }
-
-        return $this->requestRepository->getByResidentId($resident->id);
+        return $this->requestRepository->getByUserId($userId);
     }
-    
+
     public function getAllReports()
     {
         return $this->requestRepository->getAll();
     }
-    
+
     public function getReportById(int $id)
     {
         return $this->requestRepository->findById($id);
@@ -66,11 +65,11 @@ class DamageReportService
     public function addUpdate(int $adminUserId, int $requestId, array $data, array $images = [])
     {
         $request = $this->requestRepository->findById($requestId);
-        
+
         $updateData = [
-            'user_id' => $adminUserId,
+            'user_id'     => $adminUserId,
             'description' => $data['description'],
-            'status' => $data['status'] ?? null,
+            'status'      => $data['status'] ?? null,
         ];
 
         $update = $this->requestRepository->addUpdate($request, $updateData);
@@ -92,7 +91,6 @@ class DamageReportService
         $paths = [];
         foreach ($images as $image) {
             if ($image instanceof UploadedFile) {
-                // Menggunakan global ImageService untuk compress & convert ke WebP
                 $paths[] = $this->imageService->uploadAndCompress($image, $folder);
             }
         }

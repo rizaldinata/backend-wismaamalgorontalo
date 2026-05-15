@@ -10,6 +10,7 @@ interface DamageReportRepositoryInterface
 {
     public function createRequest(array $data): \Modules\Maintenance\Models\MaintenanceRequest;
     public function getByResidentId(int $residentId);
+    public function getByUserId(int $userId);
     public function getAll();
     public function findById(int $id);
     public function addRequestImages(\Modules\Maintenance\Models\MaintenanceRequest $request, array $imagePaths);
