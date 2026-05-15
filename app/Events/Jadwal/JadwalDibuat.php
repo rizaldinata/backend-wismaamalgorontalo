@@ -19,5 +19,6 @@ class JadwalDibuat
         public readonly ?string $tenantName = null,
         public readonly ?string $tenantPhone = null,
         public readonly ?float $agreedPrice = null,
+        public readonly string $source = 'lease', // 'lease' | 'schedule'
     ) {}
 }

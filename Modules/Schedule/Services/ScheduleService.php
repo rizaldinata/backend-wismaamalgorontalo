@@ -45,6 +45,7 @@ class ScheduleService
             tenantName:  $schedule->tenant_name ?? '',
             tenantPhone: $schedule->tenant_phone ?? '',
             agreedPrice: $schedule->agreed_price ? (float) $schedule->agreed_price : null,
+            source:      'schedule',
         ));
 
         return $schedule;

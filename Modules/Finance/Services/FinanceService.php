@@ -73,12 +73,15 @@ class FinanceService
             if ($isApproved) {
                 $this->invoiceRepository->updateStatus($payment->invoice, InvoiceStatus::PAID->value);
 
-                $invoice = $payment->invoice->loadMissing('lease.room', 'lease.resident.user');
-                $lease   = $invoice->lease;
+                $invoice    = $payment->invoice->loadMissing('lease.room', 'lease.resident.user');
+                $lease      = $invoice->lease;
+                // Dukung dua jalur: lama (lease_id) dan baru (schedule_id)
+                $scheduleId = $invoice->lease_id ?? $invoice->schedule_id ?? 0;
+
                 event(new PembayaranDiverifikasi(
                     paymentId:     $payment->id,
                     invoiceId:     $invoice->id,
-                    scheduleId:    $invoice->lease_id,
+                    scheduleId:    $scheduleId,
                     amount:        (float) $invoice->amount,
                     tenantName:    $lease->resident?->user?->name ?? '',
                     tenantPhone:   $lease->resident?->phone_number ?? '',
@@ -92,10 +95,11 @@ class FinanceService
                 event(new PaymentSettled($payment));
             } else {
                 // Tolak pembayaran → batalkan lease dan bebaskan kamar
+                $scheduleId = $payment->invoice->lease_id ?? $payment->invoice->schedule_id ?? 0;
                 event(new PembayaranDibatalkan(
                     paymentId:  $payment->id,
                     invoiceId:  $payment->invoice->id,
-                    scheduleId: $payment->invoice->lease_id,
+                    scheduleId: $scheduleId,
                 ));
             }
 
