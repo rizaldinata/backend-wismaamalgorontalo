@@ -23,20 +23,21 @@ class BuatInvoiceSetelahJadwalDibuat
         if ($event->agreedPrice === null || $event->agreedPrice <= 0) {
             Log::warning('BuatInvoiceSetelahJadwalDibuat: agreedPrice tidak tersedia, invoice tidak dibuat.', [
                 'schedule_id' => $event->scheduleId,
-                'source'      => $event->source,
+                'source' => $event->source,
             ]);
+
             return;
         }
 
-        $invoiceNumber = 'INV-' . date('Ymd') . '-' . str_pad($event->scheduleId, 4, '0', STR_PAD_LEFT);
+        $invoiceNumber = 'INV-'.date('Ymd').'-'.str_pad($event->scheduleId, 4, '0', STR_PAD_LEFT);
 
         // Jalur baru (ScheduleService): simpan ke schedule_id; lease_id dibiarkan null
         // Jalur lama (RentalService):   simpan ke lease_id; schedule_id dibiarkan null
         $invoiceData = [
             'invoice_number' => $invoiceNumber,
-            'amount'         => $event->agreedPrice,
-            'status'         => InvoiceStatus::UNPAID->value,
-            'due_date'       => Carbon::parse($event->startDate),
+            'amount' => $event->agreedPrice,
+            'status' => InvoiceStatus::UNPAID->value,
+            'due_date' => Carbon::parse($event->startDate),
         ];
 
         if ($event->source === 'schedule') {
@@ -48,8 +49,8 @@ class BuatInvoiceSetelahJadwalDibuat
         $this->invoiceRepository->create($invoiceData);
 
         Log::info('Invoice dibuat via event JadwalDibuat', [
-            'schedule_id'    => $event->scheduleId,
-            'source'         => $event->source,
+            'schedule_id' => $event->scheduleId,
+            'source' => $event->source,
             'invoice_number' => $invoiceNumber,
         ]);
     }

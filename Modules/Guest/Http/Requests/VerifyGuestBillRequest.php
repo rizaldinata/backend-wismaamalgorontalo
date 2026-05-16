@@ -23,8 +23,8 @@ class VerifyGuestBillRequest extends FormRequest
     {
         return [
             'is_approved.required' => 'Status verifikasi wajib diisi.',
-            'is_approved.boolean'  => 'Status verifikasi harus bernilai true atau false.',
-            'admin_notes.max'      => 'Catatan admin maksimal 500 karakter.',
+            'is_approved.boolean' => 'Status verifikasi harus bernilai true atau false.',
+            'admin_notes.max' => 'Catatan admin maksimal 500 karakter.',
         ];
     }
 }

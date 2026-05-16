@@ -4,8 +4,8 @@ namespace Modules\Setting\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Modules\Setting\Services\SettingService;
 
 class SettingController extends Controller
@@ -32,12 +32,12 @@ class SettingController extends Controller
     public function updateBulk(Request $request): JsonResponse
     {
         $validator = $request->validate([
-            'settings'                              => 'required|array',
-            'settings.wisma_name'                   => 'nullable|string|max:100',
-            'settings.feature_daily_rental'         => 'nullable|boolean',
-            'settings.feature_whatsapp_receipt'     => 'nullable|boolean',
-            'settings.feature_whatsapp_pdf_link'    => 'nullable|boolean',
-            'settings.feature_payment_midtrans'     => 'nullable|boolean',
+            'settings' => 'required|array',
+            'settings.wisma_name' => 'nullable|string|max:100',
+            'settings.feature_daily_rental' => 'nullable|boolean',
+            'settings.feature_whatsapp_receipt' => 'nullable|boolean',
+            'settings.feature_whatsapp_pdf_link' => 'nullable|boolean',
+            'settings.feature_payment_midtrans' => 'nullable|boolean',
         ]);
 
         $settingsToSave = $validator['settings'];

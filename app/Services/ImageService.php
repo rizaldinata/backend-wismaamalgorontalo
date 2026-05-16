@@ -4,8 +4,8 @@ namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class ImageService
 {
@@ -21,13 +21,15 @@ class ImageService
         }
 
         try {
-            if (!extension_loaded('gd')) {
+            if (! extension_loaded('gd')) {
                 return null;
             }
-            $this->manager = new ImageManager(new Driver());
+            $this->manager = new ImageManager(new Driver);
+
             return $this->manager;
         } catch (\Exception $e) {
-            \Log::warning('ImageService: Gagal menginisialisasi driver gambar. ' . $e->getMessage());
+            \Log::warning('ImageService: Gagal menginisialisasi driver gambar. '.$e->getMessage());
+
             return null;
         }
     }
@@ -37,23 +39,23 @@ class ImageService
      */
     public function uploadAndCompress(UploadedFile $file, string $folder, int $width = 1200, int $quality = 75): string
     {
-        $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '_' . uniqid() . '.webp';
+        $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME).'_'.uniqid().'.webp';
         $path = "$folder/$filename";
 
         // Create directory if not exists
-        if (!Storage::disk('public')->exists($folder)) {
+        if (! Storage::disk('public')->exists($folder)) {
             Storage::disk('public')->makeDirectory($folder);
         }
 
         try {
             $manager = $this->getManager();
-            
-            if (!$manager) {
+
+            if (! $manager) {
                 return $file->store($folder, 'public');
             }
 
             $image = $manager->read($file);
-            
+
             // Resize if wider than max width
             $image->scaleDown(width: $width);
 
@@ -62,7 +64,8 @@ class ImageService
 
             Storage::disk('public')->put($path, (string) $encoded);
         } catch (\Exception $e) {
-            \Log::error('ImageService: Gagal memproses gambar. ' . $e->getMessage());
+            \Log::error('ImageService: Gagal memproses gambar. '.$e->getMessage());
+
             // Fallback to original if processing fails
             return $file->store($folder, 'public');
         }
@@ -75,17 +78,17 @@ class ImageService
      */
     public function createThumbnail(UploadedFile $file, string $folder, int $size = 300, int $quality = 70): string
     {
-        $filename = 'thumb_' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '_' . uniqid() . '.webp';
+        $filename = 'thumb_'.pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME).'_'.uniqid().'.webp';
         $path = "$folder/$filename";
 
-        if (!Storage::disk('public')->exists($folder)) {
+        if (! Storage::disk('public')->exists($folder)) {
             Storage::disk('public')->makeDirectory($folder);
         }
 
         try {
             $manager = $this->getManager();
 
-            if (!$manager) {
+            if (! $manager) {
                 // If failed, just use original file but as thumbnail
                 return $file->store($folder, 'public');
             }
@@ -96,7 +99,8 @@ class ImageService
 
             Storage::disk('public')->put($path, (string) $encoded);
         } catch (\Exception $e) {
-            \Log::error('ImageService: Gagal memproses thumbnail. ' . $e->getMessage());
+            \Log::error('ImageService: Gagal memproses thumbnail. '.$e->getMessage());
+
             // If failed, just use original file
             return $file->store($folder, 'public');
         }

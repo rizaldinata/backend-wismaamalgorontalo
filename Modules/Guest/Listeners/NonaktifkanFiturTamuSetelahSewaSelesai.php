@@ -10,10 +10,11 @@ class NonaktifkanFiturTamuSetelahSewaSelesai
 {
     public function handle(JadwalSewaSelesai $event): void
     {
-        if (!$event->userId) {
+        if (! $event->userId) {
             Log::warning('NonaktifkanFiturTamu: event tanpa userId, dilewati.', [
                 'schedule_id' => $event->scheduleId,
             ]);
+
             return;
         }
 

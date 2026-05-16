@@ -23,6 +23,7 @@ class InventoryController extends Controller
     public function index()
     {
         $inventories = $this->inventoryRepository->getAll();
+
         return $this->apiSuccess(InventoryResource::collection($inventories), 'Data inventory berhasil diambil');
     }
 
@@ -41,7 +42,7 @@ class InventoryController extends Controller
     {
         $inventory = $this->inventoryRepository->findById($id);
 
-        if (!$inventory) {
+        if (! $inventory) {
             throw new NotFoundHttpException('Data barang tidak ditemukan');
         }
 
@@ -52,7 +53,7 @@ class InventoryController extends Controller
     {
         $inventory = $this->inventoryRepository->findById($id);
 
-        if (!$inventory) {
+        if (! $inventory) {
             throw new NotFoundHttpException('Data barang tidak ditemukan');
         }
 
@@ -68,7 +69,7 @@ class InventoryController extends Controller
     {
         $inventory = $this->inventoryRepository->findById($id);
 
-        if (!$inventory) {
+        if (! $inventory) {
             throw new NotFoundHttpException('Data barang tidak ditemukan');
         }
 

@@ -27,11 +27,11 @@ class KirimNotifikasiPembayaranDiterima implements ShouldQueue
         $amount = number_format($event->amount, 0, ',', '.');
 
         $message = "*PEMBAYARAN DITERIMA*\n"
-            . "Wisma Amal Gorontalo\n\n"
-            . "Yth. Bpk/Ibu {$event->tenantName},\n\n"
-            . "Pembayaran sebesar *Rp{$amount}* telah kami terima dan sedang diverifikasi oleh admin.\n\n"
-            . "Anda akan mendapat konfirmasi kembali setelah proses verifikasi selesai.\n\n"
-            . "Hormat kami,\n*Manajemen Wisma Amal Gorontalo*";
+            ."Wisma Amal Gorontalo\n\n"
+            ."Yth. Bpk/Ibu {$event->tenantName},\n\n"
+            ."Pembayaran sebesar *Rp{$amount}* telah kami terima dan sedang diverifikasi oleh admin.\n\n"
+            ."Anda akan mendapat konfirmasi kembali setelah proses verifikasi selesai.\n\n"
+            ."Hormat kami,\n*Manajemen Wisma Amal Gorontalo*";
 
         $this->notificationService->sendNotification(
             NotificationType::PEMBAYARAN_DITERIMA,

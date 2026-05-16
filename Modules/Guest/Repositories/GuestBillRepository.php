@@ -39,7 +39,7 @@ class GuestBillRepository implements GuestBillRepositoryInterface
     public function getAllPaginated(array $filters): LengthAwarePaginator
     {
         $perPage = (int) ($filters['per_page'] ?? 10);
-        $search  = $filters['search'] ?? null;
+        $search = $filters['search'] ?? null;
 
         $query = GuestBill::with([
             'guest.lease.resident.user',

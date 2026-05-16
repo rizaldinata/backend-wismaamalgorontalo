@@ -15,14 +15,15 @@ class InvoiceController extends Controller
     use ApiResponse;
 
     public function __construct(
-        private readonly InvoiceRepositoryInterface $invoiceRepository
+        private readonly InvoiceRepositoryInterface $invoiceRepository,
+        private readonly SettingService $settingService,
     ) {}
 
     public function index(Request $request)
     {
         $request->validate([
             'per_page' => 'nullable|integer|min:1|max:200',
-            'status' => 'nullable|string'
+            'status' => 'nullable|string',
         ]);
 
         $perPage = (int) $request->query('per_page', 200);
@@ -32,7 +33,7 @@ class InvoiceController extends Controller
 
         return InvoiceResource::collection($invoices)->additional([
             'success' => true,
-            'message' => 'Daftar tagihan berhasil diambil'
+            'message' => 'Daftar tagihan berhasil diambil',
         ]);
     }
 
@@ -40,14 +41,14 @@ class InvoiceController extends Controller
     {
         $invoice = $this->invoiceRepository->findById($id);
 
-        if (!$invoice) {
+        if (! $invoice) {
             return response()->json([
                 'success' => false,
-                'message' => 'Tagihan tidak ditemukan'
+                'message' => 'Tagihan tidak ditemukan',
             ], 404);
         }
 
-        $invoice->load(['lease.resident.user', 'lease.room', 'payments']);
+        $invoice->load(['schedule.room', 'payments']);
 
         return $this->apiSuccess(new InvoiceResource($invoice), 'Detail tagihan berhasil diambil');
     }
@@ -56,7 +57,7 @@ class InvoiceController extends Controller
     {
         $invoice = $this->invoiceRepository->findById($id);
 
-        if (!$invoice) {
+        if (! $invoice) {
             return response()->json(['success' => false, 'message' => 'Tagihan tidak ditemukan'], 404);
         }
 
@@ -72,12 +73,13 @@ class InvoiceController extends Controller
     public function printPdf(int $id)
     {
         $invoice = $this->invoiceRepository->findById($id);
-        if (!$invoice) abort(404);
+        if (! $invoice) {
+            abort(404);
+        }
 
-        $invoice->load(['lease.resident.user', 'lease.room', 'payments']);
+        $invoice->load(['schedule.room', 'payments']);
 
-        $settingService = app(SettingService::class);
-        $wismaName = $settingService->getSettingValue('wisma_name', 'Wisma Amal Gorontalo');
+        $wismaName = $this->settingService->getSettingValue('wisma_name', 'Wisma Amal Gorontalo');
 
         $statusValue = is_object($invoice->status) ? $invoice->status->value : $invoice->status;
         $isPaid = strtolower($statusValue) === 'paid';

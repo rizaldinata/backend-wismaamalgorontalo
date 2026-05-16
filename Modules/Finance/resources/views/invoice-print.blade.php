@@ -92,15 +92,15 @@
             <div class="info-block">
                 <h4>Ditagihkan Kepada</h4>
                 <p>
-                    <strong>{{ $invoice->lease->resident->user->name ?? 'Penyewa' }}</strong><br>
-                    No HP: {{ $invoice->lease->resident->phone_number ?? '-' }}
+                    <strong>{{ $invoice->schedule->tenant_name ?? 'Penyewa' }}</strong><br>
+                    No HP: {{ $invoice->schedule->tenant_phone ?? '-' }}
                 </p>
             </div>
             <div class="info-block">
                 <h4>Detail Kamar</h4>
                 <p>
-                    <strong>Kamar {{ $invoice->lease->room->room_number ?? '-' }}</strong><br>
-                    {{ $invoice->lease->room->title ?? '' }}
+                    <strong>Kamar {{ $invoice->schedule->room->number ?? '-' }}</strong><br>
+                    {{ $invoice->schedule->room->title ?? '' }}
                 </p>
             </div>
             <div class="info-block" style="text-align:right">
@@ -128,10 +128,10 @@
             <tbody>
                 <tr>
                     <td>
-                        Sewa Kamar {{ $invoice->lease->room->room_number ?? '' }}<br>
+                        Sewa Kamar {{ $invoice->schedule->room->number ?? '' }}<br>
                         <span style="font-size:11px;color:#6b7280;">
-                            Periode: {{ \Carbon\Carbon::parse($invoice->lease->start_date)->format('d M Y') }}
-                            – {{ \Carbon\Carbon::parse($invoice->lease->end_date)->format('d M Y') }}
+                            Periode: {{ \Carbon\Carbon::parse($invoice->schedule->start_date)->format('d M Y') }}
+                            – {{ \Carbon\Carbon::parse($invoice->schedule->end_date)->format('d M Y') }}
                         </span>
                     </td>
                     <td class="right" style="font-weight:600;">

@@ -12,15 +12,17 @@ use PHPUnit\Framework\TestCase;
 class KirimNotifikasiPembayaranDiterimaTest extends TestCase
 {
     private NotificationService $notificationService;
+
     private SettingService $settingService;
+
     private KirimNotifikasiPembayaranDiterima $listener;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->notificationService = $this->createMock(NotificationService::class);
-        $this->settingService      = $this->createMock(SettingService::class);
-        $this->listener            = new KirimNotifikasiPembayaranDiterima(
+        $this->settingService = $this->createMock(SettingService::class);
+        $this->listener = new KirimNotifikasiPembayaranDiterima(
             $this->notificationService,
             $this->settingService,
         );

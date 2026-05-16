@@ -22,6 +22,6 @@ class GuestActiveContext extends Model
 
     protected $casts = [
         'room_price' => 'decimal:2',
-        'is_active'  => 'boolean',
+        'is_active' => 'boolean',
     ];
 }

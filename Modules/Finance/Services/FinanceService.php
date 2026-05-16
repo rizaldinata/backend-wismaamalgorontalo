@@ -2,17 +2,17 @@
 
 namespace Modules\Finance\Services;
 
-use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
-use Modules\Finance\Contracts\PaymentStrategyInterface;
-use Modules\Finance\Enums\InvoiceStatus;
-use Modules\Finance\Enums\PaymentStatus;
 use App\Events\Finance\PembayaranDibatalkan;
 use App\Events\Finance\PembayaranDiterima;
 use App\Events\Finance\PembayaranDiverifikasi;
-use Modules\Finance\Events\PaymentSettled;
+use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 use Midtrans\Config;
 use Midtrans\Transaction;
+use Modules\Finance\Contracts\PaymentStrategyInterface;
+use Modules\Finance\Enums\InvoiceStatus;
+use Modules\Finance\Enums\PaymentStatus;
+use Modules\Finance\Events\PaymentSettled;
 use Modules\Finance\Models\Payment;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
@@ -25,7 +25,9 @@ class FinanceService
     public function __construct(
         private readonly InvoiceRepositoryInterface $invoiceRepository,
         private readonly PaymentRepositoryInterface $paymentRepository,
-        private readonly SettingService $settingService
+        private readonly SettingService $settingService,
+        private readonly ManualPaymentStrategy $manualStrategy,
+        private readonly MidtransPaymentStrategy $midtransStrategy,
     ) {}
 
     public function processPayment(int $invoiceId, array $data): Payment
@@ -38,6 +40,7 @@ class FinanceService
             }
 
             $strategy = $this->resolveStrategy($data['payment_method']);
+
             return $strategy->process($invoice, $data);
         });
     }
@@ -59,29 +62,29 @@ class FinanceService
             if ($isApproved) {
                 $this->invoiceRepository->updateStatus($payment->invoice, InvoiceStatus::PAID->value);
 
-                $invoice  = $payment->invoice->loadMissing('schedule.room');
+                $invoice = $payment->invoice->loadMissing('schedule.room');
                 $schedule = $invoice->schedule;
 
                 event(new PembayaranDiverifikasi(
-                    paymentId:     $payment->id,
-                    invoiceId:     $invoice->id,
-                    scheduleId:    $invoice->schedule_id ?? 0,
-                    amount:        (float) $invoice->amount,
-                    tenantName:    $schedule?->tenant_name ?? '',
-                    tenantPhone:   $schedule?->tenant_phone ?? '',
+                    paymentId: $payment->id,
+                    invoiceId: $invoice->id,
+                    scheduleId: $invoice->schedule_id ?? 0,
+                    amount: (float) $invoice->amount,
+                    tenantName: $schedule?->tenant_name ?? '',
+                    tenantPhone: $schedule?->tenant_phone ?? '',
                     invoiceNumber: $invoice->invoice_number,
-                    roomTitle:     $schedule?->room?->title ?? '',
-                    roomNumber:    $schedule?->room?->number ?? '',
-                    startDate:     $schedule?->start_date?->toDateString() ?? '',
-                    endDate:       $schedule?->end_date?->toDateString() ?? '',
+                    roomTitle: $schedule?->room?->title ?? '',
+                    roomNumber: $schedule?->room?->number ?? '',
+                    startDate: $schedule?->start_date?->toDateString() ?? '',
+                    endDate: $schedule?->end_date?->toDateString() ?? '',
                 ));
 
                 event(new PaymentSettled($payment));
             } else {
                 $scheduleId = $payment->invoice->schedule_id ?? 0;
                 event(new PembayaranDibatalkan(
-                    paymentId:  $payment->id,
-                    invoiceId:  $payment->invoice->id,
+                    paymentId: $payment->id,
+                    invoiceId: $payment->invoice->id,
                     scheduleId: $scheduleId,
                 ));
             }
@@ -104,27 +107,28 @@ class FinanceService
                 Config::$isProduction = config('finance.midtrans.is_production', false);
 
                 $params = [
-                    'refund_key' => 'refund-' . time() . '-' . $paymentId,
-                    'amount'     => (int) $payment->invoice->amount,
-                    'reason'     => $reason
+                    'refund_key' => 'refund-'.time().'-'.$paymentId,
+                    'amount' => (int) $payment->invoice->amount,
+                    'reason' => $reason,
                 ];
 
                 Transaction::refund($payment->transaction_id, $params);
 
                 $this->paymentRepository->update($payment, [
-                    'status'      => PaymentStatus::REFUNDED->value,
-                    'admin_notes' => 'Refunded: ' . $reason
+                    'status' => PaymentStatus::REFUNDED->value,
+                    'admin_notes' => 'Refunded: '.$reason,
                 ]);
 
                 $this->invoiceRepository->updateStatus($payment->invoice, InvoiceStatus::UNPAID->value);
                 event(new PembayaranDibatalkan(
-                    paymentId:  $payment->id,
-                    invoiceId:  $payment->invoice->id,
+                    paymentId: $payment->id,
+                    invoiceId: $payment->invoice->id,
                     scheduleId: $payment->invoice->schedule_id ?? 0,
                 ));
+
                 return $payment;
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Refund Error: ' . $e->getMessage());
+                \Illuminate\Support\Facades\Log::error('Refund Error: '.$e->getMessage());
                 throw new \DomainException('Gagal memproses refund ke Midtrans. Saldo mungkin tidak mencukupi atau transaksi belum di-Settle.');
             }
         });
@@ -132,14 +136,14 @@ class FinanceService
 
     private function resolveStrategy(string $method): PaymentStrategyInterface
     {
-        if ($method === 'midtrans' && !config('finance.midtrans.enabled', true)) {
+        if ($method === 'midtrans' && ! config('finance.midtrans.enabled', true)) {
             throw new \DomainException('Penyedia layanan (Admin) sedang menonaktifkan fitur pembayaran dengan Midtrans saat ini.');
         }
 
         return match ($method) {
-            'manual'   => app(ManualPaymentStrategy::class),
-            'midtrans' => app(MidtransPaymentStrategy::class),
-            default    => throw new InvalidArgumentException('Metode tidak didukung'),
+            'manual' => $this->manualStrategy,
+            'midtrans' => $this->midtransStrategy,
+            default => throw new InvalidArgumentException('Metode tidak didukung'),
         };
     }
 
@@ -147,7 +151,9 @@ class FinanceService
     {
         $orderId = $payload['order_id'];
         $payment = $this->paymentRepository->findByReference($orderId);
-        if (!$payment) return;
+        if (! $payment) {
+            return;
+        }
 
         $transactionStatus = $payload['transaction_status'];
         $invoice = $payment->invoice;
@@ -158,11 +164,11 @@ class FinanceService
 
             $invoice->loadMissing('schedule');
             event(new PembayaranDiterima(
-                paymentId:   $payment->id,
-                invoiceId:   $invoice->id,
-                scheduleId:  $invoice->schedule_id ?? 0,
-                amount:      (float) $invoice->amount,
-                tenantName:  $invoice->schedule?->tenant_name ?? '',
+                paymentId: $payment->id,
+                invoiceId: $invoice->id,
+                scheduleId: $invoice->schedule_id ?? 0,
+                amount: (float) $invoice->amount,
+                tenantName: $invoice->schedule?->tenant_name ?? '',
                 tenantPhone: $invoice->schedule?->tenant_phone ?? '',
             ));
 
@@ -171,8 +177,8 @@ class FinanceService
             $this->paymentRepository->update($payment, ['status' => PaymentStatus::FAILED->value]);
             $this->invoiceRepository->updateStatus($invoice, InvoiceStatus::UNPAID->value);
             event(new PembayaranDibatalkan(
-                paymentId:  $payment->id,
-                invoiceId:  $invoice->id,
+                paymentId: $payment->id,
+                invoiceId: $invoice->id,
                 scheduleId: $invoice->lease_id,
             ));
         }

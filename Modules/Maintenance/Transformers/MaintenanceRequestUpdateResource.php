@@ -3,7 +3,6 @@
 namespace Modules\Maintenance\Transformers;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Storage;
 
 class MaintenanceRequestUpdateResource extends JsonResource
 {
@@ -17,7 +16,7 @@ class MaintenanceRequestUpdateResource extends JsonResource
             ],
             'status' => $this->status ? $this->status->value : null,
             'description' => $this->description,
-            'images' => $this->images->map(fn($img) => url("api/maintenance/media/{$img->image_path}")),
+            'images' => $this->images->map(fn ($img) => url("api/maintenance/media/{$img->image_path}")),
             'created_at' => $this->created_at->toIso8601String(),
         ];
     }

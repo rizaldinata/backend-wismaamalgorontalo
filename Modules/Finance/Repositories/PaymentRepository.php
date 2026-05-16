@@ -2,8 +2,8 @@
 
 namespace Modules\Finance\Repositories;
 
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Modules\Finance\Enums\PaymentStatus;
 use Modules\Finance\Models\Payment;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
@@ -14,16 +14,15 @@ class PaymentRepository implements PaymentRepositoryInterface
     {
         $query = Payment::with(['invoice.schedule.room'])->orderBy('created_at', 'desc');
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
-        
-        if (!empty($filters['payment_method'])) {
+
+        if (! empty($filters['payment_method'])) {
             $query->where('payment_method', $filters['payment_method']);
         }
 
-
-        if (!empty($filters['schedule_ids'])) {
+        if (! empty($filters['schedule_ids'])) {
             $query->whereHas('invoice', function ($q) use ($filters) {
                 $q->whereIn('schedule_id', $filters['schedule_ids']);
             });
@@ -31,6 +30,7 @@ class PaymentRepository implements PaymentRepositoryInterface
 
         return $query->paginate($perPage);
     }
+
     public function findOrFail(int $id): Payment
     {
         return Payment::findOrFail($id);

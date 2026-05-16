@@ -28,6 +28,7 @@ class ExpenseRepository implements ExpenseRepositoryInterface
     public function update(Expense $expense, array $data): Expense
     {
         $expense->update($data);
+
         return $expense;
     }
 

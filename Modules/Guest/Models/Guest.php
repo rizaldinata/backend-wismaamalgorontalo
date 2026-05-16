@@ -27,10 +27,10 @@ class Guest extends Model
     ];
 
     protected $casts = [
-        'check_in_at'    => 'datetime',
-        'check_out_at'   => 'datetime',
-        'relationship'   => GuestRelationship::class,
-        'charge_amount'  => 'decimal:2',
+        'check_in_at' => 'datetime',
+        'check_out_at' => 'datetime',
+        'relationship' => GuestRelationship::class,
+        'charge_amount' => 'decimal:2',
     ];
 
     public function bill()

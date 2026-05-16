@@ -2,8 +2,8 @@
 
 namespace Modules\Room\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
 class RoomImage extends Model
@@ -26,7 +26,7 @@ class RoomImage extends Model
     public function getImageUrlAttribute()
     {
         if ($this->image_path && Storage::disk('public')->exists($this->image_path)) {
-            return url('storage-access/' . $this->image_path);
+            return url('storage-access/'.$this->image_path);
         }
 
         return url('storage-access/rooms/default.jpg');
@@ -39,7 +39,7 @@ class RoomImage extends Model
     public function getThumbnailUrlAttribute()
     {
         if ($this->thumbnail_path && Storage::disk('public')->exists($this->thumbnail_path)) {
-            return url('storage-access/' . $this->thumbnail_path);
+            return url('storage-access/'.$this->thumbnail_path);
         }
 
         return url('storage-access/rooms/default.jpg');

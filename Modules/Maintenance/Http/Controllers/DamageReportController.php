@@ -20,6 +20,7 @@ class DamageReportController extends Controller
     public function myReports()
     {
         $reports = $this->maintenanceService->getResidentReports(Auth::id());
+
         return $this->apiSuccess(MaintenanceRequestResource::collection($reports), 'Berhasil mengambil data laporan kerusakan.');
     }
 
@@ -29,14 +30,14 @@ class DamageReportController extends Controller
         $images = $request->file('images') ?? [];
 
         $report = $this->maintenanceService->createReport(Auth::id(), $validated, $images);
-        
+
         return $this->apiSuccess(new MaintenanceRequestResource($report), 'Laporan kerusakan berhasil dibuat.', 201);
     }
 
     public function show($id)
     {
         $report = $this->maintenanceService->getReportById($id);
-        
+
         // Verifikasi kepemilikan via reporter_user_id (data baru) atau relasi resident (data lama)
         $ownerId = $report->reporter_user_id ?? $report->resident?->user_id;
         if ($ownerId !== Auth::id()) {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Events;
+namespace Modules\Notification\Tests\Feature;
 
 use App\Events\Finance\PembayaranDiterima;
 use App\Events\Finance\PembayaranDiverifikasi;
@@ -17,7 +17,7 @@ use Modules\Notification\Listeners\KirimNotifikasiPembayaranDiterima;
 use Modules\Notification\Listeners\SendWhatsAppReceipt;
 use Tests\TestCase;
 
-class EventServiceProviderTest extends TestCase
+class NotificationEventWiringTest extends TestCase
 {
     public function test_jadwal_dibuat_terhubung_ke_listener_notifikasi(): void
     {

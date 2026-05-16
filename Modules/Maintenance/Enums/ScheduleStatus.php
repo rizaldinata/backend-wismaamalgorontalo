@@ -5,6 +5,6 @@ namespace Modules\Maintenance\Enums;
 enum ScheduleStatus: string
 {
     case IN_PROGRESS = 'in_progress';
-    case DONE        = 'done';
-    case CANCELLED   = 'cancelled';
+    case DONE = 'done';
+    case CANCELLED = 'cancelled';
 }

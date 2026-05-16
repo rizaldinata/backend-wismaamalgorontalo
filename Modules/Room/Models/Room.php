@@ -17,7 +17,7 @@ class Room extends Model
 
     protected $casts = [
         'status' => RoomStatus::class,
-        'facilities' => 'array'
+        'facilities' => 'array',
     ];
 
     public function schedules()

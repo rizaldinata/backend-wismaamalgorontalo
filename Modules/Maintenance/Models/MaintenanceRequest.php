@@ -2,10 +2,10 @@
 
 namespace Modules\Maintenance\Models;
 
-use Modules\Auth\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Auth\Models\User;
 use Modules\Maintenance\Enums\MaintenanceStatus;
 use Modules\Room\Models\Room;
 

@@ -17,12 +17,12 @@ class MaintenanceRequestSeeder extends Seeder
      */
     public function run(): void
     {
-        $members = User::whereHas('roles', fn($q) => $q->where('name', 'member'))->get();
+        $members = User::whereHas('roles', fn ($q) => $q->where('name', 'member'))->get();
         $admin = User::whereHas('roles', function ($q) {
             $q->where('name', 'super-admin')->orWhere('name', 'admin');
         })->first();
 
-        if ($members->isEmpty() || !$admin) {
+        if ($members->isEmpty() || ! $admin) {
             return;
         }
 
@@ -102,12 +102,14 @@ class MaintenanceRequestSeeder extends Seeder
                 ->first();
             $roomId = $activeSchedule?->room_id;
 
-            if (!$roomId) continue;
+            if (! $roomId) {
+                continue;
+            }
 
             $request = MaintenanceRequest::create([
                 'room_id' => $roomId,
                 'reporter_user_id' => $member->id,
-                'reporter_name'    => $member->name,
+                'reporter_name' => $member->name,
                 'title' => $data['title'],
                 'description' => $data['description'],
                 'status' => $data['status'],

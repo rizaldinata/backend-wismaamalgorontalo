@@ -3,7 +3,6 @@
 namespace Modules\Finance\Listeners;
 
 use App\Events\Inventory\InventariBaru;
-use Modules\Finance\Models\Inventory;
 use Modules\Finance\Services\ExpenseService;
 
 class CatatPengeluaranInventariBaru

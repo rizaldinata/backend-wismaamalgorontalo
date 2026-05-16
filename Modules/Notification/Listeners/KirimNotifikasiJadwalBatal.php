@@ -29,11 +29,11 @@ class KirimNotifikasiJadwalBatal implements ShouldQueue
         }
 
         $message = "*SEWA DIBATALKAN*\n"
-            . "Wisma Amal Gorontalo\n\n"
-            . "Yth. Bpk/Ibu {$event->tenantName},\n\n"
-            . "Pengajuan sewa Anda untuk kamar *No. {$event->roomNumber}* telah dibatalkan.\n\n"
-            . "Jika ini bukan permintaan Anda atau ada pertanyaan, silakan hubungi admin kami.\n\n"
-            . "Hormat kami,\n*Manajemen Wisma Amal Gorontalo*";
+            ."Wisma Amal Gorontalo\n\n"
+            ."Yth. Bpk/Ibu {$event->tenantName},\n\n"
+            ."Pengajuan sewa Anda untuk kamar *No. {$event->roomNumber}* telah dibatalkan.\n\n"
+            ."Jika ini bukan permintaan Anda atau ada pertanyaan, silakan hubungi admin kami.\n\n"
+            ."Hormat kami,\n*Manajemen Wisma Amal Gorontalo*";
 
         $this->notificationService->sendNotification(
             NotificationType::JADWAL_BATAL,

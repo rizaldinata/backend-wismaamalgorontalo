@@ -25,12 +25,12 @@ class KirimNotifikasiJadwalSewaAktif implements ShouldQueue
         }
 
         $message = "*SEWA KAMAR AKTIF*\n"
-            . "Wisma Amal Gorontalo\n\n"
-            . "Yth. Bpk/Ibu {$event->tenantName},\n\n"
-            . "Selamat datang! Sewa kamar *No. {$event->roomNumber}* Anda kini telah aktif.\n"
-            . "Tanggal mulai: {$event->startDate}\n\n"
-            . "Jika ada keperluan, silakan hubungi admin kami.\n\n"
-            . "Hormat kami,\n*Manajemen Wisma Amal Gorontalo*";
+            ."Wisma Amal Gorontalo\n\n"
+            ."Yth. Bpk/Ibu {$event->tenantName},\n\n"
+            ."Selamat datang! Sewa kamar *No. {$event->roomNumber}* Anda kini telah aktif.\n"
+            ."Tanggal mulai: {$event->startDate}\n\n"
+            ."Jika ada keperluan, silakan hubungi admin kami.\n\n"
+            ."Hormat kami,\n*Manajemen Wisma Amal Gorontalo*";
 
         $this->notificationService->sendNotification(
             NotificationType::JADWAL_SEWA_AKTIF,

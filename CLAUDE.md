@@ -4,23 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Laravel 11 **modular monolithic** backend for a dormitory/boarding house (wisma) management system, using `nwidart/laravel-modules`. Current modules: Room, Resident, Rental, Finance, Maintenance, Inventory, Guest, Notification, Auth, Setting.
+Laravel 11 **modular monolithic** backend for a dormitory/boarding house (wisma) management system, using `nwidart/laravel-modules`. Active modules: Room, Schedule, Finance, Maintenance, Inventory, Guest, Notification, Auth, Setting.
 
-> **Active Refactor:** This project is undergoing a major architectural refactor toward true event-driven modularity. Read `CATATAN_ARSITEKTUR.md` for the full architectural vision, and `ROADMAP_REFACTOR.md` for the step-by-step task list with progress tracking.
+> **Refactor selesai (Fase 0–11).** Arsitektur sudah event-driven modular. Modul Rental dan Resident telah dihapus — digantikan oleh modul Schedule. Lihat `CATATAN_ARSITEKTUR.md` untuk detail arsitektur.
 
 ## Key Documents
 
-These two files are the authoritative source of truth for all refactor work. **Read them at the start of every refactor session.**
-
-| File | Isi | Kapan Dibaca |
-|---|---|---|
-| [`CATATAN_ARSITEKTUR.md`](CATATAN_ARSITEKTUR.md) | Visi arsitektur akhir, alasan perubahan, daftar event penting, dan detail setiap modul bisnis | Saat membuat keputusan desain, menambah fitur baru, atau ada pertanyaan "kenapa struktur ini?" |
-| [`ROADMAP_REFACTOR.md`](ROADMAP_REFACTOR.md) | Daftar task per fase dengan progress tracker (`[ ]`/`[x]`), aturan wajib, dan perintah siap pakai | Di awal setiap sesi refactor — baca, lihat task mana yang masih `[ ]`, lanjutkan dari sana |
-
-**Cara mulai sesi refactor:**
-```
-"Lanjut refactor. Baca ROADMAP_REFACTOR.md dan lanjutkan dari task yang belum selesai."
-```
+| File | Isi |
+|---|---|
+| [`CATATAN_ARSITEKTUR.md`](CATATAN_ARSITEKTUR.md) | Arsitektur final, daftar event, dan aturan modul |
+| [`ROADMAP_REFACTOR.md`](ROADMAP_REFACTOR.md) | Riwayat refactor fase 0–11 (semua selesai) |
 
 ## Common Commands
 
@@ -84,26 +77,21 @@ HTTP → Nginx → routes/api.php → Controller (validate via FormRequest)
     → ApiResponse trait → JSON
 ```
 
-### Target Architecture (refactor in progress)
+### Architecture (final — refactor complete)
 
-The goal is strict separation into three tiers so any business module can be toggled ON/OFF without breaking others:
+Three-tier separation so any business module can be toggled ON/OFF without breaking others:
 
 ```
 INFRASTRUCTURE (always on)   Auth, Setting
-CORE (always on)             Room, Schedule (replaces Rental + Resident)
+CORE (always on)             Room, Schedule
 BUSINESS MODULES (optional)  Finance, Maintenance, Guest, Inventory, Notification
 ```
 
-Business modules must not call other modules' services or repositories directly — they communicate only via **Laravel Events**. See `CATATAN_ARSITEKTUR.md` for the full event catalog and `ROADMAP_REFACTOR.md` for the phase-by-phase plan.
-
-### Current Cross-Module Communication (pre-refactor)
-
-Modules currently call each other's **Services** directly (tight coupling that the refactor will eliminate):
-- `RentalService` → `FinanceService::createInvoice()` on new lease
-- `FinanceService` → `RentalService` to activate lease on payment
-- `InventoryService` → `FinanceService` to record purchase as expense
-- `GuestService` injects `LeaseRepositoryInterface` from Rental
-- `MaintenanceService` injects `ResidentRepositoryInterface` from Resident
+**Rules:**
+- Business modules communicate only via **Laravel Events** — no direct service/repository calls across modules
+- Each module registers its own listeners in its own `Providers/EventServiceProvider.php`
+- The global `app/Providers/EventServiceProvider.php` only declares the event catalog (empty listeners)
+- `modules_statuses.json`: set a module to `false` to disable it completely — core still works
 
 ### API Response Convention
 

@@ -120,7 +120,7 @@ test('InventoryService tidak membutuhkan Finance module untuk diinstansiasi', fu
     $params = $reflection->getConstructor()->getParameters();
 
     $paramTypes = array_map(
-        fn($p) => $p->getType()?->getName() ?? '',
+        fn ($p) => $p->getType()?->getName() ?? '',
         $params
     );
 

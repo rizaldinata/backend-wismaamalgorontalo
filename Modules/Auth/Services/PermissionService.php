@@ -3,7 +3,6 @@
 namespace Modules\Auth\Services;
 
 use Modules\Auth\Repositories\Contracts\PermissionRepositoryInterface;
-use Modules\Auth\Repositories\PermissionRepository;
 use Spatie\Permission\PermissionRegistrar;
 
 class PermissionService
@@ -26,6 +25,7 @@ class PermissionService
     {
         $permission = $this->permissionRepository->create($data);
         $this->clearPermissionCache();
+
         return $permission;
     }
 
@@ -33,6 +33,7 @@ class PermissionService
     {
         $permission = $this->permissionRepository->update($id, $data);
         $this->clearPermissionCache();
+
         return $permission;
     }
 
@@ -40,6 +41,7 @@ class PermissionService
     {
         $this->permissionRepository->delete($id);
         $this->clearPermissionCache();
+
         return true;
     }
 

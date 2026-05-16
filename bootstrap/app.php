@@ -6,8 +6,8 @@ use Illuminate\Foundation\Configuration\Middleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__ . '/../routes/web.php',
-        commands: __DIR__ . '/../routes/console.php',
+        web: __DIR__.'/../routes/web.php',
+        commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
@@ -22,7 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->is('api/*') || $request->expectsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Sesi Anda telah berakhir atau tidak valid. Silakan login kembali.'
+                    'message' => 'Sesi Anda telah berakhir atau tidak valid. Silakan login kembali.',
                 ], 401);
             }
         });
@@ -32,7 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 $statusCode = 500;
                 $message = 'Terjadi kesalahan pada sistem kami. Silakan coba lagi nanti.';
 
-                if ($e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException || 
+                if ($e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException ||
                     $e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
                     $statusCode = 404;
                     $message = 'Data atau rute spesifik yang Anda cari tidak ditemukan di dalam sistem.';
@@ -40,9 +40,9 @@ return Application::configure(basePath: dirname(__DIR__))
                     $statusCode = 422;
                     $message = 'Mohon periksa kembali data yang Anda kirimkan, beberapa pengisian tidak valid.';
                 } elseif ($e instanceof \DomainException || $e instanceof \InvalidArgumentException) {
-                    $statusCode = 403; 
+                    $statusCode = 403;
                     $message = $e->getMessage();
-                } elseif ($e instanceof \Illuminate\Auth\Access\AuthorizationException || 
+                } elseif ($e instanceof \Illuminate\Auth\Access\AuthorizationException ||
                           $e instanceof \Spatie\Permission\Exceptions\UnauthorizedException) {
                     $statusCode = 403;
                     $message = 'Anda tidak memiliki otoritas atau izin yang cukup untuk menggunakan fitur ini.';

@@ -3,8 +3,8 @@
 namespace Modules\Auth\database\seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -13,8 +13,8 @@ class RolePermissionSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         $superAdmin = Role::findByName('super-admin', 'api');
-        $admin      = Role::findByName('admin', 'api');
-        $member     = Role::findByName('member', 'api');
+        $admin = Role::findByName('admin', 'api');
+        $member = Role::findByName('member', 'api');
 
         // ─── Super Admin: akses penuh ke semua modul ─────────────────────
         $superAdminPermissions = [

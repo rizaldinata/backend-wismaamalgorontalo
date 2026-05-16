@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Modules\Guest\Models\Guest;
 use Modules\Guest\Models\GuestActiveContext;
 use Modules\Guest\Repositories\Contracts\GuestRepositoryInterface;
-use Modules\Guest\Services\GuestBillingService;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -35,19 +34,19 @@ class GuestService
         );
 
         $guest = $this->guestRepository->create([
-            'lease_id'              => $context->lease_id,
-            'user_id'               => $userId,
+            'lease_id' => $context->lease_id,
+            'user_id' => $userId,
             'schedule_reference_id' => $context->schedule_id,
-            'tenant_name'           => $context->tenant_name,
-            'tenant_email'          => $context->tenant_email,
-            'tenant_phone'          => $context->tenant_phone,
-            'name'                  => $data['name'],
-            'check_in_at'           => $data['check_in_at'],
-            'check_out_at'          => $data['check_out_at'],
-            'relationship'          => $data['relationship'],
-            'total_days'            => $billing['total_days'],
-            'billable_days'         => $billing['billable_days'],
-            'charge_amount'         => $billing['charge_amount'],
+            'tenant_name' => $context->tenant_name,
+            'tenant_email' => $context->tenant_email,
+            'tenant_phone' => $context->tenant_phone,
+            'name' => $data['name'],
+            'check_in_at' => $data['check_in_at'],
+            'check_out_at' => $data['check_out_at'],
+            'relationship' => $data['relationship'],
+            'total_days' => $billing['total_days'],
+            'billable_days' => $billing['billable_days'],
+            'charge_amount' => $billing['charge_amount'],
         ]);
 
         $this->billingService->createBillIfNeeded($guest, $billing['billable_days'], (float) $billing['charge_amount']);
@@ -61,7 +60,7 @@ class GuestService
             ->where('is_active', true)
             ->first();
 
-        if (!$context) {
+        if (! $context) {
             throw new HttpException(422, 'Sewa tidak aktif untuk menambahkan tamu.');
         }
 
@@ -72,19 +71,19 @@ class GuestService
         );
 
         $guest = $this->guestRepository->create([
-            'lease_id'              => $leaseId,
-            'user_id'               => $context->user_id,
+            'lease_id' => $leaseId,
+            'user_id' => $context->user_id,
             'schedule_reference_id' => $context->schedule_id,
-            'tenant_name'           => $context->tenant_name,
-            'tenant_email'          => $context->tenant_email,
-            'tenant_phone'          => $context->tenant_phone,
-            'name'                  => $data['name'],
-            'check_in_at'           => $data['check_in_at'],
-            'check_out_at'          => $data['check_out_at'],
-            'relationship'          => $data['relationship'],
-            'total_days'            => $billing['total_days'],
-            'billable_days'         => $billing['billable_days'],
-            'charge_amount'         => $billing['charge_amount'],
+            'tenant_name' => $context->tenant_name,
+            'tenant_email' => $context->tenant_email,
+            'tenant_phone' => $context->tenant_phone,
+            'name' => $data['name'],
+            'check_in_at' => $data['check_in_at'],
+            'check_out_at' => $data['check_out_at'],
+            'relationship' => $data['relationship'],
+            'total_days' => $billing['total_days'],
+            'billable_days' => $billing['billable_days'],
+            'charge_amount' => $billing['charge_amount'],
         ]);
 
         $this->billingService->createBillIfNeeded($guest, $billing['billable_days'], (float) $billing['charge_amount']);
@@ -99,7 +98,7 @@ class GuestService
         // Verifikasi kepemilikan via user_id (data baru) atau via relasi lease (data lama, sebelum Fase 4)
         $ownerId = $guest->user_id ?? $guest->lease?->resident?->user_id;
 
-        if (!$guest || $ownerId !== $userId) {
+        if (! $guest || $ownerId !== $userId) {
             throw new NotFoundHttpException('Data tamu tidak ditemukan atau bukan milik Anda.');
         }
 
@@ -112,7 +111,7 @@ class GuestService
             ->where('is_active', true)
             ->first();
 
-        if (!$context) {
+        if (! $context) {
             throw new HttpException(403, 'Anda tidak memiliki sewa aktif untuk mendaftarkan tamu.');
         }
 

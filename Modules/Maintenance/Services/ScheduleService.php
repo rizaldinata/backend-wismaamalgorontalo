@@ -21,7 +21,7 @@ class ScheduleService
     {
         $schedule = $this->scheduleRepository->findById($id);
 
-        if (!$schedule) {
+        if (! $schedule) {
             throw new NotFoundHttpException('Jadwal tidak ditemukan.');
         }
 
@@ -46,6 +46,7 @@ class ScheduleService
     public function update(int $id, array $data): MaintenanceSchedule
     {
         $schedule = $this->findById($id);
+
         return $this->scheduleRepository->update($schedule, $data);
     }
 

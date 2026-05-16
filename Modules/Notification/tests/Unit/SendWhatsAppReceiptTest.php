@@ -12,15 +12,17 @@ use Tests\TestCase;
 class SendWhatsAppReceiptTest extends TestCase
 {
     private NotificationService $notificationService;
+
     private SettingService $settingService;
+
     private SendWhatsAppReceipt $listener;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->notificationService = $this->createMock(NotificationService::class);
-        $this->settingService      = $this->createMock(SettingService::class);
-        $this->listener            = new SendWhatsAppReceipt(
+        $this->settingService = $this->createMock(SettingService::class);
+        $this->listener = new SendWhatsAppReceipt(
             $this->notificationService,
             $this->settingService,
         );

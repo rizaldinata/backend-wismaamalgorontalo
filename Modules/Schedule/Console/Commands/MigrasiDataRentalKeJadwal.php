@@ -19,22 +19,22 @@ class MigrasiDataRentalKeJadwal extends Command
         $isDryRun = $this->option('dry-run');
         $skipExisting = $this->option('skip-existing');
 
-        $leaseCount  = DB::table('leases')->whereNull('deleted_at')->count();
+        $leaseCount = DB::table('leases')->whereNull('deleted_at')->count();
         $existingMap = DB::table('room_schedules')
             ->whereNotNull('legacy_lease_id')
             ->pluck('legacy_lease_id')
             ->flip();
 
         $this->info("Ditemukan {$leaseCount} lease aktif.");
-        $this->info("Sudah ada " . $existingMap->count() . " room_schedule dari lease sebelumnya.");
+        $this->info('Sudah ada '.$existingMap->count().' room_schedule dari lease sebelumnya.');
 
         if ($isDryRun) {
             $this->warn('[DRY RUN] Tidak ada perubahan yang disimpan.');
         }
 
         $migrated = 0;
-        $skipped  = 0;
-        $failed   = 0;
+        $skipped = 0;
+        $failed = 0;
 
         DB::table('leases')->whereNull('deleted_at')->orderBy('id')->chunk(100, function ($leases) use (
             $isDryRun, $skipExisting, $existingMap, &$migrated, &$skipped, &$failed
@@ -42,37 +42,38 @@ class MigrasiDataRentalKeJadwal extends Command
             foreach ($leases as $lease) {
                 if ($skipExisting && $existingMap->has($lease->id)) {
                     $skipped++;
+
                     continue;
                 }
 
                 $status = $this->mapStatus($lease->status);
                 $resident = DB::table('residents')->where('id', $lease->resident_id)->first();
-                $user     = $resident ? DB::table('users')->where('id', $resident->user_id)->first() : null;
+                $user = $resident ? DB::table('users')->where('id', $resident->user_id)->first() : null;
 
                 $scheduleData = [
                     'legacy_lease_id' => $lease->id,
-                    'room_id'         => $lease->room_id,
-                    'type'            => 'sewa',
-                    'status'          => $status,
-                    'start_date'      => $lease->start_date,
-                    'end_date'        => $lease->end_date,
-                    'created_by'      => $resident?->user_id,
-                    'tenant_user_id'  => $resident?->user_id,
-                    'tenant_name'     => $user?->name,
-                    'tenant_id_number'=> $resident?->id_card_number,
-                    'tenant_phone'    => $resident?->phone_number,
+                    'room_id' => $lease->room_id,
+                    'type' => 'sewa',
+                    'status' => $status,
+                    'start_date' => $lease->start_date,
+                    'end_date' => $lease->end_date,
+                    'created_by' => $resident?->user_id,
+                    'tenant_user_id' => $resident?->user_id,
+                    'tenant_name' => $user?->name,
+                    'tenant_id_number' => $resident?->id_card_number,
+                    'tenant_phone' => $resident?->phone_number,
                     'tenant_id_photo' => $resident?->ktp_photo_path,
-                    'agreed_price'    => DB::table('invoices')
+                    'agreed_price' => DB::table('invoices')
                         ->where('lease_id', $lease->id)
                         ->orderBy('id')
                         ->value('amount'),
-                    'activated_at'    => $lease->status === 'active' ? $lease->created_at : null,
-                    'finished_at'     => $lease->finished_at,
-                    'created_at'      => $lease->created_at,
-                    'updated_at'      => $lease->updated_at,
+                    'activated_at' => $lease->status === 'active' ? $lease->created_at : null,
+                    'finished_at' => $lease->finished_at,
+                    'created_at' => $lease->created_at,
+                    'updated_at' => $lease->updated_at,
                 ];
 
-                if (!$isDryRun) {
+                if (! $isDryRun) {
                     try {
                         DB::transaction(function () use ($scheduleData, $lease) {
                             $scheduleId = DB::table('room_schedules')->insertGetId($scheduleData);
@@ -84,7 +85,7 @@ class MigrasiDataRentalKeJadwal extends Command
                         });
                         $migrated++;
                     } catch (\Exception $e) {
-                        $this->error("Gagal migrasi lease #{$lease->id}: " . $e->getMessage());
+                        $this->error("Gagal migrasi lease #{$lease->id}: ".$e->getMessage());
                         $failed++;
                     }
                 } else {
@@ -95,7 +96,7 @@ class MigrasiDataRentalKeJadwal extends Command
         });
 
         $this->newLine();
-        $this->info("Hasil migrasi:");
+        $this->info('Hasil migrasi:');
         $this->table(['Status', 'Jumlah'], [
             ['Berhasil dimigrasikan', $migrated],
             ['Dilewati (sudah ada)', $skipped],
@@ -108,11 +109,11 @@ class MigrasiDataRentalKeJadwal extends Command
     private function mapStatus(string $leaseStatus): string
     {
         return match ($leaseStatus) {
-            'pending'   => ScheduleStatus::PENDING->value,
-            'active'    => ScheduleStatus::ACTIVE->value,
-            'finished'  => ScheduleStatus::FINISHED->value,
+            'pending' => ScheduleStatus::PENDING->value,
+            'active' => ScheduleStatus::ACTIVE->value,
+            'finished' => ScheduleStatus::FINISHED->value,
             'cancelled' => ScheduleStatus::CANCELLED->value,
-            default     => ScheduleStatus::CANCELLED->value,
+            default => ScheduleStatus::CANCELLED->value,
         };
     }
 }

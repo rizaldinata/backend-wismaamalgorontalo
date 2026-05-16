@@ -2,8 +2,8 @@
 
 namespace Modules\Finance\Repositories;
 
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Modules\Finance\Enums\InvoiceStatus;
 use Modules\Finance\Models\Invoice;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
@@ -14,17 +14,17 @@ class InvoiceRepository implements InvoiceRepositoryInterface
     {
         $query = Invoice::with(['schedule.room'])->orderBy('created_at', 'desc');
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 
-
-        if (!empty($filters['schedule_ids'])) {
+        if (! empty($filters['schedule_ids'])) {
             $query->whereIn('schedule_id', $filters['schedule_ids']);
         }
 
         return $query->paginate($perPage);
     }
+
     public function findById(int $id): ?Invoice
     {
         return Invoice::findOrFail($id);
@@ -33,6 +33,7 @@ class InvoiceRepository implements InvoiceRepositoryInterface
     public function updateStatus(Invoice $invoice, string $status): Invoice
     {
         $invoice->update(['status' => $status]);
+
         return $invoice;
     }
 
@@ -68,7 +69,7 @@ class InvoiceRepository implements InvoiceRepositoryInterface
             return 0.0;
         }
 
-        $year  = $year ?? now()->year;
+        $year = $year ?? now()->year;
         $query = Invoice::where('status', InvoiceStatus::PAID->value)->whereYear('updated_at', $year);
 
         if ($month !== null) {
@@ -106,10 +107,10 @@ class InvoiceRepository implements InvoiceRepositoryInterface
             $total = (clone $monthlyQuery)->sum('amount');
 
             $revenueData[] = [
-                'date_instance'        => clone $date,
-                'total'                => (float) $total,
+                'date_instance' => clone $date,
+                'total' => (float) $total,
                 'monthly_rent_revenue' => (float) $total,
-                'daily_rent_revenue'   => 0.0
+                'daily_rent_revenue' => 0.0,
             ];
         }
 

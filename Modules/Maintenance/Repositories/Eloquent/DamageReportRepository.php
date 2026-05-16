@@ -16,7 +16,7 @@ class DamageReportRepository implements DamageReportRepositoryInterface
 
     public function addRequestImages(MaintenanceRequest $request, array $imagePaths): void
     {
-        $images = array_map(fn($path) => ['image_path' => $path], $imagePaths);
+        $images = array_map(fn ($path) => ['image_path' => $path], $imagePaths);
         $request->images()->createMany($images);
     }
 
@@ -56,7 +56,7 @@ class DamageReportRepository implements DamageReportRepositoryInterface
 
     public function addUpdateImages(MaintenanceRequestUpdate $update, array $imagePaths): void
     {
-        $images = array_map(fn($path) => ['image_path' => $path], $imagePaths);
+        $images = array_map(fn ($path) => ['image_path' => $path], $imagePaths);
         $update->images()->createMany($images);
     }
 

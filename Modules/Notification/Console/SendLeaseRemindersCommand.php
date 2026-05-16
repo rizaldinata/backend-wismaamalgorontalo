@@ -18,7 +18,7 @@ class SendLeaseRemindersCommand extends Command
         $this->info('Finding active sewa schedules going to expire...');
 
         $targetDays = [7, 3, 2, 0];
-        $today      = Carbon::today();
+        $today = Carbon::today();
 
         $schedules = DB::table('room_schedules')
             ->join('rooms', 'rooms.id', '=', 'room_schedules.room_id')
@@ -37,14 +37,14 @@ class SendLeaseRemindersCommand extends Command
         $count = 0;
 
         foreach ($schedules as $schedule) {
-            if (!$schedule->tenant_phone) {
+            if (! $schedule->tenant_phone) {
                 continue;
             }
 
-            $endDate         = Carbon::parse($schedule->end_date)->startOfDay();
+            $endDate = Carbon::parse($schedule->end_date)->startOfDay();
             $daysUntilExpiry = (int) round($today->diffInDays($endDate, false));
 
-            if (!in_array($daysUntilExpiry, $targetDays)) {
+            if (! in_array($daysUntilExpiry, $targetDays)) {
                 continue;
             }
 
@@ -58,12 +58,12 @@ class SendLeaseRemindersCommand extends Command
             }
 
             $message = "*PENGINGAT PEMBAYARAN SEWA*\n"
-                     . "Wisma Amal Gorontalo\n\n"
-                     . "Yth. Bpk/Ibu {$schedule->tenant_name},\n\n"
-                     . $body
-                     . "Mohon segera lakukan perpanjangan/pembayaran untuk bulan berikutnya jika Anda masih ingin menyewa kamar Anda. Transaksi bisa dilakukan melalui dashboard aplikasi kami.\n"
-                     . "Abaikan pesan ini jika Anda sudah berencana tidak memperpanjang atau sudah melakukan pembayaran.\n\n"
-                     . "Hormat kami,\n*Manajemen Wisma Amal Gorontalo*";
+                     ."Wisma Amal Gorontalo\n\n"
+                     ."Yth. Bpk/Ibu {$schedule->tenant_name},\n\n"
+                     .$body
+                     ."Mohon segera lakukan perpanjangan/pembayaran untuk bulan berikutnya jika Anda masih ingin menyewa kamar Anda. Transaksi bisa dilakukan melalui dashboard aplikasi kami.\n"
+                     ."Abaikan pesan ini jika Anda sudah berencana tidak memperpanjang atau sudah melakukan pembayaran.\n\n"
+                     ."Hormat kami,\n*Manajemen Wisma Amal Gorontalo*";
 
             $notificationService->sendCustomNotification($schedule->tenant_phone, $message);
             $this->info("Reminder sent to {$schedule->tenant_name} for Room {$schedule->room_number}.");

@@ -2,7 +2,6 @@
 
 namespace App\Traits;
 
-use Illuminate\Http\Resources\Json\JsonResource;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 trait ApiResponse
@@ -18,7 +17,7 @@ trait ApiResponse
 
     protected function apiError(string $message, int $code = 400, $errors = null): JsonResponse
     {
-        return  response()->json([
+        return response()->json([
             'status' => false,
             'message' => $message,
             'errors' => $errors,

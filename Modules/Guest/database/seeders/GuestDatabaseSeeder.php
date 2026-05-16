@@ -44,28 +44,28 @@ class GuestDatabaseSeeder extends Seeder
         foreach ($schedules as $index => $schedule) {
             $template = $templates[$index % count($templates)];
 
-            $checkIn  = (clone $seedStart)->subDays($index);
+            $checkIn = (clone $seedStart)->subDays($index);
             $checkOut = (clone $checkIn)->addDays($template['stay_days']);
 
             $billing = $this->calculateBilling($schedule, $checkIn, $checkOut);
 
             $guest = Guest::create([
                 'schedule_reference_id' => $schedule->id,
-                'name'                  => $template['name'],
-                'check_in_at'           => $checkIn->toDateTimeString(),
-                'check_out_at'          => $checkOut->toDateTimeString(),
-                'relationship'          => $template['relationship']->value,
-                'total_days'            => $billing['total_days'],
-                'billable_days'         => $billing['billable_days'],
-                'charge_amount'         => $billing['charge_amount'],
+                'name' => $template['name'],
+                'check_in_at' => $checkIn->toDateTimeString(),
+                'check_out_at' => $checkOut->toDateTimeString(),
+                'relationship' => $template['relationship']->value,
+                'total_days' => $billing['total_days'],
+                'billable_days' => $billing['billable_days'],
+                'charge_amount' => $billing['charge_amount'],
             ]);
 
             if ($billing['charge_amount'] > 0) {
                 GuestBill::create([
-                    'guest_id'    => $guest->id,
-                    'bill_number' => 'GB-' . now()->format('Ymd') . '-' . str_pad((string) $guest->id, 5, '0', STR_PAD_LEFT),
-                    'amount'      => $billing['charge_amount'],
-                    'status'      => GuestBillStatus::UNPAID->value,
+                    'guest_id' => $guest->id,
+                    'bill_number' => 'GB-'.now()->format('Ymd').'-'.str_pad((string) $guest->id, 5, '0', STR_PAD_LEFT),
+                    'amount' => $billing['charge_amount'],
+                    'status' => GuestBillStatus::UNPAID->value,
                 ]);
             }
         }
@@ -76,15 +76,15 @@ class GuestDatabaseSeeder extends Seeder
      */
     private function calculateBilling(Schedule $schedule, Carbon $checkIn, Carbon $checkOut): array
     {
-        $diffHours  = ($checkOut->getTimestamp() - $checkIn->getTimestamp()) / 3600;
-        $totalDays  = (int) ceil($diffHours / 24);
+        $diffHours = ($checkOut->getTimestamp() - $checkIn->getTimestamp()) / 3600;
+        $totalDays = (int) ceil($diffHours / 24);
         $billableDays = max(0, $totalDays - 2);
 
-        $roomPrice    = (float) ($schedule->room?->price ?? 0);
+        $roomPrice = (float) ($schedule->room?->price ?? 0);
         $chargeAmount = $billableDays * ($roomPrice * 0.05);
 
         return [
-            'total_days'    => $totalDays,
+            'total_days' => $totalDays,
             'billable_days' => $billableDays,
             'charge_amount' => $chargeAmount,
         ];

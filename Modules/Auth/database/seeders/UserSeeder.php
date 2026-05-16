@@ -2,9 +2,9 @@
 
 namespace Modules\Auth\database\seeders;
 
-use Modules\Auth\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Modules\Auth\Models\User;
 
 class UserSeeder extends Seeder
 {
@@ -31,7 +31,7 @@ class UserSeeder extends Seeder
         for ($i = 1; $i <= 20; $i++) {
             $member = User::updateOrCreate(
                 [
-                    'email' => "user{$i}@app.com"
+                    'email' => "user{$i}@app.com",
                 ],
                 [
                     'name' => "User {$i}",

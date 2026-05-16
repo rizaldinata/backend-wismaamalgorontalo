@@ -39,7 +39,7 @@ return new class extends Migration
     private function hasForeignKey(string $table, string $constraintName): bool
     {
         $connection = config('database.default');
-        $dbName     = config("database.connections.{$connection}.database");
+        $dbName = config("database.connections.{$connection}.database");
 
         if (empty($dbName)) {
             return false;

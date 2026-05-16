@@ -21,31 +21,31 @@ class ScheduleService
     public function buatJadwal(array $data): Schedule
     {
         $schedule = $this->scheduleRepository->create([
-            'room_id'          => $data['room_id'],
-            'type'             => $data['type'],
-            'status'           => ScheduleStatus::PENDING->value,
-            'start_date'       => $data['start_date'],
-            'end_date'         => $data['end_date'],
-            'created_by'       => $data['created_by'] ?? null,
-            'tenant_name'      => $data['tenant_name'] ?? null,
+            'room_id' => $data['room_id'],
+            'type' => $data['type'],
+            'status' => ScheduleStatus::PENDING->value,
+            'start_date' => $data['start_date'],
+            'end_date' => $data['end_date'],
+            'created_by' => $data['created_by'] ?? null,
+            'tenant_name' => $data['tenant_name'] ?? null,
             'tenant_id_number' => $data['tenant_id_number'] ?? null,
-            'tenant_phone'     => $data['tenant_phone'] ?? null,
-            'tenant_id_photo'  => $data['tenant_id_photo'] ?? null,
-            'tenant_user_id'   => $data['tenant_user_id'] ?? null,
-            'agreed_price'     => $data['agreed_price'] ?? null,
+            'tenant_phone' => $data['tenant_phone'] ?? null,
+            'tenant_id_photo' => $data['tenant_id_photo'] ?? null,
+            'tenant_user_id' => $data['tenant_user_id'] ?? null,
+            'agreed_price' => $data['agreed_price'] ?? null,
         ]);
 
         event(new JadwalDibuat(
-            scheduleId:  $schedule->id,
-            roomId:      $schedule->room_id,
-            roomNumber:  $data['room_number'] ?? '',
-            tipeJadwal:  $schedule->type->value,
-            startDate:   $schedule->start_date->toDateString(),
-            endDate:     $schedule->end_date->toDateString(),
-            tenantName:  $schedule->tenant_name ?? '',
+            scheduleId: $schedule->id,
+            roomId: $schedule->room_id,
+            roomNumber: $data['room_number'] ?? '',
+            tipeJadwal: $schedule->type->value,
+            startDate: $schedule->start_date->toDateString(),
+            endDate: $schedule->end_date->toDateString(),
+            tenantName: $schedule->tenant_name ?? '',
             tenantPhone: $schedule->tenant_phone ?? '',
             agreedPrice: $schedule->agreed_price ? (float) $schedule->agreed_price : null,
-            source:      'schedule',
+            source: 'schedule',
         ));
 
         return $schedule;
@@ -67,13 +67,13 @@ class ScheduleService
 
         if ($updated->type === ScheduleType::SEWA) {
             event(new JadwalSewaAktif(
-                scheduleId:  $updated->id,
-                roomId:      $updated->room_id,
-                roomNumber:  '',
-                tenantName:  $updated->tenant_name ?? '',
+                scheduleId: $updated->id,
+                roomId: $updated->room_id,
+                roomNumber: '',
+                tenantName: $updated->tenant_name ?? '',
                 tenantPhone: $updated->tenant_phone ?? '',
-                startDate:   $updated->start_date->toDateString(),
-                userId:      $updated->tenant_user_id,
+                startDate: $updated->start_date->toDateString(),
+                userId: $updated->tenant_user_id,
             ));
         }
 
@@ -96,13 +96,13 @@ class ScheduleService
 
         if ($updated->type === ScheduleType::SEWA) {
             event(new JadwalSewaSelesai(
-                scheduleId:  $updated->id,
-                roomId:      $updated->room_id,
-                roomNumber:  '',
-                tenantName:  $updated->tenant_name ?? '',
+                scheduleId: $updated->id,
+                roomId: $updated->room_id,
+                roomNumber: '',
+                tenantName: $updated->tenant_name ?? '',
                 tenantPhone: $updated->tenant_phone ?? '',
-                endDate:     $updated->end_date->toDateString(),
-                userId:      $updated->tenant_user_id,
+                endDate: $updated->end_date->toDateString(),
+                userId: $updated->tenant_user_id,
             ));
         }
 
@@ -124,11 +124,11 @@ class ScheduleService
         );
 
         event(new JadwalBatal(
-            scheduleId:  $updated->id,
-            roomId:      $updated->room_id,
-            roomNumber:  '',
-            tipeJadwal:  $updated->type->value,
-            tenantName:  $updated->tenant_name ?? '',
+            scheduleId: $updated->id,
+            roomId: $updated->room_id,
+            roomNumber: '',
+            tipeJadwal: $updated->type->value,
+            tenantName: $updated->tenant_name ?? '',
             tenantPhone: $updated->tenant_phone ?? '',
         ));
 

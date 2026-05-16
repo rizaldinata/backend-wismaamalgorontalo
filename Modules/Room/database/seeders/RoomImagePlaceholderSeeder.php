@@ -13,7 +13,7 @@ class RoomImagePlaceholderSeeder extends Seeder
     public function run(): void
     {
         // Pastikan direktori rooms & thumbs ada
-        if (!Storage::disk('public')->exists('rooms/thumbs')) {
+        if (! Storage::disk('public')->exists('rooms/thumbs')) {
             Storage::disk('public')->makeDirectory('rooms/thumbs');
         }
 
@@ -22,28 +22,29 @@ class RoomImagePlaceholderSeeder extends Seeder
         foreach ($rooms as $room) {
             foreach ($room->images as $image) {
                 $filename = basename($image->image_path);
-                $path = storage_path('app/public/rooms/' . $filename);
-                $thumbPath = storage_path('app/public/rooms/thumbs/' . $filename);
+                $path = storage_path('app/public/rooms/'.$filename);
+                $thumbPath = storage_path('app/public/rooms/thumbs/'.$filename);
 
                 // Update database if thumbnail_path is null
-                if (!$image->thumbnail_path) {
-                    $image->update(['thumbnail_path' => 'rooms/thumbs/' . $filename]);
+                if (! $image->thumbnail_path) {
+                    $image->update(['thumbnail_path' => 'rooms/thumbs/'.$filename]);
                 }
 
                 // Skip jika file gambar utama sudah ada dan tidak kosong (0 bytes)
                 if (file_exists($path) && filesize($path) > 0) {
                     // Cek thumbnail juga
-                    if (!file_exists($thumbPath) || filesize($thumbPath) == 0) {
-                        $this->generatePlaceholder($thumbPath, $room->number, "Thumb", 400, 300);
+                    if (! file_exists($thumbPath) || filesize($thumbPath) == 0) {
+                        $this->generatePlaceholder($thumbPath, $room->number, 'Thumb', 400, 300);
                     }
+
                     continue;
                 }
 
                 // Generate Main Image
-                $this->generatePlaceholder($path, $room->number, "Image", 800, 600);
+                $this->generatePlaceholder($path, $room->number, 'Image', 800, 600);
 
                 // Generate Thumbnail
-                $this->generatePlaceholder($thumbPath, $room->number, "Thumb", 400, 300);
+                $this->generatePlaceholder($thumbPath, $room->number, 'Thumb', 400, 300);
             }
         }
 
@@ -53,7 +54,7 @@ class RoomImagePlaceholderSeeder extends Seeder
     private function generatePlaceholder($path, $text1, $text2, $width, $height)
     {
         $directory = dirname($path);
-        if (!is_dir($directory)) {
+        if (! is_dir($directory)) {
             mkdir($directory, 0755, true);
         }
 
@@ -63,14 +64,14 @@ class RoomImagePlaceholderSeeder extends Seeder
             \imagefill($img, 0, 0, $bgColor);
             $textColor = \imagecolorallocate($img, 100, 100, 100);
 
-            \imagestring($img, 5, ($width / 2) - 50, ($height / 2) - 20, "Room " . $text1, $textColor);
+            \imagestring($img, 5, ($width / 2) - 50, ($height / 2) - 20, 'Room '.$text1, $textColor);
             \imagestring($img, 4, ($width / 2) - 40, ($height / 2) + 10, $text2, $textColor);
 
             \imagejpeg($img, $path, 80);
             \imagedestroy($img);
         } else {
             // Fallback if GD is not installed
-            file_put_contents($path, "");
+            file_put_contents($path, '');
         }
     }
 }

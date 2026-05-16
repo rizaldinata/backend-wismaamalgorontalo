@@ -2,7 +2,6 @@
 
 namespace Modules\Notification\Services;
 
-use Modules\Finance\Models\Payment;
 use Modules\Notification\Contracts\NotificationRepositoryInterface;
 use Modules\Notification\Contracts\WhatsAppProviderInterface;
 use Modules\Notification\Enums\NotificationStatus;
@@ -17,50 +16,12 @@ readonly class NotificationService
         private SettingService $settingService
     ) {}
 
-    public function sendPaymentReceiptMessage(Payment $payment): bool
-    {
-        $payment->loadMissing(['invoice.lease.resident.user', 'invoice.lease.room']);
-
-        $invoice = $payment->invoice;
-        $lease = $invoice->lease;
-        $room = $lease->room;
-        $resident = $lease->resident;
-        $user = $resident->user;
-
-        $phone = $resident->phone_number;
-        $amount = number_format($invoice->amount, 0, ',', '.');
-        $periode = collect([$lease->start_date, $lease->end_date])
-            ->map(fn($date) => $date->format('d/m/Y'))
-            ->join(' - ');
-
-        $pdfLink = null;
-        if ($this->settingService->isFeatureEnabled('feature_whatsapp_pdf_link')) {
-            $pdfLink = \Illuminate\Support\Facades\URL::temporarySignedRoute(
-                'finance.invoice.print',
-                now()->addHours(48),
-                ['id' => $invoice->id]
-            );
-        }
-
-        $message = $this->formatReceiptMessage(
-            $user->name,
-            $invoice->invoice_number,
-            $room->title,
-            $room->number,
-            $periode,
-            $amount,
-            $pdfLink
-        );
-
-        return $this->sendNotification(NotificationType::PAYMENT_RECEIPT, $phone, $message);
-    }
-
     public function sendNotification(NotificationType $type, string $target, string $message): bool
     {
         $isSent = $this->whatsAppProvider->sendMessage($target, $message);
 
         $status = $isSent ? NotificationStatus::SENT->value : NotificationStatus::FAILED->value;
-        $error  = $isSent ? null : 'Failed to send via provider';
+        $error = $isSent ? null : 'Failed to send via provider';
 
         $this->repository->logNotification($type, $target, $message, $status, $error);
 
@@ -105,27 +66,26 @@ readonly class NotificationService
         ?string $pdfLink = null
     ): string {
         $msg = "*BUKTI PEMBAYARAN RESMI*\n"
-            . "Wisma Amal Gorontalo\n\n"
-            . "Yth. Bpk/Ibu {$name},\n\n"
-            . "Kami informasikan bahwa pembayaran Anda telah kami terima dengan rincian sebagai berikut:\n\n"
-            . "🧾 *No. Tagihan:* {$invoiceNo}\n"
-            . "🚪 *Kamar:* {$roomTitle} (No. {$roomNumber})\n"
-            . "⏳ *Periode Sewa:* {$periode}\n"
-            . "💰 *Total Bayar:* Rp{$amount}\n";
+            ."Wisma Amal Gorontalo\n\n"
+            ."Yth. Bpk/Ibu {$name},\n\n"
+            ."Kami informasikan bahwa pembayaran Anda telah kami terima dengan rincian sebagai berikut:\n\n"
+            ."🧾 *No. Tagihan:* {$invoiceNo}\n"
+            ."🚪 *Kamar:* {$roomTitle} (No. {$roomNumber})\n"
+            ."⏳ *Periode Sewa:* {$periode}\n"
+            ."💰 *Total Bayar:* Rp{$amount}\n";
 
         if ($pdfLink) {
             $msg .= "\n📥 *Unduh Kwitansi PDF:*\n"
-                . $pdfLink . "\n"
-                . "⚠️ _Link berlaku selama 48 jam. Setelah itu, kwitansi tetap dapat dilihat melalui website atau aplikasi dengan login ke akun Anda._\n";
+                .$pdfLink."\n"
+                ."⚠️ _Link berlaku selama 48 jam. Setelah itu, kwitansi tetap dapat dilihat melalui website atau aplikasi dengan login ke akun Anda._\n";
         }
 
         $msg .= "\nJika ada pertanyaan, silakan hubungi admin kami.\n\n"
-            . "Hormat kami,\n"
-            . "*Manajemen Wisma Amal Gorontalo*";
+            ."Hormat kami,\n"
+            .'*Manajemen Wisma Amal Gorontalo*';
 
         return $msg;
     }
-
 
     public function getLogHistory(int $perPage = 15)
     {
@@ -142,9 +102,10 @@ readonly class NotificationService
 
         $isSent = $this->whatsAppProvider->sendMessage($log->target_phone, $log->message_body);
         $status = $isSent ? NotificationStatus::SENT->value : NotificationStatus::FAILED->value;
-        $error  = $isSent ? null : 'Retry failed';
+        $error = $isSent ? null : 'Retry failed';
 
         $this->repository->updateStatus($log, $status, $error);
+
         return $isSent;
     }
 }

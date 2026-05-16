@@ -3,11 +3,11 @@
 namespace App\Providers;
 
 use Dedoc\Scramble\Scramble;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\ServiceProvider;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
             if (method_exists($user, 'hasRole')) {
                 return $user->hasRole('super-admin') ? true : null;
             }
+
             return null;
         });
 

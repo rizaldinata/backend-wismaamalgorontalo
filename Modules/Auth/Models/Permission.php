@@ -2,9 +2,6 @@
 
 namespace Modules\Auth\Models;
 
-use App\Models\User;
-use Spatie\Permission\PermissionRegistrar;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Spatie\Permission\Models\Permission as SpatiePermission;
 
 class Permission extends SpatiePermission
@@ -17,6 +14,6 @@ class Permission extends SpatiePermission
         'name',
         'guard_name',
         'target',
-        'description'
+        'description',
     ];
 }

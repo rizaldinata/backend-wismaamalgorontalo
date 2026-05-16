@@ -29,12 +29,12 @@ class KirimNotifikasiJadwalDibuat implements ShouldQueue
         }
 
         $message = "*PENGAJUAN SEWA DITERIMA*\n"
-            . "Wisma Amal Gorontalo\n\n"
-            . "Yth. Bpk/Ibu {$event->tenantName},\n\n"
-            . "Pengajuan sewa Anda untuk kamar *No. {$event->roomNumber}* telah kami terima.\n"
-            . "Masa sewa: {$event->startDate} s/d {$event->endDate}\n\n"
-            . "Mohon tunggu konfirmasi dari admin kami.\n\n"
-            . "Hormat kami,\n*Manajemen Wisma Amal Gorontalo*";
+            ."Wisma Amal Gorontalo\n\n"
+            ."Yth. Bpk/Ibu {$event->tenantName},\n\n"
+            ."Pengajuan sewa Anda untuk kamar *No. {$event->roomNumber}* telah kami terima.\n"
+            ."Masa sewa: {$event->startDate} s/d {$event->endDate}\n\n"
+            ."Mohon tunggu konfirmasi dari admin kami.\n\n"
+            ."Hormat kami,\n*Manajemen Wisma Amal Gorontalo*";
 
         $this->notificationService->sendNotification(
             NotificationType::JADWAL_DIBUAT,

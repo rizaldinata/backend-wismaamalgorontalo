@@ -18,7 +18,7 @@ class ScheduleRepository implements ScheduleRepositoryInterface
     {
         $schedule = Schedule::find($id);
 
-        if (!$schedule) {
+        if (! $schedule) {
             throw new NotFoundHttpException('Jadwal tidak ditemukan.');
         }
 
@@ -64,15 +64,15 @@ class ScheduleRepository implements ScheduleRepositoryInterface
     {
         $query = Schedule::query();
 
-        if (!empty($filters['room_id'])) {
+        if (! empty($filters['room_id'])) {
             $query->where('room_id', $filters['room_id']);
         }
 
-        if (!empty($filters['type'])) {
+        if (! empty($filters['type'])) {
             $query->where('type', $filters['type']);
         }
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
 

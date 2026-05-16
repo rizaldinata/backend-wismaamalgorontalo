@@ -26,14 +26,14 @@ class ScheduleController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'room_id'          => 'required|integer',
-            'type'             => 'required|in:sewa,maintenance,kebersihan,blokir',
-            'start_date'       => 'required|date',
-            'end_date'         => 'required|date|after_or_equal:start_date',
-            'tenant_name'      => 'nullable|string|max:255',
+            'room_id' => 'required|integer',
+            'type' => 'required|in:sewa,maintenance,kebersihan,blokir',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'tenant_name' => 'nullable|string|max:255',
             'tenant_id_number' => 'nullable|string|max:50',
-            'tenant_phone'     => 'nullable|string|max:20',
-            'agreed_price'     => 'nullable|numeric|min:0',
+            'tenant_phone' => 'nullable|string|max:20',
+            'agreed_price' => 'nullable|numeric|min:0',
         ]);
 
         $validated['created_by'] = Auth::id();
@@ -48,7 +48,7 @@ class ScheduleController extends Controller
         $schedule = $this->scheduleService->ambilJadwalAktifKamar($id)
             ?? $this->scheduleService->ambilJadwalKamar($id);
 
-        if (is_iterable($schedule) && !($schedule instanceof \Modules\Schedule\Models\Schedule)) {
+        if (is_iterable($schedule) && ! ($schedule instanceof \Modules\Schedule\Models\Schedule)) {
             return $this->apiSuccess(ScheduleResource::collection($schedule), 'Daftar jadwal kamar');
         }
 

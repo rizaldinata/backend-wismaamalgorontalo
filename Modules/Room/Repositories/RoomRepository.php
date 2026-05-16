@@ -12,9 +12,9 @@ class RoomRepository implements RoomRepositoryInterface
     {
         return Room::query()
             ->when(isset($filters['search']), function ($q) use ($filters) {
-                $q->where('title', 'like', '%' . $filters['search'] . '%')
-                    ->orWhere('description', 'like', '%' . $filters['search'] . '$')
-                    ->orWhere('number', 'like', '%' . $filters['search'] . '%');
+                $q->where('title', 'like', '%'.$filters['search'].'%')
+                    ->orWhere('description', 'like', '%'.$filters['search'].'$')
+                    ->orWhere('number', 'like', '%'.$filters['search'].'%');
             })
             ->when(isset($filters['status']), function ($q) use ($filters) {
                 $q->where('status', $filters['status']);
@@ -37,6 +37,7 @@ class RoomRepository implements RoomRepositoryInterface
     public function update(Room $room, array $data): Room
     {
         $room->update($data);
+
         return $room;
     }
 

@@ -4,13 +4,9 @@ namespace Modules\Room\Services;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Drivers\Gd\Driver;
-use Intervention\Image\ImageManager;
 use Modules\Room\Contracts\RoomAvailabilityService;
 use Modules\Room\Enums\RoomStatus;
 use Modules\Room\Models\Room;
-use Modules\Room\Models\RoomImage;
 use Modules\Room\Repositories\Contracts\RoomRepositoryInterface;
 
 class RoomService implements RoomAvailabilityService
@@ -18,8 +14,7 @@ class RoomService implements RoomAvailabilityService
     public function __construct(
         private readonly RoomRepositoryInterface $roomRepository,
         private readonly \App\Services\ImageService $imageService
-    ) {
-    }
+    ) {}
 
     public function getAllRooms(array $filters = [])
     {
@@ -41,7 +36,7 @@ class RoomService implements RoomAvailabilityService
         return DB::transaction(function () use ($data, $images) {
             $room = $this->roomRepository->create($data);
 
-            if (!empty($images)) {
+            if (! empty($images)) {
                 $this->uploadImages($room, $images);
             }
 
@@ -55,7 +50,7 @@ class RoomService implements RoomAvailabilityService
             $room = $this->roomRepository->findById($id);
             $room = $this->roomRepository->update($room, $data);
 
-            if (!empty($newImages)) {
+            if (! empty($newImages)) {
                 $this->uploadImages($room, $newImages);
             }
 
@@ -73,18 +68,19 @@ class RoomService implements RoomAvailabilityService
 
     public function uploadImages(Room $room, array $files): void
     {
-        \Log::info('RoomService: Memulai upload gambar untuk Kamar ID ' . $room->id . '. Jumlah file: ' . count($files));
+        \Log::info('RoomService: Memulai upload gambar untuk Kamar ID '.$room->id.'. Jumlah file: '.count($files));
 
         foreach ($files as $index => $file) {
-            if (!$file instanceof UploadedFile) {
-                \Log::warning('RoomService: File pada index ' . $index . ' bukan instance dari UploadedFile.');
+            if (! $file instanceof UploadedFile) {
+                \Log::warning('RoomService: File pada index '.$index.' bukan instance dari UploadedFile.');
+
                 continue;
             }
 
-            \Log::info('RoomService: Memproses file: ' . $file->getClientOriginalName() . ' (Size: ' . $file->getSize() . ' bytes)');
+            \Log::info('RoomService: Memproses file: '.$file->getClientOriginalName().' (Size: '.$file->getSize().' bytes)');
 
             $folder = "rooms/{$room->id}";
-            
+
             try {
                 // Menggunakan global ImageService untuk compress & convert ke WebP
                 $path = $this->imageService->uploadAndCompress($file, $folder);
@@ -93,12 +89,12 @@ class RoomService implements RoomAvailabilityService
                 $this->roomRepository->addImage($room, [
                     'image_path' => $path,
                     'thumbnail_path' => $thumbPath,
-                    'order' => $index + 1
+                    'order' => $index + 1,
                 ]);
 
-                \Log::info('RoomService: Berhasil simpan gambar ke database untuk file: ' . $file->getClientOriginalName());
+                \Log::info('RoomService: Berhasil simpan gambar ke database untuk file: '.$file->getClientOriginalName());
             } catch (\Exception $e) {
-                \Log::error('RoomService: Gagal upload gambar index ' . $index . '. Error: ' . $e->getMessage());
+                \Log::error('RoomService: Gagal upload gambar index '.$index.'. Error: '.$e->getMessage());
             }
         }
     }
@@ -137,6 +133,7 @@ class RoomService implements RoomAvailabilityService
     public function getPrice(int $roomId, string $type = 'monthly'): float
     {
         $room = $this->roomRepository->findById($roomId);
+
         return $type === 'daily' ? (float) $room->price_daily : (float) $room->price;
     }
 

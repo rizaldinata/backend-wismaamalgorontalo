@@ -21,14 +21,14 @@ class DamageReportService
         $user = Auth::user() ?? \Modules\Auth\Models\User::find($userId);
 
         $data['reporter_user_id'] = $userId;
-        $data['reporter_name']    = $user?->name ?? 'Unknown';
-        $data['reporter_phone']   = $data['reporter_phone'] ?? null;
-        $data['status']           = MaintenanceStatus::PENDING->value;
-        $data['reported_at']      = now();
+        $data['reporter_name'] = $user?->name ?? 'Unknown';
+        $data['reporter_phone'] = $data['reporter_phone'] ?? null;
+        $data['status'] = MaintenanceStatus::PENDING->value;
+        $data['reported_at'] = now();
 
         $request = $this->requestRepository->createRequest($data);
 
-        if (!empty($images)) {
+        if (! empty($images)) {
             $imagePaths = $this->uploadImages($images, 'maintenance_requests');
             $this->requestRepository->addRequestImages($request, $imagePaths);
         }
@@ -36,12 +36,12 @@ class DamageReportService
         $request->load(['images', 'room']);
 
         LaporanKerusakanMasuk::dispatch(
-            reportId:     $request->id,
+            reportId: $request->id,
             reporterName: $request->reporter_name,
             reporterPhone: $request->reporter_phone ?? '',
-            description:  $request->description,
-            roomId:       $request->room_id,
-            roomNumber:   $request->room?->number,
+            description: $request->description,
+            roomId: $request->room_id,
+            roomNumber: $request->room?->number,
         );
 
         return $request;
@@ -67,14 +67,14 @@ class DamageReportService
         $request = $this->requestRepository->findById($requestId);
 
         $updateData = [
-            'user_id'     => $adminUserId,
+            'user_id' => $adminUserId,
             'description' => $data['description'],
-            'status'      => $data['status'] ?? null,
+            'status' => $data['status'] ?? null,
         ];
 
         $update = $this->requestRepository->addUpdate($request, $updateData);
 
-        if (!empty($images)) {
+        if (! empty($images)) {
             $imagePaths = $this->uploadImages($images, 'maintenance_updates');
             $this->requestRepository->addUpdateImages($update, $imagePaths);
         }
@@ -94,6 +94,7 @@ class DamageReportService
                 $paths[] = $this->imageService->uploadAndCompress($image, $folder);
             }
         }
+
         return $paths;
     }
 }

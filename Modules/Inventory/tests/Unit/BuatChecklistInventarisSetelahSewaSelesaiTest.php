@@ -23,7 +23,7 @@ test('handle tidak melempar exception saat menerima event jadwal sewa selesai', 
         endDate: '2025-06-01',
     );
 
-    $listener = new BuatChecklistInventarisSetelahSewaSelesai();
+    $listener = new BuatChecklistInventarisSetelahSewaSelesai;
     $listener->handle($event);
 });
 

@@ -17,8 +17,8 @@ class PayInvoiceRequest extends FormRequest
     {
         return [
             'payment_method' => ['required', Rule::enum(PaymentMethod::class)],
-            'payment_proof'  => 'required_if:payment_method,manual|image|max:5120',
-            'payment_type'   => 'nullable|string',
+            'payment_proof' => 'required_if:payment_method,manual|image|max:5120',
+            'payment_type' => 'nullable|string',
         ];
     }
 

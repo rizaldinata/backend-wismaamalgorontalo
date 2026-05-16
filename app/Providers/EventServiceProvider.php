@@ -18,41 +18,21 @@ use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvi
 
 class EventServiceProvider extends ServiceProvider
 {
+    // Listeners are registered in each module's own EventServiceProvider.
+    // This global provider only declares the event catalog so Laravel knows
+    // which events exist; business modules self-register their listeners.
     protected $listen = [
-        JadwalDibuat::class => [
-            \Modules\Notification\Listeners\KirimNotifikasiJadwalDibuat::class,
-            \Modules\Finance\Listeners\BuatInvoiceSetelahJadwalDibuat::class,
-        ],
-        JadwalSewaAktif::class => [
-            \Modules\Notification\Listeners\KirimNotifikasiJadwalSewaAktif::class,
-            \Modules\Guest\Listeners\AktifkanFiturTamuSetelahSewaAktif::class,
-        ],
-        JadwalSewaSelesai::class => [
-            \Modules\Notification\Listeners\KirimNotifikasiJadwalSewaSelesai::class,
-            \Modules\Inventory\Listeners\BuatChecklistInventarisSetelahSewaSelesai::class,
-            \Modules\Guest\Listeners\NonaktifkanFiturTamuSetelahSewaSelesai::class,
-        ],
-        JadwalBatal::class => [
-            \Modules\Notification\Listeners\KirimNotifikasiJadwalBatal::class,
-        ],
+        JadwalDibuat::class => [],
+        JadwalSewaAktif::class => [],
+        JadwalSewaSelesai::class => [],
+        JadwalBatal::class => [],
         StatusKamarBerubah::class => [],
-        PembayaranDiterima::class => [
-            \Modules\Notification\Listeners\KirimNotifikasiPembayaranDiterima::class,
-        ],
-        PembayaranDiverifikasi::class => [
-            \Modules\Notification\Listeners\SendWhatsAppReceipt::class,
-        ],
+        PembayaranDiterima::class => [],
+        PembayaranDiverifikasi::class => [],
         PembayaranDibatalkan::class => [],
         LaporanKerusakanMasuk::class => [],
-
-        InventariBaru::class => [
-            \Modules\Finance\Listeners\CatatPengeluaranInventariBaru::class,
-        ],
-        InventarisDiperbarui::class => [
-            \Modules\Finance\Listeners\SinkronisasiPengeluaranInventaris::class,
-        ],
-        InventarisDihapus::class => [
-            \Modules\Finance\Listeners\HapusPengeluaranInventaris::class,
-        ],
+        InventariBaru::class => [],
+        InventarisDiperbarui::class => [],
+        InventarisDihapus::class => [],
     ];
 }

@@ -39,7 +39,7 @@ class RoomDatabaseSeeder extends Seeder
 
         foreach ($floors as $floor) {
             for ($i = 1; $i <= $roomsPerFloor; $i++) {
-                $roomNumber = $floor . '0' . $i;
+                $roomNumber = $floor.'0'.$i;
 
                 // Determine type based on floor
                 if ($floor <= 2) {
@@ -51,16 +51,18 @@ class RoomDatabaseSeeder extends Seeder
                 }
 
                 $typeData = $roomTypes[$typeKey];
-                $title = $typeData['titles'][array_rand($typeData['titles'])] . ' ' . $roomNumber;
+                $title = $typeData['titles'][array_rand($typeData['titles'])].' '.$roomNumber;
 
                 $statuses = ['available', 'occupied', 'maintenance'];
                 $status = $statuses[array_rand($statuses)];
 
                 // Make sure we have a good mix
-                if ($roomNumber == '101' || $roomNumber == '201')
+                if ($roomNumber == '101' || $roomNumber == '201') {
                     $status = 'occupied';
-                if ($roomNumber == '103')
+                }
+                if ($roomNumber == '103') {
                     $status = 'maintenance';
+                }
 
                 $room = Room::firstOrCreate(
                     ['number' => $roomNumber],
@@ -80,7 +82,7 @@ class RoomDatabaseSeeder extends Seeder
                     for ($j = 0; $j < $imagesCount; $j++) {
                         RoomImage::create([
                             'room_id' => $room->id,
-                            'image_path' => 'rooms/dummy-room-' . $room->number . '-' . ($j + 1) . '.jpg',
+                            'image_path' => 'rooms/dummy-room-'.$room->number.'-'.($j + 1).'.jpg',
                             'order' => $j,
                         ]);
                     }

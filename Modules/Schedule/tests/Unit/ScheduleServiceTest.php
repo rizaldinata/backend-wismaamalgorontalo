@@ -1,11 +1,11 @@
 <?php
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Event;
-use App\Events\Jadwal\JadwalDibuat;
 use App\Events\Jadwal\JadwalBatal;
+use App\Events\Jadwal\JadwalDibuat;
 use App\Events\Jadwal\JadwalSewaAktif;
 use App\Events\Jadwal\JadwalSewaSelesai;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Modules\Schedule\Enums\ScheduleStatus;
 use Modules\Schedule\Enums\ScheduleType;
 use Modules\Schedule\Models\Schedule;
@@ -20,11 +20,11 @@ test('buatJadwal membuat record dan mengirim event JadwalDibuat', function () {
     $service = app(ScheduleService::class);
 
     $schedule = $service->buatJadwal([
-        'room_id'    => 1,
-        'type'       => 'sewa',
+        'room_id' => 1,
+        'type' => 'sewa',
         'start_date' => '2026-06-01',
-        'end_date'   => '2026-07-01',
-        'tenant_name'  => 'Budi Santoso',
+        'end_date' => '2026-07-01',
+        'tenant_name' => 'Budi Santoso',
         'tenant_phone' => '08123456789',
         'agreed_price' => 750000,
     ]);
@@ -44,11 +44,11 @@ test('aktifkanJadwal mengubah status ke active dan mengirim event JadwalSewaAkti
     Event::fake([JadwalSewaAktif::class]);
 
     $schedule = Schedule::create([
-        'room_id'    => 1,
-        'type'       => ScheduleType::SEWA->value,
-        'status'     => ScheduleStatus::PENDING->value,
+        'room_id' => 1,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::PENDING->value,
         'start_date' => '2026-06-01',
-        'end_date'   => '2026-07-01',
+        'end_date' => '2026-07-01',
     ]);
 
     $service = app(ScheduleService::class);
@@ -62,11 +62,11 @@ test('aktifkanJadwal mengubah status ke active dan mengirim event JadwalSewaAkti
 
 test('aktifkanJadwal hanya bisa dari status pending', function () {
     $schedule = Schedule::create([
-        'room_id'    => 1,
-        'type'       => ScheduleType::SEWA->value,
-        'status'     => ScheduleStatus::ACTIVE->value,
+        'room_id' => 1,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::ACTIVE->value,
         'start_date' => '2026-06-01',
-        'end_date'   => '2026-07-01',
+        'end_date' => '2026-07-01',
     ]);
 
     $service = app(ScheduleService::class);
@@ -79,11 +79,11 @@ test('selesaikanJadwal mengubah status ke finished dan mengirim event JadwalSewa
     Event::fake([JadwalSewaSelesai::class]);
 
     $schedule = Schedule::create([
-        'room_id'    => 1,
-        'type'       => ScheduleType::SEWA->value,
-        'status'     => ScheduleStatus::ACTIVE->value,
+        'room_id' => 1,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::ACTIVE->value,
         'start_date' => '2026-06-01',
-        'end_date'   => '2026-07-01',
+        'end_date' => '2026-07-01',
     ]);
 
     $service = app(ScheduleService::class);
@@ -99,11 +99,11 @@ test('batalkanJadwal mengirim event JadwalBatal', function () {
     Event::fake([JadwalBatal::class]);
 
     $schedule = Schedule::create([
-        'room_id'    => 1,
-        'type'       => ScheduleType::SEWA->value,
-        'status'     => ScheduleStatus::PENDING->value,
+        'room_id' => 1,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::PENDING->value,
         'start_date' => '2026-06-01',
-        'end_date'   => '2026-07-01',
+        'end_date' => '2026-07-01',
     ]);
 
     $service = app(ScheduleService::class);
@@ -116,11 +116,11 @@ test('batalkanJadwal mengirim event JadwalBatal', function () {
 
 test('batalkanJadwal tidak bisa dilakukan pada jadwal yang sudah selesai', function () {
     $schedule = Schedule::create([
-        'room_id'    => 1,
-        'type'       => ScheduleType::KEBERSIHAN->value,
-        'status'     => ScheduleStatus::FINISHED->value,
+        'room_id' => 1,
+        'type' => ScheduleType::KEBERSIHAN->value,
+        'status' => ScheduleStatus::FINISHED->value,
         'start_date' => '2026-06-01',
-        'end_date'   => '2026-06-02',
+        'end_date' => '2026-06-02',
     ]);
 
     $service = app(ScheduleService::class);
@@ -131,11 +131,11 @@ test('batalkanJadwal tidak bisa dilakukan pada jadwal yang sudah selesai', funct
 
 test('ambilJadwalAktifKamar mengembalikan jadwal active atau null', function () {
     Schedule::create([
-        'room_id'    => 5,
-        'type'       => ScheduleType::SEWA->value,
-        'status'     => ScheduleStatus::ACTIVE->value,
+        'room_id' => 5,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::ACTIVE->value,
         'start_date' => '2026-06-01',
-        'end_date'   => '2026-07-01',
+        'end_date' => '2026-07-01',
     ]);
 
     $service = app(ScheduleService::class);

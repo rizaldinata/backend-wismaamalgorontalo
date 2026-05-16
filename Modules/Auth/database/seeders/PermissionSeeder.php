@@ -101,7 +101,7 @@ class PermissionSeeder extends Seeder
             Permission::updateOrCreate(
                 ['name' => $permission['name'], 'guard_name' => 'api'],
                 [
-                    'target'      => $permission['target'],
+                    'target' => $permission['target'],
                     'description' => $permission['description'],
                 ]
             );

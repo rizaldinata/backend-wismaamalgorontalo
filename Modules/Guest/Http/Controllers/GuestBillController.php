@@ -33,7 +33,7 @@ class GuestBillController extends Controller
 
             $bill = $this->billRepository->findByGuestId($guestId);
 
-            if (!$bill) {
+            if (! $bill) {
                 return $this->apiError('Tagihan tidak ditemukan untuk tamu ini.', 404);
             }
 
@@ -82,12 +82,12 @@ class GuestBillController extends Controller
 
     private function validateOwnership(int $guestId): void
     {
-        $userId  = Auth::id();
+        $userId = Auth::id();
         $context = GuestActiveContext::where('user_id', $userId)
             ->where('is_active', true)
             ->first();
 
-        if (!$context) {
+        if (! $context) {
             throw new HttpException(403, 'Anda tidak memiliki sewa aktif.');
         }
 
@@ -97,7 +97,7 @@ class GuestBillController extends Controller
         $belongsToUser = ($context->schedule_id && $guest?->schedule_reference_id === $context->schedule_id)
             || ($context->lease_id && $guest?->lease_id === $context->lease_id);
 
-        if (!$guest || !$belongsToUser) {
+        if (! $guest || ! $belongsToUser) {
             throw new HttpException(403, 'Anda tidak memiliki akses ke data tamu ini.');
         }
     }

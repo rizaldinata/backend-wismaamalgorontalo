@@ -10,23 +10,24 @@ class AktifkanFiturTamuSetelahSewaAktif
 {
     public function handle(JadwalSewaAktif $event): void
     {
-        if (!$event->userId) {
+        if (! $event->userId) {
             Log::warning('AktifkanFiturTamu: event tanpa userId, dilewati.', [
                 'schedule_id' => $event->scheduleId,
             ]);
+
             return;
         }
 
         GuestActiveContext::updateOrCreate(
             ['user_id' => $event->userId],
             [
-                'schedule_id'  => $event->scheduleId,
-                'room_id'      => $event->roomId,
-                'room_price'   => $event->roomPrice ?? 0,
-                'tenant_name'  => $event->tenantName,
+                'schedule_id' => $event->scheduleId,
+                'room_id' => $event->roomId,
+                'room_price' => $event->roomPrice ?? 0,
+                'tenant_name' => $event->tenantName,
                 'tenant_email' => $event->tenantEmail,
                 'tenant_phone' => $event->tenantPhone,
-                'is_active'    => true,
+                'is_active' => true,
             ]
         );
     }

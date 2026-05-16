@@ -18,7 +18,7 @@ class MigrasiDataResidentKeJadwal extends Command
         $isDryRun = $this->option('dry-run');
         $shouldFix = $this->option('fix');
 
-        $total    = DB::table('room_schedules')->where('type', 'sewa')->count();
+        $total = DB::table('room_schedules')->where('type', 'sewa')->count();
         $complete = DB::table('room_schedules')
             ->where('type', 'sewa')
             ->whereNotNull('tenant_name')
@@ -32,6 +32,7 @@ class MigrasiDataResidentKeJadwal extends Command
 
         if ($incomplete === 0) {
             $this->info('Semua data penghuni sudah lengkap. Tidak ada yang perlu diperbaiki.');
+
             return Command::SUCCESS;
         }
 
@@ -52,12 +53,13 @@ class MigrasiDataResidentKeJadwal extends Command
             return Command::SUCCESS;
         }
 
-        if (!$shouldFix) {
+        if (! $shouldFix) {
             $this->warn('Gunakan --fix untuk mengisi data penghuni yang kosong, atau --dry-run untuk pratinjau.');
+
             return Command::SUCCESS;
         }
 
-        $fixed  = 0;
+        $fixed = 0;
         $failed = 0;
 
         DB::table('room_schedules')
@@ -69,23 +71,24 @@ class MigrasiDataResidentKeJadwal extends Command
             ->orderBy('id')
             ->chunk(100, function ($schedules) use (&$fixed, &$failed) {
                 foreach ($schedules as $schedule) {
-                    $lease    = DB::table('leases')->where('id', $schedule->legacy_lease_id)->first();
+                    $lease = DB::table('leases')->where('id', $schedule->legacy_lease_id)->first();
                     $resident = $lease ? DB::table('residents')->where('id', $lease->resident_id)->first() : null;
-                    $user     = $resident ? DB::table('users')->where('id', $resident->user_id)->first() : null;
+                    $user = $resident ? DB::table('users')->where('id', $resident->user_id)->first() : null;
 
-                    if (!$resident || !$user) {
+                    if (! $resident || ! $user) {
                         $this->warn("  schedule #{$schedule->id}: resident/user tidak ditemukan, dilewati.");
                         $failed++;
+
                         continue;
                     }
 
                     DB::table('room_schedules')->where('id', $schedule->id)->update([
-                        'tenant_user_id'  => $resident->user_id,
-                        'tenant_name'     => $user->name,
-                        'tenant_id_number'=> $resident->id_card_number,
-                        'tenant_phone'    => $resident->phone_number,
+                        'tenant_user_id' => $resident->user_id,
+                        'tenant_name' => $user->name,
+                        'tenant_id_number' => $resident->id_card_number,
+                        'tenant_phone' => $resident->phone_number,
                         'tenant_id_photo' => $resident->ktp_photo_path ?? null,
-                        'updated_at'      => now(),
+                        'updated_at' => now(),
                     ]);
 
                     $fixed++;
@@ -93,7 +96,7 @@ class MigrasiDataResidentKeJadwal extends Command
             });
 
         $this->newLine();
-        $this->info("Hasil perbaikan:");
+        $this->info('Hasil perbaikan:');
         $this->table(['Status', 'Jumlah'], [
             ['Berhasil diperbaiki', $fixed],
             ['Gagal / dilewati',   $failed],

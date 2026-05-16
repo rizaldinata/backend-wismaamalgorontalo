@@ -2,8 +2,8 @@
 
 namespace Modules\Finance\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Modules\Finance\database\factories\PaymentFactory;
 use Modules\Finance\Enums\PaymentStatus;
 
@@ -23,7 +23,7 @@ class Payment extends Model
     ];
 
     protected $casts = [
-        'status'       => PaymentStatus::class,
+        'status' => PaymentStatus::class,
         'payment_data' => 'array',
     ];
 
@@ -34,7 +34,7 @@ class Payment extends Model
 
     public function getPaymentProofUrlAttribute()
     {
-        return $this->payment_proof_path ? url('/storage/' . $this->payment_proof_path) : null;
+        return $this->payment_proof_path ? url('/storage/'.$this->payment_proof_path) : null;
     }
 
     public static function newFactory()

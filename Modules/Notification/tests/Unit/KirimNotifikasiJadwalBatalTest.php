@@ -12,15 +12,17 @@ use PHPUnit\Framework\TestCase;
 class KirimNotifikasiJadwalBatalTest extends TestCase
 {
     private NotificationService $notificationService;
+
     private SettingService $settingService;
+
     private KirimNotifikasiJadwalBatal $listener;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->notificationService = $this->createMock(NotificationService::class);
-        $this->settingService      = $this->createMock(SettingService::class);
-        $this->listener            = new KirimNotifikasiJadwalBatal(
+        $this->settingService = $this->createMock(SettingService::class);
+        $this->listener = new KirimNotifikasiJadwalBatal(
             $this->notificationService,
             $this->settingService,
         );

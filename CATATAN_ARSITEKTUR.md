@@ -1,6 +1,7 @@
 # Catatan Arsitektur: Modular Monolith — Wisma Amal Gorontalo
 
-> Dokumen ini merangkum feedback dosen dan arah refactor yang perlu dilakukan pada backend sistem wisma.
+> **Status: Refactor selesai (Fase 0–11, 2026-05-16).** Arsitektur di bawah ini sudah terimplementasi penuh.
+> Dokumen ini merangkum feedback dosen dan arsitektur final backend sistem wisma.
 
 ---
 

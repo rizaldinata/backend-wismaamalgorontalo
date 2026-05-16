@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Auth;
 use Modules\Maintenance\Http\Requests\StoreMaintenanceUpdate;
 use Modules\Maintenance\Services\DamageReportService;
 use Modules\Maintenance\Transformers\MaintenanceRequestResource;
-
 use Modules\Maintenance\Transformers\MaintenanceRequestUpdateResource;
 
 class AdminDamageReportController extends Controller
@@ -22,12 +21,14 @@ class AdminDamageReportController extends Controller
     public function index()
     {
         $reports = $this->maintenanceService->getAllReports();
+
         return $this->apiSuccess(MaintenanceRequestResource::collection($reports), 'Berhasil mengambil daftar keluhan.');
     }
 
     public function show($id)
     {
         $report = $this->maintenanceService->getReportById($id);
+
         return $this->apiSuccess(new MaintenanceRequestResource($report), 'Detail laporan berhasil diambil.');
     }
 
@@ -37,7 +38,7 @@ class AdminDamageReportController extends Controller
         $images = $request->file('images') ?? [];
 
         $update = $this->maintenanceService->addUpdate(Auth::id(), $id, $validated, $images);
-        
+
         return $this->apiSuccess(new MaintenanceRequestUpdateResource($update), 'Progres/balasan berhasil ditambahkan.', 201);
     }
 }

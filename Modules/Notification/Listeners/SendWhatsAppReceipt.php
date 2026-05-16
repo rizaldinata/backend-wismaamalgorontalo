@@ -23,7 +23,7 @@ class SendWhatsAppReceipt implements ShouldQueue
             return;
         }
 
-        $periode = $event->startDate . ' - ' . $event->endDate;
+        $periode = $event->startDate.' - '.$event->endDate;
 
         $pdfLink = null;
         if ($this->settingService->isFeatureEnabled('feature_whatsapp_pdf_link')) {

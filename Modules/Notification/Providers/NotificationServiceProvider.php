@@ -41,7 +41,7 @@ class NotificationServiceProvider extends ServiceProvider
             \Modules\Notification\Contracts\WhatsAppProviderInterface::class,
             \Modules\Notification\Infrastructure\Providers\FonnteWhatsAppProvider::class
         );
-    
+
         $this->app->bind(
             \Modules\Notification\Contracts\NotificationRepositoryInterface::class,
             \Modules\Notification\Repositories\NotificationRepository::class
@@ -139,7 +139,7 @@ class NotificationServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(array_merge($this->getPublishableViewPaths(), [$sourcePath]), $this->nameLower);
 
-        Blade::componentNamespace(config('modules.namespace').'\\' . $this->name . '\\View\\Components', $this->nameLower);
+        Blade::componentNamespace(config('modules.namespace').'\\'.$this->name.'\\View\\Components', $this->nameLower);
     }
 
     /**

@@ -19,7 +19,7 @@ class NotificationLogController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $logs
+            'data' => $logs,
         ]);
     }
 
@@ -33,7 +33,7 @@ class NotificationLogController extends Controller
             }
 
             return response()->json(['message' => 'Gagal mengirim ulang notifikasi. Periksa koneksi provider.'], 500);
-            
+
         } catch (\DomainException $e) {
             return response()->json(['message' => $e->getMessage()], 400);
         }

@@ -57,6 +57,7 @@ class ExpenseService
         if ($expense) {
             return $this->expenseRepository->delete($expense);
         }
+
         return false;
     }
 
@@ -68,11 +69,13 @@ class ExpenseService
             if (empty($data['amount']) || $data['amount'] <= 0) {
                 return $this->expenseRepository->delete($expense);
             }
+
             return $this->expenseRepository->update($expense, $data);
         } else {
-            if (!empty($data['amount']) && $data['amount'] > 0) {
+            if (! empty($data['amount']) && $data['amount'] > 0) {
                 $data['reference_id'] = $refId;
                 $data['reference_type'] = $refType;
+
                 return $this->recordExpense($data);
             }
         }

@@ -20,7 +20,7 @@ class InventoryService
         return DB::transaction(function () use ($data) {
             $inventory = $this->inventoryRepository->create($data);
 
-            if (!empty($data['purchase_price']) && $data['purchase_price'] > 0) {
+            if (! empty($data['purchase_price']) && $data['purchase_price'] > 0) {
                 InventariBaru::dispatch(
                     $inventory->id,
                     $inventory->name,

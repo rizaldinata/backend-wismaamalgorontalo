@@ -2,10 +2,10 @@
 
 namespace Modules\Auth\Services;
 
-use Modules\Auth\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Modules\Auth\Models\User;
 
 class AuthService
 {
@@ -40,7 +40,7 @@ class AuthService
     {
         $user = User::where('email', $email)->first();
 
-        if (!$user || !Hash::check($password, $user->password)) {
+        if (! $user || ! Hash::check($password, $user->password)) {
             throw new Exception('Kredensial tidak valid', 401);
         }
 
@@ -49,7 +49,7 @@ class AuthService
         return [
             'user' => $user,
             'token' => $token,
-            'role' => $user->getRoleNames()->first()
+            'role' => $user->getRoleNames()->first(),
         ];
     }
 

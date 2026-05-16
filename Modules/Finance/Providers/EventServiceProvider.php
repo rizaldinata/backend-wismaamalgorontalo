@@ -2,26 +2,34 @@
 
 namespace Modules\Finance\Providers;
 
+use App\Events\Inventory\InventariBaru;
+use App\Events\Inventory\InventarisDihapus;
+use App\Events\Inventory\InventarisDiperbarui;
+use App\Events\Jadwal\JadwalDibuat;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Modules\Finance\Listeners\BuatInvoiceSetelahJadwalDibuat;
+use Modules\Finance\Listeners\CatatPengeluaranInventariBaru;
+use Modules\Finance\Listeners\HapusPengeluaranInventaris;
+use Modules\Finance\Listeners\SinkronisasiPengeluaranInventaris;
 
 class EventServiceProvider extends ServiceProvider
 {
-    /**
-     * The event handler mappings for the application.
-     *
-     * @var array<string, array<int, string>>
-     */
-    protected $listen = [];
+    protected $listen = [
+        JadwalDibuat::class => [
+            BuatInvoiceSetelahJadwalDibuat::class,
+        ],
+        InventariBaru::class => [
+            CatatPengeluaranInventariBaru::class,
+        ],
+        InventarisDiperbarui::class => [
+            SinkronisasiPengeluaranInventaris::class,
+        ],
+        InventarisDihapus::class => [
+            HapusPengeluaranInventaris::class,
+        ],
+    ];
 
-    /**
-     * Indicates if events should be discovered.
-     *
-     * @var bool
-     */
-    protected static $shouldDiscoverEvents = true;
+    protected static $shouldDiscoverEvents = false;
 
-    /**
-     * Configure the proper event listeners for email verification.
-     */
     protected function configureEmailVerification(): void {}
 }

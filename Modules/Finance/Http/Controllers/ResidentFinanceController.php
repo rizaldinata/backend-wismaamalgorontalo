@@ -26,24 +26,24 @@ class ResidentFinanceController extends Controller
 
     public function summary()
     {
-        $userId    = Auth::id();
+        $userId = Auth::id();
         $schedules = collect($this->scheduleRepository->getByTenantUserId($userId));
 
         if ($schedules->isEmpty()) {
             return $this->apiSuccess([
                 'resident_name' => Auth::user()->name,
-                'active_lease'  => null,
-                'total_unpaid'  => 0.0,
-                'unpaid_count'  => 0,
+                'active_lease' => null,
+                'total_unpaid' => 0.0,
+                'unpaid_count' => 0,
             ], 'Ringkasan keuangan berhasil diambil');
         }
 
-        $scheduleIds    = $schedules->pluck('id')->toArray();
+        $scheduleIds = $schedules->pluck('id')->toArray();
         $activeSchedule = $schedules->first(fn ($s) => $s->status === ScheduleStatus::ACTIVE);
 
         $unpaidInvoices = $this->invoiceRepository->getPaginated(100, [
             'schedule_ids' => $scheduleIds,
-            'status'       => 'unpaid',
+            'status' => 'unpaid',
         ]);
 
         $totalUnpaid = collect($unpaidInvoices->items())->sum('amount');
@@ -60,24 +60,24 @@ class ResidentFinanceController extends Controller
             $room = DB::table('rooms')->where('id', $activeSchedule->room_id)->first();
 
             $activeLease = [
-                'id'          => $activeSchedule->id,
+                'id' => $activeSchedule->id,
                 'room_number' => $room?->number ?? '-',
-                'end_date'    => $activeSchedule->end_date->format('Y-m-d'),
+                'end_date' => $activeSchedule->end_date->format('Y-m-d'),
                 'rental_type' => $rentalType,
             ];
         }
 
         return $this->apiSuccess([
             'resident_name' => Auth::user()->name,
-            'active_lease'  => $activeLease,
-            'total_unpaid'  => (float) $totalUnpaid,
-            'unpaid_count'  => $unpaidInvoices->total(),
+            'active_lease' => $activeLease,
+            'total_unpaid' => (float) $totalUnpaid,
+            'unpaid_count' => $unpaidInvoices->total(),
         ], 'Ringkasan keuangan berhasil diambil');
     }
 
     public function invoices(Request $request)
     {
-        $userId      = Auth::id();
+        $userId = Auth::id();
         $scheduleIds = collect($this->scheduleRepository->getByTenantUserId($userId))
             ->pluck('id')
             ->toArray();
@@ -100,14 +100,14 @@ class ResidentFinanceController extends Controller
 
     public function showInvoice(int $id)
     {
-        $userId      = Auth::id();
+        $userId = Auth::id();
         $scheduleIds = collect($this->scheduleRepository->getByTenantUserId($userId))
             ->pluck('id')
             ->toArray();
 
         $invoice = $this->invoiceRepository->findById($id);
 
-        if (!$invoice || !in_array($invoice->schedule_id, $scheduleIds)) {
+        if (! $invoice || ! in_array($invoice->schedule_id, $scheduleIds)) {
             return $this->apiError('Invoice tidak ditemukan.', 404);
         }
 
@@ -119,7 +119,7 @@ class ResidentFinanceController extends Controller
 
     public function payments(Request $request)
     {
-        $userId      = Auth::id();
+        $userId = Auth::id();
         $scheduleIds = collect($this->scheduleRepository->getByTenantUserId($userId))
             ->pluck('id')
             ->toArray();

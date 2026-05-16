@@ -4,7 +4,6 @@ namespace Modules\Auth\Transformers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Modules\Auth\Transformers\RoleResource;
 
 class UserResource extends JsonResource
 {

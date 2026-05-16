@@ -14,10 +14,10 @@ class DummyDataSeeder extends Seeder
     public function run(): void
     {
         // Ensure directories exist
-        if (!Storage::disk('public')->exists('rooms')) {
+        if (! Storage::disk('public')->exists('rooms')) {
             Storage::disk('public')->makeDirectory('rooms');
         }
-        if (!Storage::disk('public')->exists('payments')) {
+        if (! Storage::disk('public')->exists('payments')) {
             Storage::disk('public')->makeDirectory('payments');
         }
 
@@ -298,7 +298,7 @@ class DummyDataSeeder extends Seeder
 
             // Create dummy images for each room
             for ($i = 1; $i <= $imagesCount; $i++) {
-                $imagePath = 'rooms/dummy-room-' . $room->number . '-' . $i . '.jpg';
+                $imagePath = 'rooms/dummy-room-'.$room->number.'-'.$i.'.jpg';
                 RoomImage::create([
                     'room_id' => $room->id,
                     'image_path' => $imagePath,
@@ -306,117 +306,117 @@ class DummyDataSeeder extends Seeder
                 ]);
 
                 // Generate physical file
-                $fullpath = storage_path('app/public/' . $imagePath);
-                $this->generatePlaceholder($fullpath, "Room " . $room->number, $room->status, 800, 600);
+                $fullpath = storage_path('app/public/'.$imagePath);
+                $this->generatePlaceholder($fullpath, 'Room '.$room->number, $room->status, 800, 600);
             }
         }
 
         // Create Schedules (type: sewa)
         // Active schedules
         Schedule::create([
-            'room_id'        => $rooms[0]->id,
-            'type'           => 'sewa',
-            'status'         => 'active',
-            'start_date'     => now()->subMonths(3)->toDateString(),
-            'end_date'       => now()->addMonths(9)->toDateString(),
+            'room_id' => $rooms[0]->id,
+            'type' => 'sewa',
+            'status' => 'active',
+            'start_date' => now()->subMonths(3)->toDateString(),
+            'end_date' => now()->addMonths(9)->toDateString(),
             'tenant_user_id' => $users[0]->id,
-            'tenant_name'    => $users[0]->name,
-            'tenant_phone'   => $residentsData[0]['phone_number'],
+            'tenant_name' => $users[0]->name,
+            'tenant_phone' => $residentsData[0]['phone_number'],
             'tenant_id_number' => $residentsData[0]['id_card_number'],
-            'agreed_price'   => 500000,
-            'created_by'     => 1,
-            'activated_at'   => now()->subMonths(3),
+            'agreed_price' => 500000,
+            'created_by' => 1,
+            'activated_at' => now()->subMonths(3),
         ]);
 
         Schedule::create([
-            'room_id'        => $rooms[5]->id,
-            'type'           => 'sewa',
-            'status'         => 'active',
-            'start_date'     => now()->subMonths(6)->toDateString(),
-            'end_date'       => now()->addMonths(6)->toDateString(),
+            'room_id' => $rooms[5]->id,
+            'type' => 'sewa',
+            'status' => 'active',
+            'start_date' => now()->subMonths(6)->toDateString(),
+            'end_date' => now()->addMonths(6)->toDateString(),
             'tenant_user_id' => $users[1]->id,
-            'tenant_name'    => $users[1]->name,
-            'tenant_phone'   => $residentsData[1]['phone_number'],
+            'tenant_name' => $users[1]->name,
+            'tenant_phone' => $residentsData[1]['phone_number'],
             'tenant_id_number' => $residentsData[1]['id_card_number'],
-            'agreed_price'   => 750000,
-            'created_by'     => 1,
-            'activated_at'   => now()->subMonths(6),
+            'agreed_price' => 750000,
+            'created_by' => 1,
+            'activated_at' => now()->subMonths(6),
         ]);
 
         Schedule::create([
-            'room_id'        => $rooms[2]->id,
-            'type'           => 'sewa',
-            'status'         => 'active',
-            'start_date'     => now()->subMonths(2)->toDateString(),
-            'end_date'       => now()->addMonths(10)->toDateString(),
+            'room_id' => $rooms[2]->id,
+            'type' => 'sewa',
+            'status' => 'active',
+            'start_date' => now()->subMonths(2)->toDateString(),
+            'end_date' => now()->addMonths(10)->toDateString(),
             'tenant_user_id' => $users[2]->id,
-            'tenant_name'    => $users[2]->name,
-            'tenant_phone'   => $residentsData[2]['phone_number'],
+            'tenant_name' => $users[2]->name,
+            'tenant_phone' => $residentsData[2]['phone_number'],
             'tenant_id_number' => $residentsData[2]['id_card_number'],
-            'agreed_price'   => 500000,
-            'created_by'     => 1,
-            'activated_at'   => now()->subMonths(2),
+            'agreed_price' => 500000,
+            'created_by' => 1,
+            'activated_at' => now()->subMonths(2),
         ]);
 
         Schedule::create([
-            'room_id'        => $rooms[7]->id,
-            'type'           => 'sewa',
-            'status'         => 'active',
-            'start_date'     => now()->subMonth()->toDateString(),
-            'end_date'       => now()->addMonths(11)->toDateString(),
+            'room_id' => $rooms[7]->id,
+            'type' => 'sewa',
+            'status' => 'active',
+            'start_date' => now()->subMonth()->toDateString(),
+            'end_date' => now()->addMonths(11)->toDateString(),
             'tenant_user_id' => $users[3]->id,
-            'tenant_name'    => $users[3]->name,
-            'tenant_phone'   => $residentsData[3]['phone_number'],
+            'tenant_name' => $users[3]->name,
+            'tenant_phone' => $residentsData[3]['phone_number'],
             'tenant_id_number' => $residentsData[3]['id_card_number'],
-            'agreed_price'   => 750000,
-            'created_by'     => 1,
-            'activated_at'   => now()->subMonth(),
+            'agreed_price' => 750000,
+            'created_by' => 1,
+            'activated_at' => now()->subMonth(),
         ]);
 
         // Pending schedules
         Schedule::create([
-            'room_id'        => $rooms[6]->id,
-            'type'           => 'sewa',
-            'status'         => 'pending',
-            'start_date'     => now()->addDays(7)->toDateString(),
-            'end_date'       => now()->addDays(7)->addYear()->toDateString(),
+            'room_id' => $rooms[6]->id,
+            'type' => 'sewa',
+            'status' => 'pending',
+            'start_date' => now()->addDays(7)->toDateString(),
+            'end_date' => now()->addDays(7)->addYear()->toDateString(),
             'tenant_user_id' => $users[5]->id,
-            'tenant_name'    => $users[5]->name,
-            'tenant_phone'   => $residentsData[5]['phone_number'],
+            'tenant_name' => $users[5]->name,
+            'tenant_phone' => $residentsData[5]['phone_number'],
             'tenant_id_number' => $residentsData[5]['id_card_number'],
-            'agreed_price'   => 750000,
-            'created_by'     => 1,
+            'agreed_price' => 750000,
+            'created_by' => 1,
         ]);
 
         Schedule::create([
-            'room_id'        => $rooms[10]->id,
-            'type'           => 'sewa',
-            'status'         => 'pending',
-            'start_date'     => now()->addDays(5)->toDateString(),
-            'end_date'       => now()->addDays(5)->addYear()->toDateString(),
+            'room_id' => $rooms[10]->id,
+            'type' => 'sewa',
+            'status' => 'pending',
+            'start_date' => now()->addDays(5)->toDateString(),
+            'end_date' => now()->addDays(5)->addYear()->toDateString(),
             'tenant_user_id' => $users[6]->id,
-            'tenant_name'    => $users[6]->name,
-            'tenant_phone'   => $residentsData[6]['phone_number'],
+            'tenant_name' => $users[6]->name,
+            'tenant_phone' => $residentsData[6]['phone_number'],
             'tenant_id_number' => $residentsData[6]['id_card_number'],
-            'agreed_price'   => 1200000,
-            'created_by'     => 1,
+            'agreed_price' => 1200000,
+            'created_by' => 1,
         ]);
 
         // Finished schedule
         Schedule::create([
-            'room_id'        => $rooms[1]->id,
-            'type'           => 'sewa',
-            'status'         => 'finished',
-            'start_date'     => now()->subYear()->toDateString(),
-            'end_date'       => now()->subMonths(2)->toDateString(),
+            'room_id' => $rooms[1]->id,
+            'type' => 'sewa',
+            'status' => 'finished',
+            'start_date' => now()->subYear()->toDateString(),
+            'end_date' => now()->subMonths(2)->toDateString(),
             'tenant_user_id' => $users[7]->id,
-            'tenant_name'    => $users[7]->name,
-            'tenant_phone'   => $residentsData[7]['phone_number'],
+            'tenant_name' => $users[7]->name,
+            'tenant_phone' => $residentsData[7]['phone_number'],
             'tenant_id_number' => $residentsData[7]['id_card_number'],
-            'agreed_price'   => 500000,
-            'created_by'     => 1,
-            'activated_at'   => now()->subYear(),
-            'finished_at'    => now()->subMonths(2),
+            'agreed_price' => 500000,
+            'created_by' => 1,
+            'activated_at' => now()->subYear(),
+            'finished_at' => now()->subMonths(2),
         ]);
 
         $this->command->info('Dummy data seeder completed successfully!');
@@ -428,11 +428,13 @@ class DummyDataSeeder extends Seeder
     private function generatePlaceholder($path, $text1, $text2, $width, $height)
     {
         $directory = dirname($path);
-        if (!is_dir($directory)) {
+        if (! is_dir($directory)) {
             mkdir($directory, 0755, true);
         }
 
-        if (file_exists($path)) return;
+        if (file_exists($path)) {
+            return;
+        }
 
         $img = \imagecreatetruecolor($width, $height);
         $bgColor = \imagecolorallocate($img, 240, 240, 240);
@@ -449,7 +451,7 @@ class DummyDataSeeder extends Seeder
             \imagepng($img, $path);
         } else {
             // Last resort: simple blank file if GD is totally broken
-            \file_put_contents($path, "");
+            \file_put_contents($path, '');
         }
 
         \imagedestroy($img);
