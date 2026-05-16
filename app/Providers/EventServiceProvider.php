@@ -38,15 +38,11 @@ class EventServiceProvider extends ServiceProvider
         StatusKamarBerubah::class => [],
         PembayaranDiterima::class => [
             \Modules\Notification\Listeners\KirimNotifikasiPembayaranDiterima::class,
-            \Modules\Rental\Listeners\AktifkanLeaseSetelahPembayaranDiterima::class,
         ],
         PembayaranDiverifikasi::class => [
             \Modules\Notification\Listeners\SendWhatsAppReceipt::class,
-            \Modules\Rental\Listeners\AktifkanLeaseSetelahPembayaranDiverifikasi::class,
         ],
-        PembayaranDibatalkan::class => [
-            \Modules\Rental\Listeners\BatalkanLeaseSetelahPembayaranDibatalkan::class,
-        ],
+        PembayaranDibatalkan::class => [],
         LaporanKerusakanMasuk::class => [],
 
         InventariBaru::class => [

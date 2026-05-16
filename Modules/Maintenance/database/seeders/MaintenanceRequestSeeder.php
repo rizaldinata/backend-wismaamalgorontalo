@@ -2,13 +2,13 @@
 
 namespace Modules\Maintenance\database\seeders;
 
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Modules\Auth\Models\User;
+use Modules\Maintenance\Enums\MaintenanceStatus;
 use Modules\Maintenance\Models\MaintenanceRequest;
 use Modules\Maintenance\Models\MaintenanceRequestUpdate;
-use Modules\Resident\Models\Resident;
-use Modules\Maintenance\Enums\MaintenanceStatus;
-use Carbon\Carbon;
+use Modules\Schedule\Models\Schedule;
 
 class MaintenanceRequestSeeder extends Seeder
 {
@@ -17,12 +17,12 @@ class MaintenanceRequestSeeder extends Seeder
      */
     public function run(): void
     {
-        $residents = Resident::all();
+        $members = User::whereHas('roles', fn($q) => $q->where('name', 'member'))->get();
         $admin = User::whereHas('roles', function ($q) {
             $q->where('name', 'super-admin')->orWhere('name', 'admin');
         })->first();
 
-        if ($residents->isEmpty() || !$admin) {
+        if ($members->isEmpty() || !$admin) {
             return;
         }
 
@@ -96,14 +96,18 @@ class MaintenanceRequestSeeder extends Seeder
         ];
 
         foreach ($scenarios as $index => $data) {
-            $resident = $residents[$index % $residents->count()];
-            $roomId = $resident->activeLease?->room_id;
+            $member = $members[$index % $members->count()];
+            $activeSchedule = Schedule::where('tenant_user_id', $member->id)
+                ->where('status', 'active')
+                ->first();
+            $roomId = $activeSchedule?->room_id;
 
             if (!$roomId) continue;
 
             $request = MaintenanceRequest::create([
-                'resident_id' => $resident->id,
                 'room_id' => $roomId,
+                'reporter_user_id' => $member->id,
+                'reporter_name'    => $member->name,
                 'title' => $data['title'],
                 'description' => $data['description'],
                 'status' => $data['status'],

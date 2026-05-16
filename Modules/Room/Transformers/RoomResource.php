@@ -31,7 +31,14 @@ class RoomResource extends JsonResource
                     ];
                 });
             }),
-            'schedules' => \Modules\Rental\Transformers\LeaseResource::collection($this->whenLoaded('leases')),
+            'schedules' => $this->whenLoaded('schedules', fn () => $this->schedules->map(fn ($s) => [
+                'id'         => $s->id,
+                'type'       => is_object($s->type) ? $s->type->value : $s->type,
+                'status'     => is_object($s->status) ? $s->status->value : $s->status,
+                'start_date' => $s->start_date?->format('Y-m-d'),
+                'end_date'   => $s->end_date?->format('Y-m-d'),
+                'tenant'     => $s->tenant_name,
+            ])),
         ];
     }
 }

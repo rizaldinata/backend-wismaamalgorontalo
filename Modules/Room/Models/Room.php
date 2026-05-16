@@ -4,9 +4,10 @@ namespace Modules\Room\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Modules\Rental\Models\Lease;
 use Modules\Room\database\factories\RoomFactory;
 use Modules\Room\Enums\RoomStatus;
+use Modules\Schedule\Enums\ScheduleStatus;
+use Modules\Schedule\Models\Schedule;
 
 class Room extends Model
 {
@@ -19,14 +20,14 @@ class Room extends Model
         'facilities' => 'array'
     ];
 
-    public function leases()
+    public function schedules()
     {
-        return $this->hasMany(Lease::class);
+        return $this->hasMany(Schedule::class);
     }
 
-    public function activeLease()
+    public function activeSchedule()
     {
-        return $this->hasOne(Lease::class)->where('status', 'active');
+        return $this->hasOne(Schedule::class)->where('status', ScheduleStatus::ACTIVE->value);
     }
 
     public function images()

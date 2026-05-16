@@ -9,7 +9,7 @@ use Modules\Finance\Enums\PaymentStatus;
 use Modules\Finance\Models\Expense;
 use Modules\Finance\Models\Invoice;
 use Modules\Finance\Models\Payment;
-use Modules\Rental\Models\Lease;
+use Modules\Schedule\Models\Schedule;
 
 class FinanceDatabaseSeeder extends Seeder
 {
@@ -23,14 +23,14 @@ class FinanceDatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $leases = Lease::with('room')->get();
+        $schedules = Schedule::with('room')->where('type', 'sewa')->get();
 
-        if ($leases->isEmpty()) {
-            $this->command->warn('Tidak ada data lease. Jalankan RentalDatabaseSeeder terlebih dahulu.');
+        if ($schedules->isEmpty()) {
+            $this->command->warn('Tidak ada data schedule sewa. Jalankan DummyDataSeeder terlebih dahulu.');
             return;
         }
 
-        $this->seedInvoicesAndPayments($leases);
+        $this->seedInvoicesAndPayments($schedules);
         $this->seedExpenses();
     }
 
@@ -38,16 +38,16 @@ class FinanceDatabaseSeeder extends Seeder
     // INVOICE & PAYMENT
     // ─────────────────────────────────────────────────────────────────────────
 
-    private function seedInvoicesAndPayments($leases): void
+    private function seedInvoicesAndPayments($schedules): void
     {
         $now = Carbon::now();
         $invoiceSeq = 1;
 
-        foreach ($leases as $lease) {
-            $amount = $this->getLeaseAmount($lease);
+        foreach ($schedules as $schedule) {
+            $amount = (int) ($schedule->agreed_price ?? 500000);
 
-            // ── A. LEASE AKTIF: buat 6 bulan historis + bulan ini ──────────
-            if ($lease->status->value === 'active') {
+            // ── A. SCHEDULE AKTIF: buat 6 bulan historis + bulan ini ──────────
+            if ($schedule->status->value === 'active') {
 
                 // 5 bulan ke belakang – semua LUNAS dengan payment VERIFIED
                 for ($monthsAgo = 5; $monthsAgo >= 1; $monthsAgo--) {
@@ -60,7 +60,7 @@ class FinanceDatabaseSeeder extends Seeder
                     $invoice = Invoice::updateOrCreate(
                         ['invoice_number' => $invoiceNumber],
                         [
-                            'lease_id'       => $lease->id,
+                            'schedule_id'    => $schedule->id,
                             'amount'         => $amount,
                             'status'         => InvoiceStatus::PAID->value,
                             'due_date'       => $dueDate,
@@ -87,7 +87,7 @@ class FinanceDatabaseSeeder extends Seeder
                 // - 60% LUNAS (verified)
                 // - 20% PENDING verifikasi (upload bukti, tunggu admin)
                 // - 20% BELUM BAYAR / OVERDUE (tidak ada payment sama sekali)
-                $roll          = $lease->id % 5; // deterministik berdasar ID
+                $roll          = $schedule->id % 5; // deterministik berdasar ID
                 $invoiceDate   = $now->copy()->startOfMonth()->addDays(rand(1, 3));
                 $dueDate       = $invoiceDate->copy()->addDays(10);
 
@@ -103,7 +103,7 @@ class FinanceDatabaseSeeder extends Seeder
                 $invoice = Invoice::updateOrCreate(
                     ['invoice_number' => $invoiceNumber],
                     [
-                        'lease_id'       => $lease->id,
+                        'schedule_id'    => $schedule->id,
                         'amount'         => $amount,
                         'status'         => $invoiceStatus,
                         'due_date'       => $dueDate,
@@ -148,15 +148,15 @@ class FinanceDatabaseSeeder extends Seeder
                 }
                 // $roll === 4: tidak ada payment – overdue jika sudah lewat jatuh tempo
 
-            // ── B. LEASE PENDING: satu invoice awal, sebagian sudah upload ──
-            } elseif ($lease->status->value === 'pending') {
+            // ── B. SCHEDULE PENDING: satu invoice awal, sebagian sudah upload ──
+            } elseif ($schedule->status->value === 'pending') {
                 $dueDate = $now->copy()->addDays(rand(3, 10));
 
                 $invoiceNumber = $this->invoiceNumber($now, $invoiceSeq++);
                 $invoice = Invoice::updateOrCreate(
                     ['invoice_number' => $invoiceNumber],
                     [
-                        'lease_id'       => $lease->id,
+                        'schedule_id'    => $schedule->id,
                         'amount'         => $amount,
                         'status'         => InvoiceStatus::UNPAID->value,
                         'due_date'       => $dueDate,
@@ -165,8 +165,8 @@ class FinanceDatabaseSeeder extends Seeder
                     ]
                 );
 
-                // Separuh lease pending sudah upload bukti bayar
-                if ($lease->id % 2 === 0) {
+                // Separuh schedule pending sudah upload bukti bayar
+                if ($schedule->id % 2 === 0) {
                     Payment::updateOrCreate(
                         ['invoice_id' => $invoice->id],
                         [
@@ -291,14 +291,6 @@ class FinanceDatabaseSeeder extends Seeder
     // ─────────────────────────────────────────────────────────────────────────
     // HELPER METHODS
     // ─────────────────────────────────────────────────────────────────────────
-
-    private function getLeaseAmount(Lease $lease): int
-    {
-        if ($lease->rental_type === 'daily') {
-            return (int) ($lease->room->price_daily ?? 150_000);
-        }
-        return (int) ($lease->room->price ?? 500_000);
-    }
 
     private function invoiceNumber(Carbon $date, int $seq): string
     {

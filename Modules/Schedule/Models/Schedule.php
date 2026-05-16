@@ -3,6 +3,7 @@
 namespace Modules\Schedule\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Modules\Room\Models\Room;
 use Modules\Schedule\Enums\ScheduleStatus;
 use Modules\Schedule\Enums\ScheduleType;
 
@@ -21,4 +22,9 @@ class Schedule extends Model
         'activated_at' => 'datetime',
         'finished_at'  => 'datetime',
     ];
+
+    public function room()
+    {
+        return $this->belongsTo(Room::class);
+    }
 }

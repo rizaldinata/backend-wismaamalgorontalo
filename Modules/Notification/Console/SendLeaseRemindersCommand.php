@@ -2,80 +2,76 @@
 
 namespace Modules\Notification\Console;
 
-use Illuminate\Console\Command;
 use Carbon\Carbon;
-use Modules\Rental\Models\Lease;
-use Modules\Rental\Enums\LeaseStatus;
-use Modules\Rental\Enums\RentalType;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Modules\Notification\Services\NotificationService;
 
 class SendLeaseRemindersCommand extends Command
 {
-    /**
-     * The name and signature of the console command.
-     */
     protected $signature = 'notification:lease-reminders';
 
-    /**
-     * The console command description.
-     */
-    protected $description = 'Send WhatsApp reminders for monthly leases that are going to expire in 7, 3, 2, or 0 days.';
+    protected $description = 'Send WhatsApp reminders for active sewa schedules expiring in 7, 3, 2, or 0 days.';
 
-    /**
-     * Execute the console command.
-     */
-    public function handle(NotificationService $notificationService)
+    public function handle(NotificationService $notificationService): int
     {
-        $this->info('Finding active monthly leases going to expire...');
-        
-        $targetDays = [7, 3, 2, 0];
-        $today = Carbon::today();
+        $this->info('Finding active sewa schedules going to expire...');
 
-        $leases = Lease::with(['resident.user', 'room'])
-            ->where('status', LeaseStatus::ACTIVE->value)
-            ->where('rental_type', RentalType::MONTHLY->value)
+        $targetDays = [7, 3, 2, 0];
+        $today      = Carbon::today();
+
+        $schedules = DB::table('room_schedules')
+            ->join('rooms', 'rooms.id', '=', 'room_schedules.room_id')
+            ->where('room_schedules.status', 'active')
+            ->where('room_schedules.type', 'sewa')
+            ->select(
+                'room_schedules.id',
+                'room_schedules.end_date',
+                'room_schedules.tenant_name',
+                'room_schedules.tenant_phone',
+                'rooms.number as room_number',
+                'rooms.title as room_title',
+            )
             ->get();
 
         $count = 0;
-        foreach ($leases as $lease) {
-            // Kita ingin membandingkan sisa hari dari hari ini ke tanggal end_date
-            // Pastikan tidak mengirim reminder di luar targetDays (misalnya sudah lewat).
-            $diffParams = Carbon::parse($lease->end_date)->startOfDay();
-            $daysUntilExpiry = $today->diffInDays($diffParams, false); // false agar bisa negatif jika terlambat
 
-            // Mengubah tipe return yang float menjadi int
-            $daysUntilExpiry = (int) round($daysUntilExpiry);
-
-            if (in_array($daysUntilExpiry, $targetDays)) {
-                $resident = $lease->resident;
-                if (!$resident || !$resident->phone_number) continue;
-
-                $user = $resident->user;
-                $phone = $resident->phone_number;
-                $room = $lease->room;
-                
-                $message = "*PENGINGAT PEMBAYARAN SEWA*\n"
-                         . "Wisma Amal Gorontalo\n\n"
-                         . "Yth. Bpk/Ibu {$user->name},\n\n";
-                         
-                $roomName = $room->title ?: $room->number;
-                
-                if ($daysUntilExpiry === 0) {
-                    $message .= "Kami informasikan bahwa masa sewa kamar *{$roomName} (No. {$room->number})* Anda habis *HARI INI*.\n\n";
-                } else {
-                    $message .= "Kami informasikan bahwa masa sewa kamar *{$roomName} (No. {$room->number})* Anda akan habis dalam *{$daysUntilExpiry} hari* (jatuh tempo pada " . Carbon::parse($lease->end_date)->format('d/m/Y') . ").\n\n";
-                }
-                
-                $message .= "Mohon segera lakukan perpanjangan/pembayaran untuk bulan berikutnya jika Anda masih ingin menyewa kamar Anda. Transaksi bisa dilakukan melalui dashboard aplikasi kami.\n"
-                          . "Abaikan pesan ini jika Anda sudah berencana tidak memperpanjang atau sudah melakukan pembayaran.\n\n"
-                          . "Hormat kami,\n*Manajemen Wisma Amal Gorontalo*";
-
-                $notificationService->sendCustomNotification($phone, $message);
-                $this->info("Reminder sent to {$user->name} for Room {$room->number}.");
-                $count++;
+        foreach ($schedules as $schedule) {
+            if (!$schedule->tenant_phone) {
+                continue;
             }
+
+            $endDate         = Carbon::parse($schedule->end_date)->startOfDay();
+            $daysUntilExpiry = (int) round($today->diffInDays($endDate, false));
+
+            if (!in_array($daysUntilExpiry, $targetDays)) {
+                continue;
+            }
+
+            $roomName = $schedule->room_title ?: $schedule->room_number;
+
+            if ($daysUntilExpiry === 0) {
+                $body = "Kami informasikan bahwa masa sewa kamar *{$roomName} (No. {$schedule->room_number})* Anda habis *HARI INI*.\n\n";
+            } else {
+                $endFormatted = Carbon::parse($schedule->end_date)->format('d/m/Y');
+                $body = "Kami informasikan bahwa masa sewa kamar *{$roomName} (No. {$schedule->room_number})* Anda akan habis dalam *{$daysUntilExpiry} hari* (jatuh tempo pada {$endFormatted}).\n\n";
+            }
+
+            $message = "*PENGINGAT PEMBAYARAN SEWA*\n"
+                     . "Wisma Amal Gorontalo\n\n"
+                     . "Yth. Bpk/Ibu {$schedule->tenant_name},\n\n"
+                     . $body
+                     . "Mohon segera lakukan perpanjangan/pembayaran untuk bulan berikutnya jika Anda masih ingin menyewa kamar Anda. Transaksi bisa dilakukan melalui dashboard aplikasi kami.\n"
+                     . "Abaikan pesan ini jika Anda sudah berencana tidak memperpanjang atau sudah melakukan pembayaran.\n\n"
+                     . "Hormat kami,\n*Manajemen Wisma Amal Gorontalo*";
+
+            $notificationService->sendCustomNotification($schedule->tenant_phone, $message);
+            $this->info("Reminder sent to {$schedule->tenant_name} for Room {$schedule->room_number}.");
+            $count++;
         }
-        
-        $this->info("Successfully sent $count reminders.");
+
+        $this->info("Successfully sent {$count} reminders.");
+
+        return Command::SUCCESS;
     }
 }

@@ -43,15 +43,10 @@ class RoomRepository implements RoomRepositoryInterface
     public function getAllWithSchedules()
     {
         return Room::with([
-            'leases' => function ($query) {
-                $query->whereIn('status', [
-                    'pending',
-                    'active',
-                    'finished',
-                ]);
+            'schedules' => function ($query) {
+                $query->whereIn('status', ['pending', 'active', 'finished'])
+                    ->orderByDesc('start_date');
             },
-
-            'leases.resident.user',
         ])->get();
     }
 

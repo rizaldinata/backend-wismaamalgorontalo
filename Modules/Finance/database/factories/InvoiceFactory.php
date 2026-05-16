@@ -13,11 +13,12 @@ class InvoiceFactory extends Factory
     public function definition(): array
     {
         return [
-            'lease_id' => \Modules\Rental\Models\Lease::factory(),
+            'schedule_id'    => null,
+            'lease_id'       => null,
             'invoice_number' => 'INV-' . fake()->unique()->numerify('##########'),
-            'amount' => 500000,
-            'status' => InvoiceStatus::UNPAID,
-            'due_date' => now()->addDays(7),
+            'amount'         => 500000,
+            'status'         => InvoiceStatus::UNPAID,
+            'due_date'       => now()->addDays(7),
         ];
     }
 }

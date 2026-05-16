@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Finance\database\factories\InvoiceFactory;
 use Modules\Finance\Enums\InvoiceStatus;
-use Modules\Rental\Models\Lease;
 use Modules\Schedule\Models\Schedule;
 
 class Invoice extends Model
@@ -26,11 +25,6 @@ class Invoice extends Model
         'due_date' => 'date',
         'status' => InvoiceStatus::class,
     ];
-
-    public function lease()
-    {
-        return $this->belongsTo(Lease::class, 'lease_id');
-    }
 
     public function schedule()
     {

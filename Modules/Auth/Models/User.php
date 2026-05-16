@@ -6,8 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\DB;
 use Modules\Auth\database\factories\UserFactory;
-use Modules\Resident\Models\Resident;
+use Modules\Schedule\Enums\ScheduleStatus;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
@@ -36,20 +37,11 @@ class User extends Authenticatable
         ];
     }
 
-    public function resident()
-    {
-        return $this->hasOne(Resident::class);
-    }
-
-    public function leases()
-    {
-        return $this->hasManyThrough(\Modules\Rental\Models\Lease::class, Resident::class);
-    }
-
     public function hasActiveLease(): bool
     {
-        return $this->leases()
-            ->where('status', \Modules\Rental\Enums\LeaseStatus::ACTIVE->value)
+        return DB::table('room_schedules')
+            ->where('tenant_user_id', $this->id)
+            ->where('status', ScheduleStatus::ACTIVE->value)
             ->where(function ($query) {
                 $query->whereNull('end_date')
                     ->orWhere('end_date', '>=', now()->startOfDay());

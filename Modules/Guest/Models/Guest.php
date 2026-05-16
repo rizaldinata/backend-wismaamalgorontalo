@@ -5,7 +5,6 @@ namespace Modules\Guest\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Guest\Enums\GuestRelationship;
-use Modules\Rental\Models\Lease;
 
 class Guest extends Model
 {
@@ -33,11 +32,6 @@ class Guest extends Model
         'relationship'   => GuestRelationship::class,
         'charge_amount'  => 'decimal:2',
     ];
-
-    public function lease()
-    {
-        return $this->belongsTo(Lease::class);
-    }
 
     public function bill()
     {

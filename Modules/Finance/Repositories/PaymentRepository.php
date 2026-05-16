@@ -12,7 +12,7 @@ class PaymentRepository implements PaymentRepositoryInterface
 {
     public function getPaginated(int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
-        $query = Payment::with(['invoice.lease.resident.user', 'invoice.lease.room'])->orderBy('created_at', 'desc');
+        $query = Payment::with(['invoice.schedule.room'])->orderBy('created_at', 'desc');
 
         if (!empty($filters['status'])) {
             $query->where('status', $filters['status']);
@@ -22,11 +22,6 @@ class PaymentRepository implements PaymentRepositoryInterface
             $query->where('payment_method', $filters['payment_method']);
         }
 
-        if (!empty($filters['resident_id'])) {
-            $query->whereHas('invoice.lease', function ($q) use ($filters) {
-                $q->where('resident_id', $filters['resident_id']);
-            });
-        }
 
         if (!empty($filters['schedule_ids'])) {
             $query->whereHas('invoice', function ($q) use ($filters) {
@@ -48,7 +43,7 @@ class PaymentRepository implements PaymentRepositoryInterface
 
     public function getPendingPayments(int $limit = 5): Collection
     {
-        return Payment::with(['invoice.lease.resident.user', 'invoice.lease.room'])
+        return Payment::with(['invoice.schedule.room'])
             ->where('status', PaymentStatus::PENDING->value)
             ->latest()
             ->limit($limit)

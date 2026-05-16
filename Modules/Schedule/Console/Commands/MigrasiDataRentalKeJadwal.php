@@ -4,7 +4,6 @@ namespace Modules\Schedule\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Modules\Rental\Enums\LeaseStatus;
 use Modules\Schedule\Enums\ScheduleStatus;
 
 class MigrasiDataRentalKeJadwal extends Command
@@ -67,7 +66,7 @@ class MigrasiDataRentalKeJadwal extends Command
                         ->where('lease_id', $lease->id)
                         ->orderBy('id')
                         ->value('amount'),
-                    'activated_at'    => $lease->status === LeaseStatus::ACTIVE->value ? $lease->created_at : null,
+                    'activated_at'    => $lease->status === 'active' ? $lease->created_at : null,
                     'finished_at'     => $lease->finished_at,
                     'created_at'      => $lease->created_at,
                     'updated_at'      => $lease->updated_at,
@@ -109,11 +108,11 @@ class MigrasiDataRentalKeJadwal extends Command
     private function mapStatus(string $leaseStatus): string
     {
         return match ($leaseStatus) {
-            LeaseStatus::PENDING->value   => ScheduleStatus::PENDING->value,
-            LeaseStatus::ACTIVE->value    => ScheduleStatus::ACTIVE->value,
-            LeaseStatus::FINISHED->value  => ScheduleStatus::FINISHED->value,
-            LeaseStatus::CANCELLED->value => ScheduleStatus::CANCELLED->value,
-            default                       => ScheduleStatus::CANCELLED->value,
+            'pending'   => ScheduleStatus::PENDING->value,
+            'active'    => ScheduleStatus::ACTIVE->value,
+            'finished'  => ScheduleStatus::FINISHED->value,
+            'cancelled' => ScheduleStatus::CANCELLED->value,
+            default     => ScheduleStatus::CANCELLED->value,
         };
     }
 }

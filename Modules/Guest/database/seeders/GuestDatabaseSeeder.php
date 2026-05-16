@@ -8,8 +8,7 @@ use Modules\Guest\Enums\GuestBillStatus;
 use Modules\Guest\Enums\GuestRelationship;
 use Modules\Guest\Models\Guest;
 use Modules\Guest\Models\GuestBill;
-use Modules\Rental\Enums\LeaseStatus;
-use Modules\Rental\Models\Lease;
+use Modules\Schedule\Models\Schedule;
 
 class GuestDatabaseSeeder extends Seeder
 {
@@ -19,16 +18,15 @@ class GuestDatabaseSeeder extends Seeder
             return;
         }
 
-        $leases = Lease::with('room')
-            ->where('status', LeaseStatus::ACTIVE->value)
+        $schedules = Schedule::with('room')
+            ->where('status', 'active')
             ->get();
 
-        if ($leases->isEmpty()) {
-            // Fallback for seeding when no active leases exist yet.
-            $leases = Lease::with('room')->get();
+        if ($schedules->isEmpty()) {
+            $schedules = Schedule::with('room')->get();
         }
 
-        if ($leases->isEmpty()) {
+        if ($schedules->isEmpty()) {
             return;
         }
 
@@ -43,31 +41,31 @@ class GuestDatabaseSeeder extends Seeder
 
         $seedStart = Carbon::now()->subDays(12);
 
-        foreach ($leases as $index => $lease) {
+        foreach ($schedules as $index => $schedule) {
             $template = $templates[$index % count($templates)];
 
-            $checkIn = (clone $seedStart)->subDays($index);
+            $checkIn  = (clone $seedStart)->subDays($index);
             $checkOut = (clone $checkIn)->addDays($template['stay_days']);
 
-            $billing = $this->calculateBilling($lease, $checkIn, $checkOut);
+            $billing = $this->calculateBilling($schedule, $checkIn, $checkOut);
 
             $guest = Guest::create([
-                'lease_id' => $lease->id,
-                'name' => $template['name'],
-                'check_in_at' => $checkIn->toDateTimeString(),
-                'check_out_at' => $checkOut->toDateTimeString(),
-                'relationship' => $template['relationship']->value,
-                'total_days' => $billing['total_days'],
-                'billable_days' => $billing['billable_days'],
-                'charge_amount' => $billing['charge_amount'],
+                'schedule_reference_id' => $schedule->id,
+                'name'                  => $template['name'],
+                'check_in_at'           => $checkIn->toDateTimeString(),
+                'check_out_at'          => $checkOut->toDateTimeString(),
+                'relationship'          => $template['relationship']->value,
+                'total_days'            => $billing['total_days'],
+                'billable_days'         => $billing['billable_days'],
+                'charge_amount'         => $billing['charge_amount'],
             ]);
 
             if ($billing['charge_amount'] > 0) {
                 GuestBill::create([
-                    'guest_id' => $guest->id,
+                    'guest_id'    => $guest->id,
                     'bill_number' => 'GB-' . now()->format('Ymd') . '-' . str_pad((string) $guest->id, 5, '0', STR_PAD_LEFT),
-                    'amount' => $billing['charge_amount'],
-                    'status' => GuestBillStatus::UNPAID->value,
+                    'amount'      => $billing['charge_amount'],
+                    'status'      => GuestBillStatus::UNPAID->value,
                 ]);
             }
         }
@@ -76,17 +74,17 @@ class GuestDatabaseSeeder extends Seeder
     /**
      * @return array{total_days: int, billable_days: int, charge_amount: float}
      */
-    private function calculateBilling(Lease $lease, Carbon $checkIn, Carbon $checkOut): array
+    private function calculateBilling(Schedule $schedule, Carbon $checkIn, Carbon $checkOut): array
     {
-        $diffHours = ($checkOut->getTimestamp() - $checkIn->getTimestamp()) / 3600;
-        $totalDays = (int) ceil($diffHours / 24);
+        $diffHours  = ($checkOut->getTimestamp() - $checkIn->getTimestamp()) / 3600;
+        $totalDays  = (int) ceil($diffHours / 24);
         $billableDays = max(0, $totalDays - 2);
 
-        $roomPrice = (float) ($lease->room?->price ?? 0);
+        $roomPrice    = (float) ($schedule->room?->price ?? 0);
         $chargeAmount = $billableDays * ($roomPrice * 0.05);
 
         return [
-            'total_days' => $totalDays,
+            'total_days'    => $totalDays,
             'billable_days' => $billableDays,
             'charge_amount' => $chargeAmount,
         ];

@@ -2,7 +2,6 @@
 
 namespace Modules\Finance\Services;
 
-use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Modules\Finance\Contracts\PaymentStrategyInterface;
@@ -43,19 +42,6 @@ class FinanceService
         });
     }
 
-    public function generateInvoiceForLease(int $leaseId, float $amount, Carbon $dueDate)
-    {
-        $InvoiceNumber = 'INV-' . date('Ymd') . '-' . str_pad($leaseId, 4, '0', STR_PAD_LEFT);
-
-        return $this->invoiceRepository->create([
-            'lease_id' => $leaseId,
-            'invoice_number' => $InvoiceNumber,
-            'amount' => $amount,
-            'status' => InvoiceStatus::UNPAID->value,
-            'due_date' => $dueDate,
-        ]);
-    }
-
     public function verifyPayment(int $paymentId, bool $isApproved, ?string $adminNotes = null): Payment
     {
         return DB::transaction(function () use ($paymentId, $isApproved, $adminNotes) {
@@ -73,29 +59,26 @@ class FinanceService
             if ($isApproved) {
                 $this->invoiceRepository->updateStatus($payment->invoice, InvoiceStatus::PAID->value);
 
-                $invoice    = $payment->invoice->loadMissing('lease.room', 'lease.resident.user');
-                $lease      = $invoice->lease;
-                // Dukung dua jalur: lama (lease_id) dan baru (schedule_id)
-                $scheduleId = $invoice->lease_id ?? $invoice->schedule_id ?? 0;
+                $invoice  = $payment->invoice->loadMissing('schedule.room');
+                $schedule = $invoice->schedule;
 
                 event(new PembayaranDiverifikasi(
                     paymentId:     $payment->id,
                     invoiceId:     $invoice->id,
-                    scheduleId:    $scheduleId,
+                    scheduleId:    $invoice->schedule_id ?? 0,
                     amount:        (float) $invoice->amount,
-                    tenantName:    $lease->resident?->user?->name ?? '',
-                    tenantPhone:   $lease->resident?->phone_number ?? '',
+                    tenantName:    $schedule?->tenant_name ?? '',
+                    tenantPhone:   $schedule?->tenant_phone ?? '',
                     invoiceNumber: $invoice->invoice_number,
-                    roomTitle:     $lease->room?->title ?? '',
-                    roomNumber:    $lease->room?->number ?? '',
-                    startDate:     $lease->start_date?->toDateString() ?? '',
-                    endDate:       $lease->end_date?->toDateString() ?? '',
+                    roomTitle:     $schedule?->room?->title ?? '',
+                    roomNumber:    $schedule?->room?->number ?? '',
+                    startDate:     $schedule?->start_date?->toDateString() ?? '',
+                    endDate:       $schedule?->end_date?->toDateString() ?? '',
                 ));
 
                 event(new PaymentSettled($payment));
             } else {
-                // Tolak pembayaran → batalkan lease dan bebaskan kamar
-                $scheduleId = $payment->invoice->lease_id ?? $payment->invoice->schedule_id ?? 0;
+                $scheduleId = $payment->invoice->schedule_id ?? 0;
                 event(new PembayaranDibatalkan(
                     paymentId:  $payment->id,
                     invoiceId:  $payment->invoice->id,
@@ -137,7 +120,7 @@ class FinanceService
                 event(new PembayaranDibatalkan(
                     paymentId:  $payment->id,
                     invoiceId:  $payment->invoice->id,
-                    scheduleId: $payment->invoice->lease_id,
+                    scheduleId: $payment->invoice->schedule_id ?? 0,
                 ));
                 return $payment;
             } catch (\Exception $e) {
@@ -173,14 +156,14 @@ class FinanceService
             $this->paymentRepository->update($payment, ['status' => PaymentStatus::PAID->value]);
             $this->invoiceRepository->updateStatus($invoice, InvoiceStatus::PAID->value);
 
-            $invoice->loadMissing('lease.resident.user');
+            $invoice->loadMissing('schedule');
             event(new PembayaranDiterima(
                 paymentId:   $payment->id,
                 invoiceId:   $invoice->id,
-                scheduleId:  $invoice->lease_id,
+                scheduleId:  $invoice->schedule_id ?? 0,
                 amount:      (float) $invoice->amount,
-                tenantName:  $invoice->lease?->resident?->user?->name ?? '',
-                tenantPhone: $invoice->lease?->resident?->phone_number ?? '',
+                tenantName:  $invoice->schedule?->tenant_name ?? '',
+                tenantPhone: $invoice->schedule?->tenant_phone ?? '',
             ));
 
             event(new PaymentSettled($payment));

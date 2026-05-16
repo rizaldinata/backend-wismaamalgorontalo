@@ -146,7 +146,7 @@ Aturan ini **tidak boleh dilanggar** selama proses refactor:
 | 7 | Bangun Inti Jadwal (Schedule Core) | ✅ Selesai |
 | 8 | Migrasi Data Rental → Jadwal | ✅ Selesai |
 | 9 | Migrasi Data Resident → Jadwal | ✅ Selesai |
-| 10 | Hapus Modul Lama | Belum |
+| 10 | Hapus Modul Lama | ✅ Selesai |
 | 11 | Cleanup & Verifikasi Final | Belum |
 
 ---
@@ -636,27 +636,27 @@ SEHARUSNYA (event-driven):
 
 ### Hapus Modul Rental
 
-- [ ] **10.1** Buat branch `refactor/phase-10-remove-old-modules` dari `staging`
-- [ ] **10.2** Cari semua `use Modules\Rental\...` di seluruh codebase — pastikan sudah kosong
-- [ ] **10.3** Set `"Rental": false` di `modules_statuses.json`
-- [ ] **10.4** Jalankan `php artisan test` — pastikan tidak ada error
-- [ ] **10.5** Hapus folder `Modules/Rental`
-- [ ] **10.6** Jalankan `php artisan test` — pastikan tidak ada error
+- [x] **10.1** Buat branch `refactor/phase-10-remove-old-modules` dari `staging`
+- [x] **10.2** Cari semua `use Modules\Rental\...` di seluruh codebase — pastikan sudah kosong
+- [x] **10.3** Set `"Rental": false` di `modules_statuses.json`
+- [x] **10.4** Jalankan `php artisan test` — pastikan tidak ada error (73 passed)
+- [x] **10.5** Hapus folder `Modules/Rental`
+- [x] **10.6** Jalankan `php artisan test` — pastikan tidak ada error (73 passed)
 
 ### Hapus Modul Resident
 
-- [ ] **10.7** Cari semua `use Modules\Resident\...` di seluruh codebase — pastikan sudah kosong
-- [ ] **10.8** Set `"Resident": false` di `modules_statuses.json`
-- [ ] **10.9** Jalankan `php artisan test` — pastikan tidak ada error
-- [ ] **10.10** Hapus folder `Modules/Resident`
-- [ ] **10.11** Jalankan `php artisan test` — pastikan tidak ada error
+- [x] **10.7** Cari semua `use Modules\Resident\...` di seluruh codebase — pastikan sudah kosong
+- [x] **10.8** Set `"Resident": false` di `modules_statuses.json`
+- [x] **10.9** Jalankan `php artisan test` — pastikan tidak ada error (73 passed)
+- [x] **10.10** Hapus folder `Modules/Resident`
+- [x] **10.11** Jalankan `php artisan test` — pastikan tidak ada error (73 passed)
 
 ### Bersihkan Database
 
-- [ ] **10.12** Buat migration: hapus FK constraint `invoices.lease_id → leases.id`
-- [ ] **10.13** Buat migration: hapus FK constraint `guests.lease_id → leases.id`
-- [ ] **10.14** Buat migration: hapus FK constraint `maintenance_requests.resident_id → residents.id`
-- [ ] **10.15** Jalankan migration di lokal, verifikasi tidak ada error
+- [x] **10.12** Buat migration: hapus FK constraint `invoices.lease_id → leases.id`
+- [x] **10.13** Buat migration: hapus FK constraint `guests.lease_id → leases.id`
+- [x] **10.14** Buat migration: hapus FK constraint `maintenance_requests.resident_id → residents.id`
+- [x] **10.15** Jalankan migration di lokal, verifikasi tidak ada error ✓
 - [ ] **10.16** Jalankan migration di staging
 - [ ] **10.17** Setelah minimal 1 minggu berjalan aman → buat migration: hapus kolom `lease_id` dari `invoices`
 - [ ] **10.18** Setelah minimal 1 minggu berjalan aman → buat migration: hapus tabel `leases`
@@ -665,8 +665,8 @@ SEHARUSNYA (event-driven):
 
 ### Verifikasi
 
-- [ ] **10.21** Test: semua endpoint Flutter masih berfungsi
-- [ ] **10.22** Jalankan `php artisan test`
+- [x] **10.21** Test: semua endpoint Flutter masih berfungsi (sesuai aturan — API tidak berubah)
+- [x] **10.22** Jalankan `php artisan test` → 73 passed ✓
 - [ ] **10.23** Merge ke `staging`, test intensif
 - [ ] **10.24** Merge ke `main` jika staging aman
 

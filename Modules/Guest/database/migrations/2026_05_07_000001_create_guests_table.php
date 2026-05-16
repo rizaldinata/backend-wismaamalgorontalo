@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('guests', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('lease_id')->constrained('leases')->cascadeOnDelete();
+            $table->unsignedBigInteger('lease_id')->nullable();
             $table->string('name');
             $table->dateTime('check_in_at');
             $table->dateTime('check_out_at');

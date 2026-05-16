@@ -10,7 +10,6 @@ use Modules\Finance\Models\Invoice;
 use Modules\Finance\Models\Payment;
 use Modules\Finance\Services\ExpenseService;
 use Modules\Finance\Services\FinanceService;
-use Modules\Rental\Models\Lease;
 use Tests\TestCase;
 
 use function Pest\Laravel\assertDatabaseHas;
@@ -21,11 +20,8 @@ uses(TestCase::class, RefreshDatabase::class);
 test('dapat memproses pembayaran manual dengan mengunggah bukti transfer', function () {
     Storage::fake('public');
 
-    $lease = Lease::factory()->create();
-
     $invoice = Invoice::factory()->create([
-        'lease_id' => $lease->id,
-        'status' => InvoiceStatus::UNPAID
+        'status' => InvoiceStatus::UNPAID,
     ]);
 
     $file = UploadedFile::fake()->image('transfer_proof.jpg');
