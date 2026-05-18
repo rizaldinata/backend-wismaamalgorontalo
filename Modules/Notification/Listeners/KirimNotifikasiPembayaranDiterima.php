@@ -7,7 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Modules\Notification\Enums\NotificationType;
 use Modules\Notification\Services\NotificationService;
-use Modules\Setting\Services\SettingService;
+use App\Contracts\ConfigProviderInterface;
 
 class KirimNotifikasiPembayaranDiterima implements ShouldQueue
 {
@@ -15,7 +15,7 @@ class KirimNotifikasiPembayaranDiterima implements ShouldQueue
 
     public function __construct(
         private readonly NotificationService $notificationService,
-        private readonly SettingService $settingService,
+        private readonly ConfigProviderInterface $settingService,
     ) {}
 
     public function handle(PembayaranDiterima $event): void

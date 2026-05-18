@@ -1,0 +1,93 @@
+deptrac:
+  paths:
+    - ./app
+    - ./Modules
+
+  exclude_files:
+    - '#.*Test.*#'
+    - '#.*tests.*#'
+    - '#.*database/migrations.*#'
+    - '#.*database/seeders.*#'
+    - '#.*database/factories.*#'
+
+  layers:
+    - name: Infrastructure
+      collectors:
+        - type: className
+          regex: '^Modules\\(Auth|Setting)\\'
+
+    - name: Core
+      collectors:
+        - type: className
+          regex: '^Modules\\(Room|Schedule)\\'
+
+    - name: Finance
+      collectors:
+        - type: className
+          regex: '^Modules\\Finance\\'
+
+    - name: Maintenance
+      collectors:
+        - type: className
+          regex: '^Modules\\Maintenance\\'
+
+    - name: Guest
+      collectors:
+        - type: className
+          regex: '^Modules\\Guest\\'
+
+    - name: Inventory
+      collectors:
+        - type: className
+          regex: '^Modules\\Inventory\\'
+
+    - name: Notification
+      collectors:
+        - type: className
+          regex: '^Modules\\Notification\\'
+
+    - name: AppLayer
+      collectors:
+        - type: className
+          regex: '^App\\'
+
+  ruleset:
+    # Infrastructure boleh depend ke AppLayer saja
+    Infrastructure:
+      - AppLayer
+
+    # Core boleh depend ke Infrastructure dan AppLayer
+    Core:
+      - Infrastructure
+      - AppLayer
+
+    # Business modules boleh depend ke Core, Infrastructure, dan AppLayer
+    # Tapi TIDAK boleh antar sesama Business module
+    Finance:
+      - Core
+      - Infrastructure
+      - AppLayer
+
+    Maintenance:
+      - Core
+      - Infrastructure
+      - AppLayer
+
+    Guest:
+      - Core
+      - Infrastructure
+      - AppLayer
+
+    Inventory:
+      - Core
+      - Infrastructure
+      - AppLayer
+
+    Notification:
+      - Core
+      - Infrastructure
+      - AppLayer
+
+    # AppLayer (composition root) boleh wire up Infrastructure — ini memang tugasnya
+    AppLayer:
+      - Infrastructure

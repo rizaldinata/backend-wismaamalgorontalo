@@ -33,6 +33,7 @@ class ScheduleController extends Controller
             'tenant_name' => 'nullable|string|max:255',
             'tenant_id_number' => 'nullable|string|max:50',
             'tenant_phone' => 'nullable|string|max:20',
+            'tenant_user_id' => 'nullable|integer|exists:users,id',
             'agreed_price' => 'nullable|numeric|min:0',
         ]);
 

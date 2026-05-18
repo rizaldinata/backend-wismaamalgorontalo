@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Transformers\InvoiceResource;
-use Modules\Setting\Services\SettingService;
+use App\Contracts\ConfigProviderInterface;
 
 class InvoiceController extends Controller
 {
@@ -16,7 +16,7 @@ class InvoiceController extends Controller
 
     public function __construct(
         private readonly InvoiceRepositoryInterface $invoiceRepository,
-        private readonly SettingService $settingService,
+        private readonly ConfigProviderInterface $settingService,
     ) {}
 
     public function index(Request $request)
@@ -48,7 +48,7 @@ class InvoiceController extends Controller
             ], 404);
         }
 
-        $invoice->load(['schedule.room', 'payments']);
+        $invoice->load(['payments']);
 
         return $this->apiSuccess(new InvoiceResource($invoice), 'Detail tagihan berhasil diambil');
     }
@@ -77,7 +77,7 @@ class InvoiceController extends Controller
             abort(404);
         }
 
-        $invoice->load(['schedule.room', 'payments']);
+        $invoice->load(['payments']);
 
         $wismaName = $this->settingService->getSettingValue('wisma_name', 'Wisma Amal Gorontalo');
 

@@ -6,14 +6,14 @@ use Modules\Notification\Contracts\NotificationRepositoryInterface;
 use Modules\Notification\Contracts\WhatsAppProviderInterface;
 use Modules\Notification\Enums\NotificationStatus;
 use Modules\Notification\Enums\NotificationType;
-use Modules\Setting\Services\SettingService;
+use App\Contracts\ConfigProviderInterface;
 
 readonly class NotificationService
 {
     public function __construct(
         private WhatsAppProviderInterface $whatsAppProvider,
         private NotificationRepositoryInterface $repository,
-        private SettingService $settingService
+        private ConfigProviderInterface $settingService
     ) {}
 
     public function sendNotification(NotificationType $type, string $target, string $message): bool

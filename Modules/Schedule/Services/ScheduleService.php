@@ -35,10 +35,12 @@ class ScheduleService
             'agreed_price' => $data['agreed_price'] ?? null,
         ]);
 
+        $roomNumber = $data['room_number'] ?? ($schedule->room->number ?? '');
+
         event(new JadwalDibuat(
             scheduleId: $schedule->id,
             roomId: $schedule->room_id,
-            roomNumber: $data['room_number'] ?? '',
+            roomNumber: $roomNumber,
             tipeJadwal: $schedule->type->value,
             startDate: $schedule->start_date->toDateString(),
             endDate: $schedule->end_date->toDateString(),
@@ -46,6 +48,7 @@ class ScheduleService
             tenantPhone: $schedule->tenant_phone ?? '',
             agreedPrice: $schedule->agreed_price ? (float) $schedule->agreed_price : null,
             source: 'schedule',
+            tenantUserId: $schedule->tenant_user_id,
         ));
 
         return $schedule;
@@ -69,11 +72,12 @@ class ScheduleService
             event(new JadwalSewaAktif(
                 scheduleId: $updated->id,
                 roomId: $updated->room_id,
-                roomNumber: '',
+                roomNumber: $updated->room->number ?? '',
                 tenantName: $updated->tenant_name ?? '',
                 tenantPhone: $updated->tenant_phone ?? '',
                 startDate: $updated->start_date->toDateString(),
                 userId: $updated->tenant_user_id,
+                endDate: $updated->end_date->toDateString(),
             ));
         }
 

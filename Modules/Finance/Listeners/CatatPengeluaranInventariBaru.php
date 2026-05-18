@@ -23,7 +23,7 @@ class CatatPengeluaranInventariBaru
             'amount' => $event->purchasePrice,
             'expense_date' => now(),
             'reference_id' => $event->inventoryId,
-            'reference_type' => \Modules\Inventory\Models\Inventory::class,
+            'reference_type' => 'Modules\\Inventory\\Models\\Inventory',
         ]);
     }
 }

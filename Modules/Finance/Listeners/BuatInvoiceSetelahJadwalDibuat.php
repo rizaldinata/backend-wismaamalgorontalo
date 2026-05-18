@@ -38,6 +38,12 @@ class BuatInvoiceSetelahJadwalDibuat
             'amount' => $event->agreedPrice,
             'status' => InvoiceStatus::UNPAID->value,
             'due_date' => Carbon::parse($event->startDate),
+            'tenant_user_id' => $event->tenantUserId,
+            'tenant_name' => $event->tenantName,
+            'tenant_phone' => $event->tenantPhone,
+            'room_number' => $event->roomNumber,
+            'period_start' => $event->startDate,
+            'period_end' => $event->endDate,
         ];
 
         if ($event->source === 'schedule') {

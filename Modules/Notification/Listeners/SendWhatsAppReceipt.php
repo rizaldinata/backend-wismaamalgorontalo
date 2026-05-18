@@ -6,7 +6,7 @@ use App\Events\Finance\PembayaranDiverifikasi;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Modules\Notification\Services\NotificationService;
-use Modules\Setting\Services\SettingService;
+use App\Contracts\ConfigProviderInterface;
 
 class SendWhatsAppReceipt implements ShouldQueue
 {
@@ -14,7 +14,7 @@ class SendWhatsAppReceipt implements ShouldQueue
 
     public function __construct(
         private readonly NotificationService $notificationService,
-        private readonly SettingService $settingService,
+        private readonly ConfigProviderInterface $settingService,
     ) {}
 
     public function handle(PembayaranDiverifikasi $event): void

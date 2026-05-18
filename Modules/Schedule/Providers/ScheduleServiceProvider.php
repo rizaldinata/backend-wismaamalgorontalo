@@ -4,8 +4,10 @@ namespace Modules\Schedule\Providers;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use App\Contracts\ActiveTenantCheckerInterface;
 use Modules\Schedule\Repositories\Contracts\ScheduleRepositoryInterface;
 use Modules\Schedule\Repositories\Eloquent\ScheduleRepository;
+use Modules\Schedule\Services\ScheduleActiveTenantChecker;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -40,6 +42,7 @@ class ScheduleServiceProvider extends ServiceProvider
         $this->app->register(RouteServiceProvider::class);
 
         $this->app->bind(ScheduleRepositoryInterface::class, ScheduleRepository::class);
+        $this->app->bind(ActiveTenantCheckerInterface::class, ScheduleActiveTenantChecker::class);
     }
 
     /**

@@ -16,8 +16,8 @@ class InvoiceResource extends JsonResource
             'due_date' => $this->due_date ? $this->due_date->format('Y-m-d') : null,
             'lease' => [
                 'id' => $this->schedule_id ?? $this->lease_id,
-                'resident_name' => $this->schedule?->tenant_name,
-                'room_number' => $this->schedule?->room?->number,
+                'resident_name' => $this->tenant_name,
+                'room_number' => $this->room_number,
             ],
             'created_at' => $this->created_at ? $this->created_at->toIso8601String() : null,
             'updated_at' => $this->updated_at ? $this->updated_at->toIso8601String() : null,

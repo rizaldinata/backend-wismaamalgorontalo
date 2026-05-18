@@ -12,7 +12,7 @@ class InvoiceRepository implements InvoiceRepositoryInterface
 {
     public function getPaginated(int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
-        $query = Invoice::with(['schedule.room'])->orderBy('created_at', 'desc');
+        $query = Invoice::with(['payments'])->orderBy('created_at', 'desc');
 
         if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
@@ -20,6 +20,10 @@ class InvoiceRepository implements InvoiceRepositoryInterface
 
         if (! empty($filters['schedule_ids'])) {
             $query->whereIn('schedule_id', $filters['schedule_ids']);
+        }
+
+        if (! empty($filters['tenant_user_id'])) {
+            $query->where('tenant_user_id', $filters['tenant_user_id']);
         }
 
         return $query->paginate($perPage);
@@ -119,8 +123,7 @@ class InvoiceRepository implements InvoiceRepositoryInterface
 
     public function getDueInvoices(int $limit = 5): Collection
     {
-        return Invoice::with(['schedule.room'])
-            ->where('status', InvoiceStatus::UNPAID->value)
+        return Invoice::where('status', InvoiceStatus::UNPAID->value)
             ->where('due_date', '<=', now()->addDays(7))
             ->orderBy('due_date', 'asc')
             ->limit($limit)

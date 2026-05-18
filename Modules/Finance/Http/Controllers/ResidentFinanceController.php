@@ -11,8 +11,6 @@ use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
 use Modules\Finance\Transformers\InvoiceResource;
 use Modules\Finance\Transformers\PaymentResource;
-use Modules\Schedule\Enums\ScheduleStatus;
-use Modules\Schedule\Repositories\Contracts\ScheduleRepositoryInterface;
 
 class ResidentFinanceController extends Controller
 {
@@ -21,49 +19,31 @@ class ResidentFinanceController extends Controller
     public function __construct(
         private readonly InvoiceRepositoryInterface $invoiceRepository,
         private readonly PaymentRepositoryInterface $paymentRepository,
-        private readonly ScheduleRepositoryInterface $scheduleRepository,
     ) {}
 
     public function summary()
     {
         $userId = Auth::id();
-        $schedules = collect($this->scheduleRepository->getByTenantUserId($userId));
-
-        if ($schedules->isEmpty()) {
-            return $this->apiSuccess([
-                'resident_name' => Auth::user()->name,
-                'active_lease' => null,
-                'total_unpaid' => 0.0,
-                'unpaid_count' => 0,
-            ], 'Ringkasan keuangan berhasil diambil');
-        }
-
-        $scheduleIds = $schedules->pluck('id')->toArray();
-        $activeSchedule = $schedules->first(fn ($s) => $s->status === ScheduleStatus::ACTIVE);
 
         $unpaidInvoices = $this->invoiceRepository->getPaginated(100, [
-            'schedule_ids' => $scheduleIds,
+            'tenant_user_id' => $userId,
             'status' => 'unpaid',
         ]);
 
         $totalUnpaid = collect($unpaidInvoices->items())->sum('amount');
 
+        // Semua data diambil dari tabel milik Finance sendiri — tidak query modul lain
+        $activeTenant = DB::table('finance_active_tenants')
+            ->where('user_id', $userId)
+            ->first();
+
         $activeLease = null;
-        if ($activeSchedule) {
-            $rentalType = 'monthly';
-            if ($activeSchedule->legacy_lease_id) {
-                $rentalType = DB::table('leases')
-                    ->where('id', $activeSchedule->legacy_lease_id)
-                    ->value('rental_type') ?? 'monthly';
-            }
-
-            $room = DB::table('rooms')->where('id', $activeSchedule->room_id)->first();
-
+        if ($activeTenant) {
             $activeLease = [
-                'id' => $activeSchedule->id,
-                'room_number' => $room?->number ?? '-',
-                'end_date' => $activeSchedule->end_date->format('Y-m-d'),
-                'rental_type' => $rentalType,
+                'id' => $activeTenant->schedule_id,
+                'room_number' => $activeTenant->room_number ?? '-',
+                'end_date' => $activeTenant->end_date,
+                'rental_type' => 'monthly',
             ];
         }
 
@@ -78,19 +58,15 @@ class ResidentFinanceController extends Controller
     public function invoices(Request $request)
     {
         $userId = Auth::id();
-        $scheduleIds = collect($this->scheduleRepository->getByTenantUserId($userId))
-            ->pluck('id')
-            ->toArray();
-
-        if (empty($scheduleIds)) {
-            return $this->apiError('Data penghuni tidak ditemukan.', 404);
-        }
-
         $perPage = (int) $request->query('per_page', 15);
         $filters = $request->only(['status']);
-        $filters['schedule_ids'] = $scheduleIds;
+        $filters['tenant_user_id'] = $userId;
 
         $invoices = $this->invoiceRepository->getPaginated($perPage, $filters);
+
+        if ($invoices->isEmpty()) {
+            return $this->apiError('Data penghuni tidak ditemukan.', 404);
+        }
 
         return InvoiceResource::collection($invoices)->additional([
             'success' => true,
@@ -101,13 +77,9 @@ class ResidentFinanceController extends Controller
     public function showInvoice(int $id)
     {
         $userId = Auth::id();
-        $scheduleIds = collect($this->scheduleRepository->getByTenantUserId($userId))
-            ->pluck('id')
-            ->toArray();
-
         $invoice = $this->invoiceRepository->findById($id);
 
-        if (! $invoice || ! in_array($invoice->schedule_id, $scheduleIds)) {
+        if (! $invoice || $invoice->tenant_user_id !== $userId) {
             return $this->apiError('Invoice tidak ditemukan.', 404);
         }
 
@@ -120,8 +92,16 @@ class ResidentFinanceController extends Controller
     public function payments(Request $request)
     {
         $userId = Auth::id();
-        $scheduleIds = collect($this->scheduleRepository->getByTenantUserId($userId))
-            ->pluck('id')
+
+        $unpaidInvoices = $this->invoiceRepository->getPaginated(200, [
+            'tenant_user_id' => $userId,
+        ]);
+
+        $scheduleIds = collect($unpaidInvoices->items())
+            ->pluck('schedule_id')
+            ->filter()
+            ->unique()
+            ->values()
             ->toArray();
 
         if (empty($scheduleIds)) {

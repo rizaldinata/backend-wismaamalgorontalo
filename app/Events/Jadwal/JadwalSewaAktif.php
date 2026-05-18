@@ -19,5 +19,6 @@ class JadwalSewaAktif
         public readonly ?int $userId = null,
         public readonly ?float $roomPrice = null,
         public readonly ?string $tenantEmail = null,
+        public readonly ?string $endDate = null,
     ) {}
 }

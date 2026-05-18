@@ -15,7 +15,7 @@ class SinkronisasiPengeluaranInventaris
     {
         $this->expenseService->syncExpenseByReference(
             $event->inventoryId,
-            \Modules\Inventory\Models\Inventory::class,
+            'Modules\\Inventory\\Models\\Inventory',
             [
                 'title' => "Revisi Pembelian: {$event->name}",
                 'amount' => $event->purchasePrice,

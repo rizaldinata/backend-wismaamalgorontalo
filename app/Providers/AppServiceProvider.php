@@ -2,18 +2,21 @@
 
 namespace App\Providers;
 
+use App\Contracts\ActiveTenantCheckerInterface;
+use App\Contracts\ConfigProviderInterface;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Modules\Setting\Services\SettingService;
 
 class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        $this->app->bind(ConfigProviderInterface::class, SettingService::class);
     }
 
     public function boot(): void
@@ -36,9 +39,9 @@ class AppServiceProvider extends ServiceProvider
             return true;
         });
 
-        // Gate khusus penghuni aktif
+        // Gate khusus penghuni aktif — depend ke contract, implementasi di Schedule Core
         Gate::define('resident-access', function ($user) {
-            return $user->hasActiveLease();
+            return app(ActiveTenantCheckerInterface::class)->isActiveTenant($user->id);
         });
 
         Scramble::configure()

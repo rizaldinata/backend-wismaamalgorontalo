@@ -15,7 +15,7 @@ class HapusPengeluaranInventaris
     {
         $this->expenseService->removeExpenseByReference(
             $event->inventoryId,
-            \Modules\Inventory\Models\Inventory::class,
+            'Modules\\Inventory\\Models\\Inventory',
         );
     }
 }

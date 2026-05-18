@@ -2,9 +2,10 @@
 
 namespace Modules\Setting\Services;
 
+use App\Contracts\ConfigProviderInterface;
 use Modules\Setting\Repositories\Contracts\SettingRepositoryInterface;
 
-class SettingService
+class SettingService implements ConfigProviderInterface
 {
     public function __construct(
         private readonly SettingRepositoryInterface $settingRepository
@@ -32,7 +33,7 @@ class SettingService
         $this->settingRepository->updateOrCreate($key, (string) $value, $description);
     }
 
-    public function getSettingValue(string $key, $default = '')
+    public function getSettingValue(string $key, mixed $default = ''): mixed
     {
         return $this->settingRepository->getValueByKey($key, $default);
     }

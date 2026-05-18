@@ -18,14 +18,14 @@ use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
 use Modules\Finance\Strategies\ManualPaymentStrategy;
 use Modules\Finance\Strategies\MidtransPaymentStrategy;
-use Modules\Setting\Services\SettingService;
+use App\Contracts\ConfigProviderInterface;
 
 class FinanceService
 {
     public function __construct(
         private readonly InvoiceRepositoryInterface $invoiceRepository,
         private readonly PaymentRepositoryInterface $paymentRepository,
-        private readonly SettingService $settingService,
+        private readonly ConfigProviderInterface $settingService,
         private readonly ManualPaymentStrategy $manualStrategy,
         private readonly MidtransPaymentStrategy $midtransStrategy,
     ) {}
@@ -62,21 +62,20 @@ class FinanceService
             if ($isApproved) {
                 $this->invoiceRepository->updateStatus($payment->invoice, InvoiceStatus::PAID->value);
 
-                $invoice = $payment->invoice->loadMissing('schedule.room');
-                $schedule = $invoice->schedule;
+                $invoice = $payment->invoice;
 
                 event(new PembayaranDiverifikasi(
                     paymentId: $payment->id,
                     invoiceId: $invoice->id,
                     scheduleId: $invoice->schedule_id ?? 0,
                     amount: (float) $invoice->amount,
-                    tenantName: $schedule?->tenant_name ?? '',
-                    tenantPhone: $schedule?->tenant_phone ?? '',
+                    tenantName: $invoice->tenant_name ?? '',
+                    tenantPhone: $invoice->tenant_phone ?? '',
                     invoiceNumber: $invoice->invoice_number,
-                    roomTitle: $schedule?->room?->title ?? '',
-                    roomNumber: $schedule?->room?->number ?? '',
-                    startDate: $schedule?->start_date?->toDateString() ?? '',
-                    endDate: $schedule?->end_date?->toDateString() ?? '',
+                    roomTitle: '',
+                    roomNumber: $invoice->room_number ?? '',
+                    startDate: $invoice->period_start?->toDateString() ?? '',
+                    endDate: $invoice->period_end?->toDateString() ?? '',
                 ));
 
                 event(new PaymentSettled($payment));
@@ -162,14 +161,13 @@ class FinanceService
             $this->paymentRepository->update($payment, ['status' => PaymentStatus::PAID->value]);
             $this->invoiceRepository->updateStatus($invoice, InvoiceStatus::PAID->value);
 
-            $invoice->loadMissing('schedule');
             event(new PembayaranDiterima(
                 paymentId: $payment->id,
                 invoiceId: $invoice->id,
                 scheduleId: $invoice->schedule_id ?? 0,
                 amount: (float) $invoice->amount,
-                tenantName: $invoice->schedule?->tenant_name ?? '',
-                tenantPhone: $invoice->schedule?->tenant_phone ?? '',
+                tenantName: $invoice->tenant_name ?? '',
+                tenantPhone: $invoice->tenant_phone ?? '',
             ));
 
             event(new PaymentSettled($payment));
