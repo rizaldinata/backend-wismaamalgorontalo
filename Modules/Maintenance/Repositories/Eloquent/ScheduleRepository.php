@@ -27,6 +27,7 @@ class ScheduleRepository implements ScheduleRepositoryInterface
     public function update(MaintenanceSchedule $schedule, array $data): MaintenanceSchedule
     {
         $schedule->update($data);
+
         return $schedule->fresh();
     }
 

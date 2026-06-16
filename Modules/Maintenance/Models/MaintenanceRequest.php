@@ -2,18 +2,20 @@
 
 namespace Modules\Maintenance\Models;
 
-use Modules\Auth\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Auth\Models\User;
 use Modules\Maintenance\Enums\MaintenanceStatus;
-use Modules\Resident\Models\Resident;
 use Modules\Room\Models\Room;
 
 class MaintenanceRequest extends Model
 {
     protected $fillable = [
         'resident_id',
+        'reporter_user_id',
+        'reporter_name',
+        'reporter_phone',
         'room_id',
         'title',
         'description',
@@ -26,9 +28,9 @@ class MaintenanceRequest extends Model
         'reported_at' => 'datetime',
     ];
 
-    public function resident(): BelongsTo
+    public function reporterUser(): BelongsTo
     {
-        return $this->belongsTo(Resident::class);
+        return $this->belongsTo(User::class, 'reporter_user_id');
     }
 
     public function room(): BelongsTo

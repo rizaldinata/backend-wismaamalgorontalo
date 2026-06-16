@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('notification:lease-reminders')->dailyAt('08:00');
+Schedule::command('schedule:expire-pending')->everyMinute();

@@ -2,13 +2,13 @@
 
 namespace Modules\Maintenance\database\seeders;
 
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Modules\Auth\Models\User;
-use Modules\Maintenance\Models\MaintenanceSchedule;
-use Modules\Maintenance\Enums\ScheduleType;
-use Modules\Maintenance\Enums\ScheduleSubtype;
 use Modules\Maintenance\Enums\ScheduleStatus;
-use Carbon\Carbon;
+use Modules\Maintenance\Enums\ScheduleSubtype;
+use Modules\Maintenance\Enums\ScheduleType;
+use Modules\Maintenance\Models\MaintenanceSchedule;
 
 class MaintenanceScheduleSeeder extends Seeder
 {
@@ -21,7 +21,7 @@ class MaintenanceScheduleSeeder extends Seeder
             $q->where('name', 'super-admin')->orWhere('name', 'admin');
         })->first();
 
-        if (!$admin) {
+        if (! $admin) {
             return;
         }
 

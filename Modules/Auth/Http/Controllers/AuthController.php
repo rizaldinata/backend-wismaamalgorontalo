@@ -2,17 +2,15 @@
 
 namespace Modules\Auth\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
-use Modules\Auth\Models\User;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Modules\Auth\Services\AuthService;
-use Laravel\Sanctum\PersonalAccessToken;
-use Modules\Auth\Http\Requests\LoginRequest;
 use Illuminate\Validation\ValidationException;
+use Modules\Auth\Http\Requests\LoginRequest;
 use Modules\Auth\Http\Requests\RegisterRequest;
+use Modules\Auth\Models\User;
+use Modules\Auth\Services\AuthService;
 
 class AuthController extends Controller
 {
@@ -58,6 +56,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $this->authService->logout($request->user());
+
         return $this->apiSuccess(null, 'Logout berhasil');
     }
 
@@ -73,24 +72,29 @@ class AuthController extends Controller
         /** @var \App\Models\User $user */
         $user = $request->user('sanctum');
 
-        if (!$user) {
+        if (! $user) {
             $guestRole = \Spatie\Permission\Models\Role::where('name', 'guest')->where('guard_name', 'api')->first();
-            $permissions = $guestRole ? $guestRole->permissions->pluck('name') : ['view-room'];
-            return $this->apiSuccess($permissions, 'Guest permissions retrieved successfully');
+            $permissions = $guestRole ? $guestRole->permissions->pluck('name') : collect(['view-room']);
+
+            return $this->apiSuccess([
+                'permissions' => $permissions->values()->all(),
+                'roles'       => ['guest'],
+            ], 'Guest permissions retrieved successfully');
         }
 
-        $permissions = $user->getAllPermissions()->pluck('name');
-
-        return $this->apiSuccess($permissions, 'User permissions retrieved successfully');
+        return $this->apiSuccess([
+            'permissions' => $user->getAllPermissions()->pluck('name')->values()->all(),
+            'roles'       => $user->getRoleNames()->values()->all(),
+        ], 'User permissions retrieved successfully');
     }
 
     public function updateProfile(Request $request)
     {
         $user = $request->user();
-        
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'phone_number' => 'nullable|string|max:20',
         ]);
 
@@ -108,12 +112,12 @@ class AuthController extends Controller
 
         $user = $request->user();
 
-        if (!Hash::check($request->old_password, $user->password)) {
+        if (! Hash::check($request->old_password, $user->password)) {
             return $this->apiError('Password lama tidak sesuai', 422);
         }
 
         $user->update([
-            'password' => Hash::make($request->new_password)
+            'password' => Hash::make($request->new_password),
         ]);
 
         return $this->apiSuccess(null, 'Password berhasil diubah');

@@ -3,8 +3,6 @@
 namespace Modules\Auth\Services;
 
 use Modules\Auth\Repositories\Contracts\RoleRepositoryInterface;
-use Modules\Auth\Repositories\RoleRepository;
-use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class RoleService

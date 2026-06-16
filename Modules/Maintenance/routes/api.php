@@ -13,11 +13,11 @@ Route::get('maintenance/media/{path}', [MediaController::class, 'show'])->where(
 Route::middleware(['auth:sanctum'])->prefix('v1/damage-reports')->group(function () {
     // Resident routes
     Route::get('/my-reports', [DamageReportController::class, 'myReports'])
-        ->middleware('permission:view-maintenance');
+        ->middleware('permission:view-my-damage-report');
     Route::get('/{id}', [DamageReportController::class, 'show'])->where('id', '[0-9]+')
-        ->middleware('permission:view-maintenance');
+        ->middleware('permission:view-my-damage-report');
     Route::post('/', [DamageReportController::class, 'store'])
-        ->middleware('permission:create-maintenance');
+        ->middleware('permission:create-damage-report');
 
     // Admin routes
     Route::prefix('admin')->group(function () {

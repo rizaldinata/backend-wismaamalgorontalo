@@ -2,30 +2,32 @@
 
 namespace Modules\Finance\Services;
 
-use Carbon\Carbon;
+use App\Events\Finance\PembayaranDibatalkan;
+use App\Events\Finance\PembayaranDiterima;
+use App\Events\Finance\PembayaranDiverifikasi;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
+use Midtrans\Config;
+use Midtrans\Transaction;
 use Modules\Finance\Contracts\PaymentStrategyInterface;
 use Modules\Finance\Enums\InvoiceStatus;
 use Modules\Finance\Enums\PaymentStatus;
 use Modules\Finance\Events\PaymentSettled;
-use Midtrans\Config;
-use Midtrans\Transaction;
-use Modules\Finance\Models\Payment; 
+use Modules\Finance\Models\Payment;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
 use Modules\Finance\Strategies\ManualPaymentStrategy;
 use Modules\Finance\Strategies\MidtransPaymentStrategy;
-use Modules\Rental\Services\RentalService;
-use Modules\Setting\Services\SettingService;
+use App\Contracts\ConfigProviderInterface;
 
 class FinanceService
 {
     public function __construct(
         private readonly InvoiceRepositoryInterface $invoiceRepository,
-        private readonly RentalService $rentalService,
         private readonly PaymentRepositoryInterface $paymentRepository,
-        private readonly SettingService $settingService
+        private readonly ConfigProviderInterface $settingService,
+        private readonly ManualPaymentStrategy $manualStrategy,
+        private readonly MidtransPaymentStrategy $midtransStrategy,
     ) {}
 
     public function processPayment(int $invoiceId, array $data): Payment
@@ -38,21 +40,9 @@ class FinanceService
             }
 
             $strategy = $this->resolveStrategy($data['payment_method']);
+
             return $strategy->process($invoice, $data);
         });
-    }
-
-    public function generateInvoiceForLease(int $leaseId, float $amount, Carbon $dueDate)
-    {
-        $InvoiceNumber = 'INV-' . date('Ymd') . '-' . str_pad($leaseId, 4, '0', STR_PAD_LEFT);
-
-        return $this->invoiceRepository->create([
-            'lease_id' => $leaseId,
-            'invoice_number' => $InvoiceNumber,
-            'amount' => $amount,
-            'status' => InvoiceStatus::UNPAID->value,
-            'due_date' => $dueDate,
-        ]);
     }
 
     public function verifyPayment(int $paymentId, bool $isApproved, ?string $adminNotes = null): Payment
@@ -71,11 +61,37 @@ class FinanceService
 
             if ($isApproved) {
                 $this->invoiceRepository->updateStatus($payment->invoice, InvoiceStatus::PAID->value);
-                $this->rentalService->activateLease($payment->invoice->lease_id);
+
+                $invoice = $payment->invoice;
+                $invoice->load('schedule.room');
+                $room = $invoice->schedule?->room;
+
+                event(new PembayaranDiverifikasi(
+                    paymentId: $payment->id,
+                    invoiceId: $invoice->id,
+                    scheduleId: $invoice->schedule_id ?? 0,
+                    amount: (float) $invoice->amount,
+                    tenantName: $invoice->tenant_name ?? '',
+                    tenantPhone: $invoice->tenant_phone ?? '',
+                    invoiceNumber: $invoice->invoice_number,
+                    roomTitle: $room?->title ?? $room?->number ?? '',
+                    roomNumber: $invoice->room_number ?? '',
+                    startDate: $invoice->period_start?->toDateString() ?? '',
+                    endDate: $invoice->period_end?->toDateString() ?? '',
+                ));
+
                 event(new PaymentSettled($payment));
             } else {
-                // Tolak pembayaran → batalkan lease dan bebaskan kamar
-                $this->rentalService->cancelLease($payment->invoice->lease_id);
+                $rejectedInvoice = $payment->invoice;
+                event(new PembayaranDibatalkan(
+                    paymentId: $payment->id,
+                    invoiceId: $rejectedInvoice->id,
+                    scheduleId: $rejectedInvoice->schedule_id ?? 0,
+                    tenantName: $rejectedInvoice->tenant_name ?? '',
+                    tenantPhone: $rejectedInvoice->tenant_phone ?? '',
+                    amount: (float) $rejectedInvoice->amount,
+                    paymentStatus: PaymentStatus::REJECTED->value,
+                ));
             }
 
             return $payment;
@@ -87,7 +103,7 @@ class FinanceService
         return DB::transaction(function () use ($paymentId, $reason) {
             $payment = $this->paymentRepository->findOrFail($paymentId);
 
-            if ($payment->status !== PaymentStatus::PAID->value || $payment->payment_method !== 'midtrans') {
+            if ($payment->status !== PaymentStatus::PAID || $payment->payment_method !== 'midtrans') {
                 throw new \DomainException('Hanya metode Midtrans berstatus lunas yang dapat dikembalikan secara otomatis.');
             }
 
@@ -96,24 +112,33 @@ class FinanceService
                 Config::$isProduction = config('finance.midtrans.is_production', false);
 
                 $params = [
-                    'refund_key' => 'refund-' . time() . '-' . $paymentId,
-                    'amount'     => (int) $payment->invoice->amount,
-                    'reason'     => $reason
+                    'refund_key' => 'refund-'.time().'-'.$paymentId,
+                    'amount' => (int) $payment->invoice->amount,
+                    'reason' => $reason,
                 ];
 
                 Transaction::refund($payment->transaction_id, $params);
 
                 $this->paymentRepository->update($payment, [
-                    'status'      => PaymentStatus::REFUNDED->value,
-                    'admin_notes' => 'Refunded: ' . $reason
+                    'status' => PaymentStatus::REFUNDED->value,
+                    'admin_notes' => 'Refunded: '.$reason,
                 ]);
 
-                $this->invoiceRepository->updateStatus($payment->invoice, InvoiceStatus::UNPAID->value);
-                $this->rentalService->cancelLease($payment->invoice->lease_id);
+                $refundedInvoice = $payment->invoice;
+                $this->invoiceRepository->updateStatus($refundedInvoice, InvoiceStatus::UNPAID->value);
+                event(new PembayaranDibatalkan(
+                    paymentId: $payment->id,
+                    invoiceId: $refundedInvoice->id,
+                    scheduleId: $refundedInvoice->schedule_id ?? 0,
+                    tenantName: $refundedInvoice->tenant_name ?? '',
+                    tenantPhone: $refundedInvoice->tenant_phone ?? '',
+                    amount: (float) $refundedInvoice->amount,
+                    paymentStatus: PaymentStatus::REFUNDED->value,
+                ));
 
                 return $payment;
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Refund Error: ' . $e->getMessage());
+                \Illuminate\Support\Facades\Log::error('Refund Error: '.$e->getMessage());
                 throw new \DomainException('Gagal memproses refund ke Midtrans. Saldo mungkin tidak mencukupi atau transaksi belum di-Settle.');
             }
         });
@@ -121,14 +146,14 @@ class FinanceService
 
     private function resolveStrategy(string $method): PaymentStrategyInterface
     {
-        if ($method === 'midtrans' && !config('finance.midtrans.enabled', true)) {
+        if ($method === 'midtrans' && ! config('finance.midtrans.enabled', true)) {
             throw new \DomainException('Penyedia layanan (Admin) sedang menonaktifkan fitur pembayaran dengan Midtrans saat ini.');
         }
 
         return match ($method) {
-            'manual'   => app(ManualPaymentStrategy::class),
-            'midtrans' => app(MidtransPaymentStrategy::class),
-            default    => throw new InvalidArgumentException('Metode tidak didukung'),
+            'manual' => $this->manualStrategy,
+            'midtrans' => $this->midtransStrategy,
+            default => throw new InvalidArgumentException('Metode tidak didukung'),
         };
     }
 
@@ -136,7 +161,9 @@ class FinanceService
     {
         $orderId = $payload['order_id'];
         $payment = $this->paymentRepository->findByReference($orderId);
-        if (!$payment) return;
+        if (! $payment) {
+            return;
+        }
 
         $transactionStatus = $payload['transaction_status'];
         $invoice = $payment->invoice;
@@ -144,12 +171,47 @@ class FinanceService
         if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
             $this->paymentRepository->update($payment, ['status' => PaymentStatus::PAID->value]);
             $this->invoiceRepository->updateStatus($invoice, InvoiceStatus::PAID->value);
-            $this->rentalService->activateLease($invoice->lease_id);
+
+            $invoice->load('schedule.room');
+            $room = $invoice->schedule?->room;
+
+            // Dibutuhkan oleh AktifkanJadwalSetelahPembayaranDiterima di Schedule module
+            event(new PembayaranDiterima(
+                paymentId: $payment->id,
+                invoiceId: $invoice->id,
+                scheduleId: $invoice->schedule_id ?? 0,
+                amount: (float) $invoice->amount,
+                tenantName: $invoice->tenant_name ?? '',
+                tenantPhone: $invoice->tenant_phone ?? '',
+            ));
+
+            event(new PembayaranDiverifikasi(
+                paymentId: $payment->id,
+                invoiceId: $invoice->id,
+                scheduleId: $invoice->schedule_id ?? 0,
+                amount: (float) $invoice->amount,
+                tenantName: $invoice->tenant_name ?? '',
+                tenantPhone: $invoice->tenant_phone ?? '',
+                invoiceNumber: $invoice->invoice_number ?? '',
+                roomTitle: $room?->title ?? $room?->number ?? '',
+                roomNumber: $invoice->room_number ?? '',
+                startDate: $invoice->period_start?->toDateString() ?? '',
+                endDate: $invoice->period_end?->toDateString() ?? '',
+            ));
+
             event(new PaymentSettled($payment));
         } elseif ($transactionStatus == 'cancel' || $transactionStatus == 'deny' || $transactionStatus == 'expire') {
             $this->paymentRepository->update($payment, ['status' => PaymentStatus::FAILED->value]);
-            $this->invoiceRepository->updateStatus($invoice, InvoiceStatus::UNPAID->value); 
-            $this->rentalService->cancelLease($invoice->lease_id);
+            $this->invoiceRepository->updateStatus($invoice, InvoiceStatus::UNPAID->value);
+            event(new PembayaranDibatalkan(
+                paymentId: $payment->id,
+                invoiceId: $invoice->id,
+                scheduleId: $invoice->schedule_id ?? $invoice->lease_id ?? 0,
+                tenantName: $invoice->tenant_name ?? '',
+                tenantPhone: $invoice->tenant_phone ?? '',
+                amount: (float) $invoice->amount,
+                paymentStatus: PaymentStatus::FAILED->value,
+            ));
         }
     }
 }

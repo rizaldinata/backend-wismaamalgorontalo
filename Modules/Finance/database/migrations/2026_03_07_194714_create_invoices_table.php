@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('lease_id')->constrained('leases')->cascadeOnDelete();
+            $table->unsignedBigInteger('lease_id')->nullable();
 
             $table->string('invoice_number')->unique();
             $table->decimal('amount', 12, 2);

@@ -10,7 +10,6 @@ use Modules\Finance\Models\Invoice;
 use Modules\Finance\Models\Payment;
 use Modules\Finance\Services\ExpenseService;
 use Modules\Finance\Services\FinanceService;
-use Modules\Rental\Models\Lease;
 use Tests\TestCase;
 
 use function Pest\Laravel\assertDatabaseHas;
@@ -21,11 +20,8 @@ uses(TestCase::class, RefreshDatabase::class);
 test('dapat memproses pembayaran manual dengan mengunggah bukti transfer', function () {
     Storage::fake('public');
 
-    $lease = Lease::factory()->create();
-
     $invoice = Invoice::factory()->create([
-        'lease_id' => $lease->id,
-        'status' => InvoiceStatus::UNPAID
+        'status' => InvoiceStatus::UNPAID,
     ]);
 
     $file = UploadedFile::fake()->image('transfer_proof.jpg');
@@ -33,7 +29,7 @@ test('dapat memproses pembayaran manual dengan mengunggah bukti transfer', funct
 
     $payment = $service->processPayment($invoice->id, [
         'payment_method' => 'manual',
-        'payment_proof' => $file
+        'payment_proof' => $file,
     ]);
 
     expect($payment->status)->toBe(PaymentStatus::PENDING);
@@ -44,7 +40,7 @@ test('gagal memproses pembayaran jika invoice sudah lunas', function () {
     $invoice = Invoice::factory()->create(['status' => InvoiceStatus::PAID]);
     $service = app(FinanceService::class);
 
-    expect(fn() => $service->processPayment($invoice->id, ['payment_method' => 'manual']))
+    expect(fn () => $service->processPayment($invoice->id, ['payment_method' => 'manual']))
         ->toThrow(\DomainException::class, 'Tagihan ini sudah lunas.');
 });
 
@@ -52,7 +48,7 @@ test('admin dapat menyetujui pembayaran dan melunasi invoice', function () {
     $invoice = Invoice::factory()->create(['status' => InvoiceStatus::UNPAID]);
     $payment = Payment::factory()->create([
         'invoice_id' => $invoice->id,
-        'status' => PaymentStatus::PENDING
+        'status' => PaymentStatus::PENDING,
     ]);
 
     $service = app(FinanceService::class);
@@ -89,12 +85,12 @@ test('dapat mencatat pengeluaran manual baru', function () {
 test('tidak bisa menghapus pengeluaran yang terintegrasi (reference_type tidak null)', function () {
     $expense = Expense::factory()->create([
         'reference_type' => 'Modules\Inventory\Models\Stock',
-        'reference_id' => 99
+        'reference_id' => 99,
     ]);
 
     $service = app(ExpenseService::class);
 
-    expect(fn() => $service->deleteManualExpense($expense))
+    expect(fn () => $service->deleteManualExpense($expense))
         ->toThrow(DomainException::class);
 });
 

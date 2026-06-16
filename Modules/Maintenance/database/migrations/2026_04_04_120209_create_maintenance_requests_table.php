@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('maintenance_requests', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('resident_id')->constrained('residents')->cascadeOnDelete();
+            $table->unsignedBigInteger('resident_id')->nullable();
             $table->foreignId('room_id')->nullable()->constrained('rooms')->nullOnDelete();
             $table->string('title');
             $table->text('description');

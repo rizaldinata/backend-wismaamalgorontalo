@@ -16,7 +16,7 @@ class DamageReportRepository implements DamageReportRepositoryInterface
 
     public function addRequestImages(MaintenanceRequest $request, array $imagePaths): void
     {
-        $images = array_map(fn($path) => ['image_path' => $path], $imagePaths);
+        $images = array_map(fn ($path) => ['image_path' => $path], $imagePaths);
         $request->images()->createMany($images);
     }
 
@@ -28,16 +28,24 @@ class DamageReportRepository implements DamageReportRepositoryInterface
             ->get();
     }
 
+    public function getByUserId(int $userId): Collection
+    {
+        return MaintenanceRequest::with(['images', 'updates.user', 'updates.images'])
+            ->where('reporter_user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
     public function getAll(): Collection
     {
-        return MaintenanceRequest::with(['resident.user', 'room', 'images', 'updates.user', 'updates.images'])
+        return MaintenanceRequest::with(['room', 'images', 'updates.user', 'updates.images'])
             ->orderBy('created_at', 'desc')
             ->get();
     }
 
     public function findById(int $id): ?MaintenanceRequest
     {
-        return MaintenanceRequest::with(['resident.user', 'room', 'images', 'updates.user', 'updates.images'])
+        return MaintenanceRequest::with(['room', 'images', 'updates.user', 'updates.images'])
             ->findOrFail($id);
     }
 
@@ -48,7 +56,7 @@ class DamageReportRepository implements DamageReportRepositoryInterface
 
     public function addUpdateImages(MaintenanceRequestUpdate $update, array $imagePaths): void
     {
-        $images = array_map(fn($path) => ['image_path' => $path], $imagePaths);
+        $images = array_map(fn ($path) => ['image_path' => $path], $imagePaths);
         $update->images()->createMany($images);
     }
 

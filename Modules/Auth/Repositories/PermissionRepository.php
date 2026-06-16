@@ -43,6 +43,7 @@ class PermissionRepository implements PermissionRepositoryInterface
         $permission = $this->findById($id);
         $permission->roles()->detach();
         $permission->delete();
+
         return true;
     }
 }

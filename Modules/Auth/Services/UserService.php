@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 class UserService
 {
     public function __construct(
-        private readonly UserRepositoryInterface $userRepository = new UserRepository()
+        private readonly UserRepositoryInterface $userRepository = new UserRepository
     ) {}
 
     public function getAllUsers()
@@ -56,7 +56,7 @@ class UserService
     public function deleteUser(int $id, int $currentUserId)
     {
         if ($id === $currentUserId) {
-            throw new HttpException(403, "Anda tidak dapat menghapus diri sendiri.");
+            throw new HttpException(403, 'Anda tidak dapat menghapus diri sendiri.');
         }
 
         return $this->userRepository->delete($id);
@@ -66,7 +66,7 @@ class UserService
     {
         $role = Role::where('name', $roleName)->where('guard_name', 'api')->first();
 
-        if (!$role) {
+        if (! $role) {
             throw new HttpException(422, "Role '{$roleName}' tidak ditemukan dalam sistem (Guard: api).");
         }
 

@@ -12,14 +12,14 @@ class RoomRepository implements RoomRepositoryInterface
     {
         return Room::query()
             ->when(isset($filters['search']), function ($q) use ($filters) {
-                $q->where('title', 'like', '%' . $filters['search'] . '%')
-                    ->orWhere('description', 'like', '%' . $filters['search'] . '$')
-                    ->orWhere('number', 'like', '%' . $filters['search'] . '%');
+                $q->where('title', 'like', '%'.$filters['search'].'%')
+                    ->orWhere('description', 'like', '%'.$filters['search'].'$')
+                    ->orWhere('number', 'like', '%'.$filters['search'].'%');
             })
             ->when(isset($filters['status']), function ($q) use ($filters) {
                 $q->where('status', $filters['status']);
             })
-            ->with(['images', 'activeLease'])
+            ->with(['images', 'activeSchedule'])
             ->latest()
             ->get();
     }
@@ -37,21 +37,17 @@ class RoomRepository implements RoomRepositoryInterface
     public function update(Room $room, array $data): Room
     {
         $room->update($data);
+
         return $room;
     }
 
     public function getAllWithSchedules()
     {
         return Room::with([
-            'leases' => function ($query) {
-                $query->whereIn('status', [
-                    'pending',
-                    'active',
-                    'finished',
-                ]);
+            'schedules' => function ($query) {
+                $query->whereIn('status', ['pending', 'active', 'finished'])
+                    ->orderByDesc('start_date');
             },
-
-            'leases.resident.user',
         ])->get();
     }
 

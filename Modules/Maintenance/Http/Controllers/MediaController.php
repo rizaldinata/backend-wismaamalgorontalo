@@ -4,7 +4,6 @@ namespace Modules\Maintenance\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\Response;
 
 class MediaController extends Controller
 {
@@ -15,7 +14,7 @@ class MediaController extends Controller
     public function show(string $path)
     {
         // Path might contain multiple segments, e.g., maintenance/img.jpg
-        if (!Storage::disk('public')->exists($path)) {
+        if (! Storage::disk('public')->exists($path)) {
             abort(404);
         }
 

@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace Modules\Notification\Infrastructure\Providers;
 
@@ -9,6 +9,7 @@ use Modules\Notification\Contracts\WhatsAppProviderInterface;
 class FonnteWhatsAppProvider implements WhatsAppProviderInterface
 {
     private string $token;
+
     private string $endpoint = 'https://api.fonnte.com/send';
 
     public function __construct()
@@ -20,6 +21,7 @@ class FonnteWhatsAppProvider implements WhatsAppProviderInterface
     {
         if (empty($this->token)) {
             Log::warning('Fonnte token is not set. Notification not sent.');
+
             return false;
         }
 
@@ -32,14 +34,16 @@ class FonnteWhatsAppProvider implements WhatsAppProviderInterface
                 'countryCode' => '62',
             ]);
 
-            if (!$response->successful()) {
-                Log::error('Fonnte API Error: ' . $response->body());
+            if (! $response->successful()) {
+                Log::error('Fonnte API Error: '.$response->body());
+
                 return false;
             }
 
             return true;
         } catch (\Exception $e) {
-            Log::error('Fonnte Notification Exception: ' . $e->getMessage());
+            Log::error('Fonnte Notification Exception: '.$e->getMessage());
+
             return false;
         }
     }

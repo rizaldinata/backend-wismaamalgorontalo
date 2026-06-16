@@ -8,8 +8,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Finance\Http\Requests\PayInvoiceRequest;
 use Modules\Finance\Http\Requests\VerifyPaymentRequest;
-use Modules\Finance\Services\FinanceService;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
+use Modules\Finance\Services\FinanceService;
 use Modules\Finance\Transformers\PaymentResource;
 
 class PaymentController extends Controller
@@ -26,7 +26,7 @@ class PaymentController extends Controller
         $request->validate([
             'per_page' => 'nullable|integer|min:1|max:200',
             'status' => 'nullable|string',
-            'payment_method' => 'nullable|string'
+            'payment_method' => 'nullable|string',
         ]);
 
         $perPage = (int) $request->query('per_page', 200);
@@ -36,14 +36,14 @@ class PaymentController extends Controller
 
         return PaymentResource::collection($payments)->additional([
             'success' => true,
-            'message' => 'Daftar log pembayaran berhasil diambil'
+            'message' => 'Daftar log pembayaran berhasil diambil',
         ]);
     }
 
     public function show(int $id)
     {
         $payment = $this->paymentRepository->findOrFail($id);
-        $payment->load(['invoice.lease.resident.user', 'invoice.lease.room']);
+        $payment->load(['invoice']);
 
         return $this->apiSuccess(new PaymentResource($payment), 'Detail pembayaran berhasil diambil');
     }
@@ -77,7 +77,7 @@ class PaymentController extends Controller
     public function refund(Request $request, int $paymentId): JsonResponse
     {
         $request->validate([
-            'reason' => 'required|string|max:255'
+            'reason' => 'required|string|max:255',
         ]);
 
         $payment = $this->financeService->refundPayment($paymentId, $request->input('reason'));

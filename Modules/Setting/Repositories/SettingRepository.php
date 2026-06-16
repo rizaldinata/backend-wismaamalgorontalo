@@ -10,6 +10,7 @@ class SettingRepository implements SettingRepositoryInterface
     public function getValueByKey(string $key, $default = null)
     {
         $setting = AppSetting::where('key', $key)->first();
+
         return $setting ? $setting->parsed_value : $default;
     }
 

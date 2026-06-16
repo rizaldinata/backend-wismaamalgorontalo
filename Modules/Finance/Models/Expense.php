@@ -2,8 +2,8 @@
 
 namespace Modules\Finance\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Modules\Finance\database\factories\ExpenseFactory;
 
 class Expense extends Model

@@ -26,9 +26,9 @@ class GuestBill extends Model
     ];
 
     protected $casts = [
-        'amount'   => 'decimal:2',
-        'status'   => GuestBillStatus::class,
-        'paid_at'  => 'datetime',
+        'amount' => 'decimal:2',
+        'status' => GuestBillStatus::class,
+        'paid_at' => 'datetime',
     ];
 
     public function guest()
@@ -38,10 +38,10 @@ class GuestBill extends Model
 
     public function getPaymentProofUrlAttribute(): ?string
     {
-        if (!$this->payment_proof_path) {
+        if (! $this->payment_proof_path) {
             return null;
         }
 
-        return url('/storage/' . $this->payment_proof_path);
+        return url('/storage/'.$this->payment_proof_path);
     }
 }

@@ -7,12 +7,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Modules\Auth\database\factories\UserFactory;
-use Modules\Resident\Models\Resident;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable;
 
     protected $guard_name = 'api';
 
@@ -34,27 +33,6 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
-    }
-
-    public function resident()
-    {
-        return $this->hasOne(Resident::class);
-    }
-
-    public function leases()
-    {
-        return $this->hasManyThrough(\Modules\Rental\Models\Lease::class, Resident::class);
-    }
-
-    public function hasActiveLease(): bool
-    {
-        return $this->leases()
-            ->where('status', \Modules\Rental\Enums\LeaseStatus::ACTIVE->value)
-            ->where(function ($query) {
-                $query->whereNull('end_date')
-                    ->orWhere('end_date', '>=', now()->startOfDay());
-            })
-            ->exists();
     }
 
     protected static function newFactory()

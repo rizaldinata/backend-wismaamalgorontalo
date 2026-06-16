@@ -6,7 +6,6 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class VerifyPaymentRequest extends FormRequest
 {
-
     public function rules(): array
     {
         return [
@@ -14,7 +13,6 @@ class VerifyPaymentRequest extends FormRequest
             'admin_notes' => ['nullable', 'string', 'max:500'],
         ];
     }
-
 
     public function authorize(): bool
     {

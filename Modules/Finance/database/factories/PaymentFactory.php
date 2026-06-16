@@ -3,8 +3,8 @@
 namespace Modules\Finance\database\factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Modules\Finance\Models\Payment;
 use Modules\Finance\Enums\PaymentStatus;
+use Modules\Finance\Models\Payment;
 
 class PaymentFactory extends Factory
 {

@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreExpenseRequest extends FormRequest
 {
-    function rules(): array
+    public function rules(): array
     {
         return [
             'title' => ['required', 'string', 'max:255'],

@@ -15,7 +15,7 @@ class PayGuestBillRequest extends FormRequest
     {
         return [
             'payment_method' => ['required', 'in:manual,midtrans'],
-            'payment_proof'  => [
+            'payment_proof' => [
                 'required_if:payment_method,manual',
                 'nullable',
                 'file',
@@ -29,11 +29,11 @@ class PayGuestBillRequest extends FormRequest
     {
         return [
             'payment_method.required' => 'Metode pembayaran wajib dipilih.',
-            'payment_method.in'       => 'Metode pembayaran tidak valid.',
+            'payment_method.in' => 'Metode pembayaran tidak valid.',
             'payment_proof.required_if' => 'Bukti pembayaran wajib diunggah untuk metode manual.',
-            'payment_proof.file'      => 'File bukti pembayaran tidak valid.',
-            'payment_proof.mimes'     => 'Bukti pembayaran harus berformat JPG, JPEG, PNG, atau PDF.',
-            'payment_proof.max'       => 'Ukuran bukti pembayaran maksimal 5 MB.',
+            'payment_proof.file' => 'File bukti pembayaran tidak valid.',
+            'payment_proof.mimes' => 'Bukti pembayaran harus berformat JPG, JPEG, PNG, atau PDF.',
+            'payment_proof.max' => 'Ukuran bukti pembayaran maksimal 5 MB.',
         ];
     }
 }

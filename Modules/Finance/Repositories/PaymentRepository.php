@@ -2,8 +2,8 @@
 
 namespace Modules\Finance\Repositories;
 
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Modules\Finance\Enums\PaymentStatus;
 use Modules\Finance\Models\Payment;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
@@ -12,24 +12,25 @@ class PaymentRepository implements PaymentRepositoryInterface
 {
     public function getPaginated(int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
-        $query = Payment::with(['invoice.lease.resident.user', 'invoice.lease.room'])->orderBy('created_at', 'desc');
+        $query = Payment::with(['invoice'])->orderBy('created_at', 'desc');
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $query->where('status', $filters['status']);
         }
-        
-        if (!empty($filters['payment_method'])) {
+
+        if (! empty($filters['payment_method'])) {
             $query->where('payment_method', $filters['payment_method']);
         }
 
-        if (!empty($filters['resident_id'])) {
-            $query->whereHas('invoice.lease', function ($q) use ($filters) {
-                $q->where('resident_id', $filters['resident_id']);
+        if (! empty($filters['schedule_ids'])) {
+            $query->whereHas('invoice', function ($q) use ($filters) {
+                $q->whereIn('schedule_id', $filters['schedule_ids']);
             });
         }
 
         return $query->paginate($perPage);
     }
+
     public function findOrFail(int $id): Payment
     {
         return Payment::findOrFail($id);
@@ -42,7 +43,7 @@ class PaymentRepository implements PaymentRepositoryInterface
 
     public function getPendingPayments(int $limit = 5): Collection
     {
-        return Payment::with(['invoice.lease.resident.user', 'invoice.lease.room'])
+        return Payment::with(['invoice'])
             ->where('status', PaymentStatus::PENDING->value)
             ->latest()
             ->limit($limit)

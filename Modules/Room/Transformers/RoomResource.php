@@ -15,8 +15,8 @@ class RoomResource extends JsonResource
             'number' => $this->number,
             'price' => $this->price,
             'price_daily' => $this->price_daily,
-            'price_formatted' => 'Rp ' . number_format($this->price, 0, ',', '.'),
-            'price_daily_formatted' => $this->price_daily ? 'Rp ' . number_format($this->price_daily, 0, ',', '.') : '-',
+            'price_formatted' => 'Rp '.number_format($this->price, 0, ',', '.'),
+            'price_daily_formatted' => $this->price_daily ? 'Rp '.number_format($this->price_daily, 0, ',', '.') : '-',
             'status' => $this->status->label(),
             'status_code' => $this->status->value,
             'description' => $this->description,
@@ -31,7 +31,14 @@ class RoomResource extends JsonResource
                     ];
                 });
             }),
-            'schedules' => \Modules\Rental\Transformers\LeaseResource::collection($this->whenLoaded('leases')),
+            'schedules' => $this->whenLoaded('schedules', fn () => $this->schedules->map(fn ($s) => [
+                'id' => $s->id,
+                'type' => is_object($s->type) ? $s->type->value : $s->type,
+                'status' => is_object($s->status) ? $s->status->value : $s->status,
+                'start_date' => $s->start_date?->format('Y-m-d'),
+                'end_date' => $s->end_date?->format('Y-m-d'),
+                'tenant' => $s->tenant_name,
+            ])),
         ];
     }
 }

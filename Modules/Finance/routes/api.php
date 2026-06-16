@@ -47,5 +47,6 @@ Route::prefix('finance/')->middleware(['auth:sanctum'])->group(function () {
         Route::get('/invoices', [ResidentFinanceController::class, 'invoices'])->middleware('permission:finance-me-invoice-view');
         Route::get('/invoices/{id}', [ResidentFinanceController::class, 'showInvoice'])->middleware('permission:finance-me-invoice-view');
         Route::get('/payments', [ResidentFinanceController::class, 'payments'])->middleware('permission:finance-me-payment-view');
+        Route::post('/leases/{scheduleId}/perpanjang', [ResidentFinanceController::class, 'perpanjangSewa'])->middleware('permission:finance-me-invoice-view');
     });
 });

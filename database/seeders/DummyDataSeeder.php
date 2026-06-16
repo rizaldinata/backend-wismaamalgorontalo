@@ -5,10 +5,9 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 use Modules\Auth\Models\User;
-use Modules\Rental\Models\Lease;
-use Modules\Resident\Models\Resident;
 use Modules\Room\Models\Room;
 use Modules\Room\Models\RoomImage;
+use Modules\Schedule\Models\Schedule;
 
 class DummyDataSeeder extends Seeder
 {
@@ -23,31 +22,37 @@ class DummyDataSeeder extends Seeder
         }
 
         // Create Admin User
-        $admin = User::create([
-            'name' => 'Admin Wisma Amal',
-            'email' => 'admin@wismaamal.com',
-            'password' => bcrypt('password'),
-        ]);
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@wismaamal.com'],
+            [
+                'name' => 'Admin Wisma Amal',
+                'password' => bcrypt('password'),
+            ]
+        );
         $admin->email_verified_at = now();
         $admin->save();
         $admin->assignRole('super-admin');
 
         // Create Admin Staff User (role: admin)
-        $staff1 = User::create([
-            'name' => 'Staff Admin',
-            'email' => 'staff@wismaamal.com',
-            'password' => bcrypt('password'),
-        ]);
+        $staff1 = User::firstOrCreate(
+            ['email' => 'staff@wismaamal.com'],
+            [
+                'name' => 'Staff Admin',
+                'password' => bcrypt('password'),
+            ]
+        );
         $staff1->email_verified_at = now();
         $staff1->save();
         $staff1->assignRole('admin');
 
         // Create sample Guest User (calon penghuni yang belum sewa)
-        $guest = User::create([
-            'name' => 'Guest User',
-            'email' => 'guest@wismaamal.com',
-            'password' => bcrypt('password'),
-        ]);
+        $guest = User::firstOrCreate(
+            ['email' => 'guest@wismaamal.com'],
+            [
+                'name' => 'Guest User',
+                'password' => bcrypt('password'),
+            ]
+        );
         $guest->email_verified_at = now();
         $guest->save();
         $guest->assignRole('member');
@@ -146,25 +151,16 @@ class DummyDataSeeder extends Seeder
 
         $users = [];
         foreach ($residentsData as $residentData) {
-            $user = User::create([
-                'name' => $residentData['name'],
-                'email' => $residentData['email'],
-                'password' => bcrypt('password'),
-            ]);
+            $user = User::firstOrCreate(
+                ['email' => $residentData['email']],
+                [
+                    'name' => $residentData['name'],
+                    'password' => bcrypt('password'),
+                ]
+            );
             $user->email_verified_at = now();
             $user->save();
-            $user->assignRole('member');
-
-            Resident::create([
-                'user_id' => $user->id,
-                'id_card_number' => $residentData['id_card_number'],
-                'phone_number' => $residentData['phone_number'],
-                'gender' => $residentData['gender'],
-                'job' => $residentData['job'],
-                'address_ktp' => $residentData['address_ktp'],
-                'emergency_contact_name' => $residentData['emergency_contact_name'],
-                'emergency_contact_phone' => $residentData['emergency_contact_phone'],
-            ]);
+            $user->assignRole('resident');
 
             $users[] = $user;
         }
@@ -298,124 +294,149 @@ class DummyDataSeeder extends Seeder
             $imagesCount = $roomData['images_count'];
             unset($roomData['images_count']);
 
-            $room = Room::create([
-                'number' => $roomData['number'],
-                'title' => $roomData['title'],
-                'price' => $roomData['price'],
-                'status' => $roomData['status'],
-                'description' => $roomData['description'],
-                'facilities' => $roomData['facilities'],
-            ]);
+            $room = Room::updateOrCreate(
+                ['number' => $roomData['number']],
+                [
+                    'title' => $roomData['title'],
+                    'price' => $roomData['price'],
+                    'status' => $roomData['status'],
+                    'description' => $roomData['description'],
+                    'facilities' => $roomData['facilities'],
+                ]
+            );
             $rooms[] = $room;
 
             // Create dummy images for each room
             for ($i = 1; $i <= $imagesCount; $i++) {
                 $imagePath = 'rooms/dummy-room-' . $room->number . '-' . $i . '.jpg';
-                RoomImage::create([
-                    'room_id' => $room->id,
-                    'image_path' => $imagePath,
-                    'order' => $i - 1,
-                ]);
+                RoomImage::firstOrCreate(
+                    [
+                        'room_id' => $room->id,
+                        'order' => $i - 1,
+                    ],
+                    [
+                        'image_path' => $imagePath,
+                    ]
+                );
 
                 // Generate physical file
                 $fullpath = storage_path('app/public/' . $imagePath);
-                $this->generatePlaceholder($fullpath, "Room " . $room->number, $room->status, 800, 600);
+                $this->generatePlaceholder($fullpath, 'Room ' . $room->number, $room->status, 800, 600);
             }
         }
 
-        // Create Leases
-        // Active leases
-        Lease::create([
-            'user_id' => $users[0]->id,
+        // Create Schedules (type: sewa)
+        // Active schedules
+        Schedule::create([
             'room_id' => $rooms[0]->id,
-            'start_date' => now()->subMonths(3),
-            'end_date' => null,
-            'price_per_month' => 500000,
-            'total_price' => 1500000,
+            'type' => 'sewa',
             'status' => 'active',
-            'payment_proof' => 'payments/proof-1.jpg',
+            'start_date' => now()->subMonths(3)->toDateString(),
+            'end_date' => now()->addMonths(9)->toDateString(),
+            'tenant_user_id' => $users[0]->id,
+            'tenant_name' => $users[0]->name,
+            'tenant_phone' => $residentsData[0]['phone_number'],
+            'tenant_id_number' => $residentsData[0]['id_card_number'],
+            'agreed_price' => 500000,
+            'created_by' => 1,
+            'activated_at' => now()->subMonths(3),
         ]);
-        $this->generatePlaceholder(storage_path('app/public/payments/proof-1.jpg'), "Proof 1", "Payment", 400, 600);
 
-        Lease::create([
-            'user_id' => $users[1]->id,
+        Schedule::create([
             'room_id' => $rooms[5]->id,
-            'start_date' => now()->subMonths(6),
-            'end_date' => null,
-            'price_per_month' => 750000,
-            'total_price' => 4500000,
+            'type' => 'sewa',
             'status' => 'active',
-            'payment_proof' => 'payments/proof-2.jpg',
+            'start_date' => now()->subMonths(6)->toDateString(),
+            'end_date' => now()->addMonths(6)->toDateString(),
+            'tenant_user_id' => $users[1]->id,
+            'tenant_name' => $users[1]->name,
+            'tenant_phone' => $residentsData[1]['phone_number'],
+            'tenant_id_number' => $residentsData[1]['id_card_number'],
+            'agreed_price' => 750000,
+            'created_by' => 1,
+            'activated_at' => now()->subMonths(6),
         ]);
-        $this->generatePlaceholder(storage_path('app/public/payments/proof-2.jpg'), "Proof 2", "Payment", 400, 600);
 
-        Lease::create([
-            'user_id' => $users[2]->id,
+        Schedule::create([
             'room_id' => $rooms[2]->id,
-            'start_date' => now()->subMonths(2),
-            'end_date' => null,
-            'price_per_month' => 500000,
-            'total_price' => 1000000,
+            'type' => 'sewa',
             'status' => 'active',
-            'payment_proof' => 'payments/proof-3.jpg',
+            'start_date' => now()->subMonths(2)->toDateString(),
+            'end_date' => now()->addMonths(10)->toDateString(),
+            'tenant_user_id' => $users[2]->id,
+            'tenant_name' => $users[2]->name,
+            'tenant_phone' => $residentsData[2]['phone_number'],
+            'tenant_id_number' => $residentsData[2]['id_card_number'],
+            'agreed_price' => 500000,
+            'created_by' => 1,
+            'activated_at' => now()->subMonths(2),
         ]);
-        $this->generatePlaceholder(storage_path('app/public/payments/proof-3.jpg'), "Proof 3", "Payment", 400, 600);
 
-        Lease::create([
-            'user_id' => $users[3]->id,
+        Schedule::create([
             'room_id' => $rooms[7]->id,
-            'start_date' => now()->subMonth(),
-            'end_date' => null,
-            'price_per_month' => 750000,
-            'total_price' => 750000,
+            'type' => 'sewa',
             'status' => 'active',
-            'payment_proof' => 'payments/proof-4.jpg',
+            'start_date' => now()->subMonth()->toDateString(),
+            'end_date' => now()->addMonths(11)->toDateString(),
+            'tenant_user_id' => $users[3]->id,
+            'tenant_name' => $users[3]->name,
+            'tenant_phone' => $residentsData[3]['phone_number'],
+            'tenant_id_number' => $residentsData[3]['id_card_number'],
+            'agreed_price' => 750000,
+            'created_by' => 1,
+            'activated_at' => now()->subMonth(),
         ]);
-        $this->generatePlaceholder(storage_path('app/public/payments/proof-4.jpg'), "Proof 4", "Payment", 400, 600);
 
-        // Pending leases
-        Lease::create([
-            'user_id' => $users[5]->id,
+        // Pending schedules
+        Schedule::create([
             'room_id' => $rooms[6]->id,
-            'start_date' => now()->addDays(7),
-            'end_date' => null,
-            'price_per_month' => 750000,
-            'total_price' => 750000,
+            'type' => 'sewa',
             'status' => 'pending',
-            'payment_proof' => 'payments/proof-pending-1.jpg',
+            'start_date' => now()->addDays(7)->toDateString(),
+            'end_date' => now()->addDays(7)->addYear()->toDateString(),
+            'tenant_user_id' => $users[5]->id,
+            'tenant_name' => $users[5]->name,
+            'tenant_phone' => $residentsData[5]['phone_number'],
+            'tenant_id_number' => $residentsData[5]['id_card_number'],
+            'agreed_price' => 750000,
+            'created_by' => 1,
         ]);
-        $this->generatePlaceholder(storage_path('app/public/payments/proof-pending-1.jpg'), "Pending 1", "Payment", 400, 600);
 
-        Lease::create([
-            'user_id' => $users[6]->id,
+        Schedule::create([
             'room_id' => $rooms[10]->id,
-            'start_date' => now()->addDays(5),
-            'end_date' => null,
-            'price_per_month' => 1200000,
-            'total_price' => 1200000,
+            'type' => 'sewa',
             'status' => 'pending',
-            'payment_proof' => 'payments/proof-pending-2.jpg',
+            'start_date' => now()->addDays(5)->toDateString(),
+            'end_date' => now()->addDays(5)->addYear()->toDateString(),
+            'tenant_user_id' => $users[6]->id,
+            'tenant_name' => $users[6]->name,
+            'tenant_phone' => $residentsData[6]['phone_number'],
+            'tenant_id_number' => $residentsData[6]['id_card_number'],
+            'agreed_price' => 1200000,
+            'created_by' => 1,
         ]);
-        $this->generatePlaceholder(storage_path('app/public/payments/proof-pending-2.jpg'), "Pending 2", "Payment", 400, 600);
 
-        // Finished/ended leases (use cancelled status to match enum)
-        Lease::create([
-            'user_id' => $users[7]->id,
+        // Finished schedule
+        Schedule::create([
             'room_id' => $rooms[1]->id,
-            'start_date' => now()->subYear(),
-            'end_date' => now()->subMonths(2),
+            'type' => 'sewa',
+            'status' => 'finished',
+            'start_date' => now()->subYear()->toDateString(),
+            'end_date' => now()->subMonths(2)->toDateString(),
+            'tenant_user_id' => $users[7]->id,
+            'tenant_name' => $users[7]->name,
+            'tenant_phone' => $residentsData[7]['phone_number'],
+            'tenant_id_number' => $residentsData[7]['id_card_number'],
+            'agreed_price' => 500000,
+            'created_by' => 1,
+            'activated_at' => now()->subYear(),
             'finished_at' => now()->subMonths(2),
-            'price_per_month' => 500000,
-            'total_price' => 5000000,
-            'status' => 'cancelled',
-            'payment_proof' => 'payments/proof-old.jpg',
         ]);
-        $this->generatePlaceholder(storage_path('app/public/payments/proof-old.jpg'), "Old Proof", "Payment", 400, 600);
 
         $this->command->info('Dummy data seeder completed successfully!');
         $this->command->info('Admin: admin@wismaamal.com / password');
         $this->command->info('Staff: staff@wismaamal.com / password');
-        $this->command->info('Residents: ahmad@example.com (and others) / password');
+        $this->command->info('Members: ahmad@example.com (and others) / password');
     }
 
     private function generatePlaceholder($path, $text1, $text2, $width, $height)
@@ -425,7 +446,9 @@ class DummyDataSeeder extends Seeder
             mkdir($directory, 0755, true);
         }
 
-        if (file_exists($path)) return;
+        if (file_exists($path)) {
+            return;
+        }
 
         $img = \imagecreatetruecolor($width, $height);
         $bgColor = \imagecolorallocate($img, 240, 240, 240);
@@ -442,7 +465,7 @@ class DummyDataSeeder extends Seeder
             \imagepng($img, $path);
         } else {
             // Last resort: simple blank file if GD is totally broken
-            \file_put_contents($path, "");
+            \file_put_contents($path, '');
         }
 
         \imagedestroy($img);

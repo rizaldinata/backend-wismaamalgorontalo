@@ -20,7 +20,7 @@ class GuestRepository implements GuestRepositoryInterface
     public function getAllPaginated(array $filters = []): LengthAwarePaginator
     {
         $perPage = (int) ($filters['per_page'] ?? 10);
-        $search  = $filters['search'] ?? null;
+        $search = $filters['search'] ?? null;
 
         $query = Guest::with(['lease.resident.user', 'lease.room'])
             ->orderByDesc('check_in_at');
@@ -28,12 +28,12 @@ class GuestRepository implements GuestRepositoryInterface
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhereHas('lease.resident.user', function ($u) use ($search) {
-                      $u->where('name', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas('lease.room', function ($r) use ($search) {
-                      $r->where('number', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('lease.resident.user', function ($u) use ($search) {
+                        $u->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('lease.room', function ($r) use ($search) {
+                        $r->where('number', 'like', "%{$search}%");
+                    });
             });
         }
 

@@ -2,11 +2,11 @@
 
 namespace Modules\Notification\Listeners;
 
+use App\Events\Finance\PembayaranDiverifikasi;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use Modules\Finance\Events\PaymentSettled;
 use Modules\Notification\Services\NotificationService;
-use Modules\Setting\Services\SettingService;
+use App\Contracts\ConfigProviderInterface;
 
 class SendWhatsAppReceipt implements ShouldQueue
 {
@@ -14,16 +14,35 @@ class SendWhatsAppReceipt implements ShouldQueue
 
     public function __construct(
         private readonly NotificationService $notificationService,
-        private readonly SettingService $settingService,
+        private readonly ConfigProviderInterface $settingService,
     ) {}
 
-    public function handle(PaymentSettled $event): void
+    public function handle(PembayaranDiverifikasi $event): void
     {
-        // Hanya kirim jika fitur notifikasi WA struk diaktifkan admin
-        if (!$this->settingService->isFeatureEnabled('feature_whatsapp_receipt')) {
+        if (! $this->settingService->isFeatureEnabled('feature_whatsapp_receipt')) {
             return;
         }
 
-        $this->notificationService->sendPaymentReceiptMessage($event->payment);
+        $periode = $event->startDate.' - '.$event->endDate;
+
+        $pdfLink = null;
+        if ($this->settingService->isFeatureEnabled('feature_whatsapp_pdf_link')) {
+            $pdfLink = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                'finance.invoice.print',
+                now()->addHours(48),
+                ['id' => $event->invoiceId]
+            );
+        }
+
+        $this->notificationService->sendReceiptFromPrimitives(
+            tenantName: $event->tenantName,
+            tenantPhone: $event->tenantPhone,
+            invoiceNumber: $event->invoiceNumber,
+            roomTitle: $event->roomTitle,
+            roomNumber: $event->roomNumber,
+            periode: $periode,
+            amount: $event->amount,
+            pdfLink: $pdfLink
+        );
     }
 }

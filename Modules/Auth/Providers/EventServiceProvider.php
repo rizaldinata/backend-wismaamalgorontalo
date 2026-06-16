@@ -2,26 +2,28 @@
 
 namespace Modules\Auth\Providers;
 
+use App\Events\Jadwal\JadwalBatal;
+use App\Events\Jadwal\JadwalSewaAktif;
+use App\Events\Jadwal\JadwalSewaSelesai;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Modules\Auth\Listeners\TingkatkanKeRoleResident;
+use Modules\Auth\Listeners\TurunkanKeRoleMember;
 
 class EventServiceProvider extends ServiceProvider
 {
-    /**
-     * The event handler mappings for the application.
-     *
-     * @var array<string, array<int, string>>
-     */
-    protected $listen = [];
+    protected $listen = [
+        JadwalSewaAktif::class => [
+            TingkatkanKeRoleResident::class,
+        ],
+        JadwalSewaSelesai::class => [
+            TurunkanKeRoleMember::class,
+        ],
+        JadwalBatal::class => [
+            TurunkanKeRoleMember::class,
+        ],
+    ];
 
-    /**
-     * Indicates if events should be discovered.
-     *
-     * @var bool
-     */
-    protected static $shouldDiscoverEvents = true;
+    protected static $shouldDiscoverEvents = false;
 
-    /**
-     * Configure the proper event listeners for email verification.
-     */
     protected function configureEmailVerification(): void {}
 }

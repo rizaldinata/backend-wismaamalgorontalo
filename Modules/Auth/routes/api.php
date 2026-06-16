@@ -1,10 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Auth\Http\Controllers\AuthController;
 use Modules\Auth\Http\Controllers\PermissionController;
 use Modules\Auth\Http\Controllers\RoleController;
 use Modules\Auth\Http\Controllers\UserController;
-use Modules\Auth\Http\Controllers\AuthController;
+use Modules\Auth\Http\Controllers\UserProfileController;
 
 Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {});
 
@@ -17,6 +18,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::put('/profile', [AuthController::class, 'updateProfile']);
     Route::put('/change-password', [AuthController::class, 'changePassword']);
+
+    Route::get('/resident/profile', [UserProfileController::class, 'show']);
+    Route::post('/resident/profile', [UserProfileController::class, 'store']);
 
     Route::prefix('admin')->group(function () {
         // route crud permission

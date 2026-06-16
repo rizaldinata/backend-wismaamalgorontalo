@@ -60,6 +60,7 @@ class RoleRepository implements RoleRepositoryInterface
     {
         $role = $this->findById($id);
         $role->delete();
+
         return true;
     }
 }

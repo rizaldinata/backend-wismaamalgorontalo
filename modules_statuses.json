@@ -1,13 +1,14 @@
 {
     "Room": true,
-    "Resident": true,
+    "Resident": false,
     "Finance": true,
     "Maintenance": true,
     "Auth": true,
     "Iventory": true,
     "Inventory": true,
     "Setting": true,
-    "Rental": true,
+    "Rental": false,
     "Notification": true,
-    "Guest": true
+    "Guest": true,
+    "Schedule": true
 }

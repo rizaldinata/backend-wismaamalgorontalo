@@ -14,23 +14,22 @@ class NotificationController extends Controller
         private readonly NotificationService $notificationService
     ) {}
 
-
     public function store(StoreNotificationRequest $request): JsonResponse|NotificationResource
     {
         $data = $request->validated();
-        
+
         $isSent = $this->notificationService->sendCustomNotification(
-            $data['target_phone'], 
+            $data['target_phone'],
             $data['message_body']
         );
 
-        if (!$isSent) {
+        if (! $isSent) {
             return response()->json(['error' => 'Failed to send notification'], 500);
         }
 
         return new NotificationResource([
             'target' => $data['target_phone'],
-            'status' => 'sent'
+            'status' => 'sent',
         ]);
     }
 }

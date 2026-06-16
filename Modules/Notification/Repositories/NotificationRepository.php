@@ -37,14 +37,4 @@ class NotificationRepository implements NotificationRepositoryInterface
             'error_response' => $error,
         ]);
     }
-
-    public function markAllAsRead(): int
-    {
-        return NotificationLog::where('is_read', false)->update(['is_read' => true]);
-    }
-
-    public function countUnread(): int
-    {
-        return NotificationLog::where('is_read', false)->count();
-    }
 }

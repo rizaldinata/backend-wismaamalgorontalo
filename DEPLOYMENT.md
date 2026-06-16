@@ -66,6 +66,71 @@ GitHub Actions akan secara otomatis:
 
 ---
 
+## ✅ Checklist Konfigurasi Wajib Saat Deploy
+
+> **Cara pakai:** Setiap kali ada fitur baru yang butuh setup manual di server (cron, env, seeder, dsb.), tambahkan di section yang relevan di bawah. Sertakan tanggal penambahan dan konteks singkat agar jelas kapan dan kenapa itu diperlukan.
+
+---
+
+### 🕐 Cron / Laravel Scheduler
+
+Jadikan Laravel Scheduler berjalan di server. Tanpa ini, fitur expiry otomatis tidak akan bekerja.
+
+```bash
+# Tambahkan ke crontab server (cukup sekali):
+* * * * * cd /path/to/project && php artisan schedule:run >> /dev/null 2>&1
+
+# Untuk verifikasi scheduler sudah berjalan:
+php artisan schedule:list
+```
+
+| Command | Jadwal | Ditambahkan | Fungsi |
+|---|---|---|---|
+| `schedule:expire-pending` | Setiap menit | 2026-06-14 | Batalkan jadwal sewa PENDING yang melebihi 15 menit tanpa ada pembayaran. Membebaskan kamar yang dibooking tapi tidak dilanjutkan bayar. |
+| `notification:lease-reminders` | Setiap hari jam 08:00 | — | Kirim pengingat WhatsApp ke penghuni yang kontrak sewanya hampir habis. |
+
+---
+
+### 🔑 Environment Variables Tambahan
+
+Selain variabel di `.env.example`, pastikan variabel berikut diisi sebelum deploy:
+
+| Variable | Contoh Nilai | Ditambahkan | Keterangan |
+|---|---|---|---|
+| `MIDTRANS_SERVER_KEY` | `SB-Mid-server-xxx` | — | Server key Midtrans. Gunakan key **production** (bukan sandbox) saat live. |
+| `MIDTRANS_CLIENT_KEY` | `SB-Mid-client-xxx` | — | Client key Midtrans untuk frontend. |
+| `MIDTRANS_IS_PRODUCTION` | `true` | — | Set `false` untuk sandbox/testing, `true` untuk production. |
+| `MIDTRANS_NOTIFICATION_URL` | `https://domain.com/api/finance/payments/midtrans/notification` | 2026-06-14 | URL webhook yang didaftarkan di dashboard Midtrans. Midtrans akan kirim notifikasi expire/settlement ke sini. Wajib dapat diakses publik (bukan localhost). |
+| `FONNTE_TOKEN` | `abc123` | — | Token API Fonnte untuk notifikasi WhatsApp. |
+
+---
+
+### 🌱 Database Seeder
+
+Jalankan seeder berikut setelah `migrate:fresh` di production (sekali saja):
+
+```bash
+php artisan db:seed --class=Modules\\Setting\\Database\\Seeders\\SettingDatabaseSeeder
+```
+
+| Seeder | Ditambahkan | Isi |
+|---|---|---|
+| `SettingDatabaseSeeder` | — | Nilai default konfigurasi: nama wisma, toggle fitur Midtrans/WhatsApp, info rekening bank (`bank_name`, `bank_account`, `bank_holder`). Wajib ada agar halaman keuangan member tidak kosong. |
+
+---
+
+### 🔔 Konfigurasi Midtrans Dashboard
+
+Hal-hal yang harus dikonfigurasi di **[dashboard Midtrans](https://dashboard.midtrans.com)**:
+
+1. **Payment Notification URL** → isi dengan URL webhook: `https://domain.com/api/finance/payments/midtrans/notification`
+2. **Finish / Unfinish / Error Redirect URL** → arahkan ke halaman yang sesuai di frontend
+3. **Enable payment methods** yang ingin diaktifkan (QRIS, VA, dll.)
+
+> Catatan (2026-06-14): Snap token dikonfigurasi dengan expiry 15 menit. Artinya Midtrans akan otomatis kirim webhook `expire` setelah 15 menit jika user tidak menyelesaikan pembayaran. Pastikan webhook URL terdaftar dan bisa diakses.
+
+---
+
 ## ❓ Troubleshooting (Masalah Umum)
 
 ### 1. Error: `ssh: no key found`

@@ -4,7 +4,6 @@ namespace Modules\Finance\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
-use DomainException;
 use Illuminate\Http\Request;
 use Modules\Finance\Http\Requests\StoreExpenseRequest;
 use Modules\Finance\Http\Requests\UpdateExpenseRequest;
@@ -24,7 +23,7 @@ class ExpenseController extends Controller
     public function index(Request $request)
     {
         $request->validate([
-            'per_page' => 'nullable|integer|min:1|max:200'
+            'per_page' => 'nullable|integer|min:1|max:200',
         ]);
 
         $perPage = (int) $request->query('per_page', 50);
@@ -33,7 +32,7 @@ class ExpenseController extends Controller
 
         return ExpenseResource::collection($expenses)->additional([
             'success' => true,
-            'message' => 'Daftar pengeluaran berhasil diambil'
+            'message' => 'Daftar pengeluaran berhasil diambil',
         ]);
     }
 
@@ -60,6 +59,7 @@ class ExpenseController extends Controller
         $expense = $this->expenseRepository->findOrFail($id);
 
         $updatedExpense = $this->expenseService->updateManualExpense($expense, $request->validated());
+
         return $this->apiSuccess(new ExpenseResource($updatedExpense), 'Data pengeluaran berhasil diperbarui');
     }
 
@@ -68,6 +68,7 @@ class ExpenseController extends Controller
         $expense = $this->expenseRepository->findOrFail($id);
 
         $this->expenseService->deleteManualExpense($expense);
+
         return $this->apiSuccess(null, 'Data pengeluaran berhasil dihapus');
     }
 }

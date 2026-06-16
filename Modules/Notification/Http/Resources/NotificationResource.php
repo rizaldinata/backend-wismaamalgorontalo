@@ -10,8 +10,8 @@ class NotificationResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'target'  => $this->resource['target'],
-            'status'  => $this->resource['status'],
+            'target' => $this->resource['target'],
+            'status' => $this->resource['status'],
             'message' => 'Notification dispatched successfully',
         ];
     }

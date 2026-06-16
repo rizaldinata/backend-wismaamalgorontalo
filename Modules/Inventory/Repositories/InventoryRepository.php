@@ -26,6 +26,7 @@ class InventoryRepository implements InventoryRepositoryInterface
     public function update(Inventory $inventory, array $data): Inventory
     {
         $inventory->update($data);
+
         return $inventory;
     }
 

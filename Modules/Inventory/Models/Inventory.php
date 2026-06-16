@@ -2,13 +2,19 @@
 
 namespace Modules\Inventory\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Modules\Inventory\database\factories\InventoryFactory;
 use Modules\Inventory\Enums\ItemCondition;
 
 class Inventory extends Model
 {
     use HasFactory;
+
+    protected static function newFactory(): InventoryFactory
+    {
+        return InventoryFactory::new();
+    }
 
     protected $fillable = [
         'name',

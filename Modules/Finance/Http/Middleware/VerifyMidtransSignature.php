@@ -11,7 +11,7 @@ class VerifyMidtransSignature
     {
         $payload = $request->all();
 
-        if (!isset($payload['order_id']) || !isset($payload['signature_key'])) {
+        if (! isset($payload['order_id']) || ! isset($payload['signature_key'])) {
             return response()->json(['message' => 'Missing signature properties'], 400);
         }
 
@@ -20,7 +20,7 @@ class VerifyMidtransSignature
         $grossAmount = $payload['gross_amount'] ?? '';
         $serverKey = config('finance.midtrans.server_key');
 
-        $signatureKey = hash('sha512', $orderId . $statusCode . $grossAmount . $serverKey);
+        $signatureKey = hash('sha512', $orderId.$statusCode.$grossAmount.$serverKey);
         if ($signatureKey !== $payload['signature_key']) {
             return response()->json(['message' => 'Invalid Signature'], 403);
         }

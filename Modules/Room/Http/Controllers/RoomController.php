@@ -21,6 +21,7 @@ class RoomController extends Controller
     public function index(Request $request)
     {
         $rooms = $this->roomService->getAllRooms($request->query());
+
         return $this->apiSuccess(
             RoomResource::collection($rooms)->response()->getData(true),
             'Data kamar berhasil diambil'
@@ -30,6 +31,7 @@ class RoomController extends Controller
     public function schedules()
     {
         $rooms = $this->roomService->getRoomSchedules();
+
         return $this->apiSuccess(
             RoomResource::collection($rooms),
             'Jadwal kamar berhasil diambil'
@@ -49,6 +51,7 @@ class RoomController extends Controller
     public function show($id)
     {
         $room = $this->roomService->getRoomDetails($id);
+
         return $this->apiSuccess(new RoomResource($room), 'Detail kamar berhasil diambil');
     }
 
@@ -66,6 +69,7 @@ class RoomController extends Controller
     public function destroy($id)
     {
         $this->roomService->deleteRoom($id);
+
         return $this->apiSuccess(null, 'Kamar berhasil dihapus');
     }
 
@@ -82,6 +86,7 @@ class RoomController extends Controller
     public function deleteImage($roomId, $imageId)
     {
         $this->roomService->deleteImage($imageId);
+
         return $this->apiSuccess(null, 'Foto berhasil dihapus');
     }
 }

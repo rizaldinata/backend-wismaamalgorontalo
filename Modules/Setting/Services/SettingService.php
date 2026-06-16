@@ -2,10 +2,10 @@
 
 namespace Modules\Setting\Services;
 
+use App\Contracts\ConfigProviderInterface;
 use Modules\Setting\Repositories\Contracts\SettingRepositoryInterface;
-use Modules\Setting\Repositories\SettingRepository;
 
-class SettingService
+class SettingService implements ConfigProviderInterface
 {
     public function __construct(
         private readonly SettingRepositoryInterface $settingRepository
@@ -13,7 +13,9 @@ class SettingService
 
     public function isFeatureEnabled(string $featureKey): bool
     {
-        return (bool) $this->settingRepository->getValueByKey($featureKey, false);
+        $value = $this->settingRepository->getValueByKey($featureKey, 'false');
+
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
     }
 
     public function setFeatureState(string $featureKey, bool $isEnabled, string $description = ''): void
@@ -30,10 +32,10 @@ class SettingService
             $value = $value ? 'true' : 'false';
         }
 
-        $this->settingRepository->updateOrCreate($key, (string)$value, $description);
+        $this->settingRepository->updateOrCreate($key, (string) $value, $description);
     }
 
-    public function getSettingValue(string $key, $default = '')
+    public function getSettingValue(string $key, mixed $default = ''): mixed
     {
         return $this->settingRepository->getValueByKey($key, $default);
     }
@@ -41,12 +43,15 @@ class SettingService
     public function getPublicSettings(): array
     {
         return [
-            'wisma_name'                   => $this->getSettingValue('wisma_name', 'Sistem Manajemen Kos'),
-            'feature_daily_rental'         => $this->isDailyRentalEnabled(),
-            'feature_whatsapp_receipt'     => $this->isFeatureEnabled('feature_whatsapp_receipt'),
-            'feature_whatsapp_pdf_link'    => $this->isFeatureEnabled('feature_whatsapp_pdf_link'),
-            'feature_payment_midtrans'     => $this->isMidtransEnabled(),
-            'midtrans_enabled_payments'    => config('finance.midtrans.enabled_payments', ['qris', 'gopay', 'shopeepay']),
+            'wisma_name' => $this->getSettingValue('wisma_name', 'Sistem Manajemen Kos'),
+            'feature_daily_rental' => $this->isDailyRentalEnabled(),
+            'feature_whatsapp_receipt' => $this->isFeatureEnabled('feature_whatsapp_receipt'),
+            'feature_whatsapp_pdf_link' => $this->isFeatureEnabled('feature_whatsapp_pdf_link'),
+            'feature_payment_midtrans' => $this->isMidtransEnabled(),
+            'midtrans_enabled_payments' => config('finance.midtrans.enabled_payments', ['qris', 'gopay', 'shopeepay']),
+            'bank_name' => $this->getSettingValue('bank_name', ''),
+            'bank_account' => $this->getSettingValue('bank_account', ''),
+            'bank_holder' => $this->getSettingValue('bank_holder', ''),
         ];
     }
 

@@ -4,19 +4,17 @@ namespace Modules\Guest\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Modules\Guest\Enums\GuestRelationship;
-use Modules\Rental\Enums\LeaseStatus;
 
 class StoreAdminGuestRequest extends FormRequest
 {
     public function rules(): array
     {
         $relationships = implode(',', array_column(GuestRelationship::cases(), 'value'));
-        $activeStatus = LeaseStatus::ACTIVE->value;
 
         return [
-            'lease_id'     => "required|integer|exists:leases,id,status,{$activeStatus}",
-            'name'         => 'required|string|max:255',
-            'check_in_at'  => 'required|date',
+            'schedule_id' => 'required|integer|exists:room_schedules,id,status,active,type,sewa',
+            'name' => 'required|string|max:255',
+            'check_in_at' => 'required|date',
             'check_out_at' => 'required|date|after:check_in_at',
             'relationship' => "required|string|in:{$relationships}",
         ];
