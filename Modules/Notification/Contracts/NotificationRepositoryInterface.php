@@ -12,4 +12,6 @@ interface NotificationRepositoryInterface
     public function getLogsPaginated(int $perPage = 15): LengthAwarePaginator;
     public function findById(int $id): ?NotificationLog;
     public function updateStatus(NotificationLog $log, string $status, ?string $error = null): bool;
+    public function markAllAsRead(): int;
+    public function countUnread(): int;
 }

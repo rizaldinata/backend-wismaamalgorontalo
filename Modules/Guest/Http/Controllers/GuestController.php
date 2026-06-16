@@ -60,4 +60,19 @@ class GuestController extends Controller
             return $this->apiError('Terjadi kesalahan sistem.', 500);
         }
     }
+
+    public function checkout(int $id)
+    {
+        try {
+            $guest = $this->guestService->checkoutMyGuest(Auth::id(), $id);
+
+            return $this->apiSuccess(new GuestResource($guest), 'Tamu berhasil ditandai keluar.');
+        } catch (NotFoundHttpException $e) {
+            return $this->apiError($e->getMessage(), 404);
+        } catch (HttpException $e) {
+            return $this->apiError($e->getMessage(), $e->getStatusCode());
+        } catch (Exception $e) {
+            return $this->apiError('Terjadi kesalahan sistem.', 500);
+        }
+    }
 }

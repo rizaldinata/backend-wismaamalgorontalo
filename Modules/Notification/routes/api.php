@@ -10,6 +10,7 @@ Route::prefix('notification/')->middleware(['auth:sanctum'])->group(function () 
 
     Route::prefix('logs')->group(function () {
         Route::get('/', [NotificationLogController::class, 'index']);
+        Route::patch('/mark-all-read', [NotificationLogController::class, 'markAllAsRead']);
         Route::post('/{id}/resend', [NotificationLogController::class, 'resend']);
     });
 });

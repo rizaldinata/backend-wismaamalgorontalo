@@ -8,4 +8,6 @@ enum NotificationType: string
     case PAYMENT_REMINDER = 'payment_reminder';
     case MANUAL_BROADCAST = 'manual_broadcast';
     case SYSTEM_ALERT = 'system_alert';
+    case GUEST_REGISTERED = 'guest_registered';
+    case GUEST_STAY_ENDED = 'guest_stay_ended';
 }

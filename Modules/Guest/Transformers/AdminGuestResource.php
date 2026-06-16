@@ -14,6 +14,7 @@ class AdminGuestResource extends JsonResource
             'name'               => $this->name,
             'check_in_at'        => $this->check_in_at?->toDateTimeString(),
             'check_out_at'       => $this->check_out_at?->toDateTimeString(),
+            'stay_completed_notified_at' => $this->stay_completed_notified_at?->toDateTimeString(),
             'relationship'       => $this->relationship?->value,
             'relationship_label' => $this->relationship?->label(),
             'penghuni'           => $this->lease?->resident?->user?->name ?? '-',

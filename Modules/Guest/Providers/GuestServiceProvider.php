@@ -2,8 +2,10 @@
 
 namespace Modules\Guest\Providers;
 
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Modules\Guest\Console\NotifyGuestStayEndedCommand;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -41,9 +43,20 @@ class GuestServiceProvider extends ServiceProvider
         );
     }
 
-    protected function registerCommands(): void {}
+    protected function registerCommands(): void
+    {
+        $this->commands([
+            NotifyGuestStayEndedCommand::class,
+        ]);
+    }
 
-    protected function registerCommandSchedules(): void {}
+    protected function registerCommandSchedules(): void
+    {
+        $this->app->booted(function () {
+            $schedule = $this->app->make(Schedule::class);
+            $schedule->command('guest:notify-stay-ended')->everyMinute();
+        });
+    }
 
     public function registerTranslations(): void
     {

@@ -16,6 +16,7 @@ class Guest extends Model
         'name',
         'check_in_at',
         'check_out_at',
+        'stay_completed_notified_at',
         'relationship',
         'total_days',
         'billable_days',
@@ -25,6 +26,7 @@ class Guest extends Model
     protected $casts = [
         'check_in_at'    => 'datetime',
         'check_out_at'   => 'datetime',
+        'stay_completed_notified_at' => 'datetime',
         'relationship'   => GuestRelationship::class,
         'charge_amount'  => 'decimal:2',
     ];

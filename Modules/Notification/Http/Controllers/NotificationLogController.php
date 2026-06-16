@@ -18,8 +18,20 @@ class NotificationLogController extends Controller
         $logs = $this->notificationService->getLogHistory($perPage);
 
         return response()->json([
+            'success'      => true,
+            'data'         => $logs,
+            'unread_count' => $this->notificationService->countUnread(),
+        ]);
+    }
+
+    public function markAllAsRead()
+    {
+        $updated = $this->notificationService->markAllAsRead();
+
+        return response()->json([
             'success' => true,
-            'data' => $logs
+            'message' => "{$updated} notifikasi berhasil ditandai sudah dibaca.",
+            'updated' => $updated,
         ]);
     }
 

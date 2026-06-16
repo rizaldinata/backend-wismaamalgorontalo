@@ -72,6 +72,27 @@ readonly class NotificationService
         return $this->sendNotification(NotificationType::MANUAL_BROADCAST, $target, $message);
     }
 
+    public function logSystemNotification(NotificationType $type, string $message, string $target = 'admin'): void
+    {
+        $this->repository->logNotification(
+            $type,
+            $target,
+            $message,
+            NotificationStatus::SENT->value,
+            null
+        );
+    }
+
+    public function markAllAsRead(): int
+    {
+        return $this->repository->markAllAsRead();
+    }
+
+    public function countUnread(): int
+    {
+        return $this->repository->countUnread();
+    }
+
     private function formatReceiptMessage(
         string $name,
         string $invoiceNo,

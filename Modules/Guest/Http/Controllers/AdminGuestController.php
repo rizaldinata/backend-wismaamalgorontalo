@@ -55,4 +55,20 @@ class AdminGuestController extends Controller
             return $this->apiError('Terjadi kesalahan sistem.', 500);
         }
     }
+
+    public function checkout(int $id)
+    {
+        try {
+            $guest = $this->guestService->checkoutGuest($id);
+            $guest->loadMissing(['lease.resident.user', 'lease.room']);
+
+            return $this->apiSuccess(new AdminGuestResource($guest), 'Tamu berhasil ditandai keluar.');
+        } catch (NotFoundHttpException $e) {
+            return $this->apiError($e->getMessage(), 404);
+        } catch (HttpException $e) {
+            return $this->apiError($e->getMessage(), $e->getStatusCode());
+        } catch (Exception $e) {
+            return $this->apiError('Terjadi kesalahan sistem.', 500);
+        }
+    }
 }

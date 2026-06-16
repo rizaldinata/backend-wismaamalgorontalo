@@ -95,6 +95,7 @@ class PermissionSeeder extends Seeder
             ['name' => 'pay-guest-bill',     'target' => 'guest', 'description' => 'Membayar tagihan tamu (penghuni aktif)'],
             ['name' => 'verify-guest-bill',  'target' => 'guest', 'description' => 'Memverifikasi pembayaran tagihan tamu (admin)'],
             ['name' => 'view-guest-bill',    'target' => 'guest', 'description' => 'Melihat semua tagihan tamu (admin)'],
+            ['name' => 'checkout-guest',     'target' => 'guest', 'description' => 'Menandai tamu telah keluar (admin)'],
         ];
 
         foreach ($permissions as $permission) {
