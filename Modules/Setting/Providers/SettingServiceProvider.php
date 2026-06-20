@@ -4,6 +4,8 @@ namespace Modules\Setting\Providers;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Modules\Setting\Repositories\BankAccountRepository;
+use Modules\Setting\Repositories\Contracts\BankAccountRepositoryInterface;
 use Modules\Setting\Repositories\Contracts\SettingRepositoryInterface;
 use Modules\Setting\Repositories\SettingRepository;
 use Nwidart\Modules\Traits\PathNamespace;
@@ -42,6 +44,11 @@ class SettingServiceProvider extends ServiceProvider
         $this->app->bind(
             SettingRepositoryInterface::class,
             SettingRepository::class
+        );
+
+        $this->app->bind(
+            BankAccountRepositoryInterface::class,
+            BankAccountRepository::class
         );
     }
 

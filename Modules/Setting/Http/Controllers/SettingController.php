@@ -31,7 +31,9 @@ class SettingController extends Controller
      */
     public function updateBulk(Request $request): JsonResponse
     {
-        $validator = $request->validate([
+        $fiturPengeluaranTetapAktif = (bool) $request->input('settings.feature_pengeluaran_tetap', false);
+
+        $validated = $request->validate([
             'settings' => 'required|array',
             'settings.wisma_name' => 'nullable|string|max:100',
             'settings.feature_daily_rental' => 'nullable|boolean',
@@ -41,9 +43,34 @@ class SettingController extends Controller
             'settings.bank_name' => 'nullable|string|max:100',
             'settings.bank_account' => 'nullable|string|max:50',
             'settings.bank_holder' => 'nullable|string|max:100',
+            'settings.feature_pengeluaran_tetap' => 'nullable|boolean',
+            'settings.pengeluaran_tetap_jenis_aktif' => [
+                'nullable',
+                'array',
+                $fiturPengeluaranTetapAktif ? 'min:1' : '',
+            ],
+            'settings.pengeluaran_tetap_jenis_aktif.*' => 'in:listrik,air,wifi',
         ]);
 
-        $settingsToSave = $validator['settings'];
+        if ($fiturPengeluaranTetapAktif) {
+            $jenis = $validated['settings']['pengeluaran_tetap_jenis_aktif'] ?? [];
+            if (empty($jenis)) {
+                return $this->apiError(
+                    'Minimal satu jenis pengeluaran tetap (listrik, air, atau wifi) harus dipilih jika fitur diaktifkan.',
+                    422
+                );
+            }
+        }
+
+        $settingsToSave = $validated['settings'];
+
+        // Pengeluaran tetap disimpan via method khusus (JSON array)
+        if (array_key_exists('pengeluaran_tetap_jenis_aktif', $settingsToSave)) {
+            $this->settingService->setJenisPengeluaranTetapAktif(
+                $settingsToSave['pengeluaran_tetap_jenis_aktif'] ?? []
+            );
+            unset($settingsToSave['pengeluaran_tetap_jenis_aktif']);
+        }
 
         foreach ($settingsToSave as $key => $value) {
             $this->settingService->updateSetting($key, $value);

@@ -64,4 +64,34 @@ class PaymentRepository implements PaymentRepositoryInterface
     {
         return $payment->update($data);
     }
+
+    public function getMidtransSummary(): array
+    {
+        $currentMonth = now()->month;
+        $currentYear  = now()->year;
+
+        $settled = Payment::with('invoice')
+            ->where('payment_method', 'midtrans')
+            ->where('status', PaymentStatus::PAID->value)
+            ->get();
+
+        $settledBulanIni = Payment::with('invoice')
+            ->where('payment_method', 'midtrans')
+            ->where('status', PaymentStatus::PAID->value)
+            ->whereMonth('updated_at', $currentMonth)
+            ->whereYear('updated_at', $currentYear)
+            ->get();
+
+        return [
+            'total_transaksi'      => Payment::where('payment_method', 'midtrans')->count(),
+            'total_settlement'     => (float) $settled->sum(fn ($p) => $p->invoice?->amount ?? 0),
+            'jumlah_settlement'    => $settled->count(),
+            'jumlah_pending'       => Payment::where('payment_method', 'midtrans')
+                                        ->where('status', PaymentStatus::PENDING->value)
+                                        ->count(),
+            'settlement_bulan_ini' => (float) $settledBulanIni->sum(fn ($p) => $p->invoice?->amount ?? 0),
+            'bulan'                => $currentMonth,
+            'tahun'                => $currentYear,
+        ];
+    }
 }

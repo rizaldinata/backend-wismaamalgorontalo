@@ -27,5 +27,11 @@ class SettingDatabaseSeeder extends Seeder
         foreach ($settings as $key => $value) {
             $settingService->updateSetting($key, $value);
         }
+
+        $settingService->setEnabledMidtransPaymentMethods(['qris', 'gopay', 'bca_va', 'mandiri_va']);
+
+        // Pengeluaran Tetap (default: nonaktif)
+        $settingService->setFeatureState('feature_pengeluaran_tetap', false, 'Aktifkan pencatatan pengeluaran tetap bulanan (listrik, air, wifi)');
+        $settingService->setJenisPengeluaranTetapAktif([]);
     }
 }

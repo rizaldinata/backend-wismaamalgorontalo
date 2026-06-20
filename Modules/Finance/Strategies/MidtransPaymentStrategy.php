@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Strategies;
 
+use App\Contracts\ConfigProviderInterface;
 use Exception;
 use Midtrans\Config;
 use Midtrans\CoreApi;
@@ -17,7 +18,8 @@ use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
 class MidtransPaymentStrategy implements PaymentStrategyInterface
 {
     public function __construct(
-        private readonly PaymentRepositoryInterface $paymentRepository
+        private readonly PaymentRepositoryInterface $paymentRepository,
+        private readonly ConfigProviderInterface $settingService,
     ) {
         Config::$serverKey = config('finance.midtrans.server_key');
         Config::$isProduction = config('finance.midtrans.is_production', false);
@@ -81,7 +83,7 @@ class MidtransPaymentStrategy implements PaymentStrategyInterface
                 ]);
             } else {
                 // ── Snap: fallback untuk metode yang tidak didukung Core API ──
-                $enabledPayments = config('finance.midtrans.enabled_payments', []);
+                $enabledPayments = $this->settingService->getEnabledMidtransPaymentMethods();
                 $snapParams = $baseParams;
                 if (! empty($enabledPayments)) {
                     $snapParams['enabled_payments'] = $enabledPayments;

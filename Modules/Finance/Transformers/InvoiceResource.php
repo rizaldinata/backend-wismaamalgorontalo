@@ -14,6 +14,11 @@ class InvoiceResource extends JsonResource
             'amount' => (float) $this->amount,
             'status' => is_object($this->status) ? $this->status->value : $this->status,
             'due_date' => $this->due_date ? $this->due_date->format('Y-m-d') : null,
+            'payment_expires_at' => $this->payment_expires_at
+                ? $this->payment_expires_at->toIso8601String()
+                : null,
+            'period_start' => $this->period_start ? $this->period_start->format('Y-m-d') : null,
+            'period_end'   => $this->period_end   ? $this->period_end->format('Y-m-d')   : null,
             'lease' => [
                 'id' => $this->schedule_id ?? $this->lease_id,
                 'resident_name' => $this->tenant_name,

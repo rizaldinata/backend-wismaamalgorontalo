@@ -55,6 +55,10 @@ class RolePermissionSeeder extends Seeder
             'finance-expense-create',
             'finance-expense-update',
             'finance-expense-delete',
+            'finance-fixed-expense-view',
+            'finance-fixed-expense-create',
+            'finance-fixed-expense-update',
+            'finance-fixed-expense-delete',
             // Inventory
             'view-inventory',
             'create-inventory',
@@ -125,6 +129,10 @@ class RolePermissionSeeder extends Seeder
             'finance-expense-create',
             'finance-expense-update',
             'finance-expense-delete',
+            'finance-fixed-expense-view',
+            'finance-fixed-expense-create',
+            'finance-fixed-expense-update',
+            'finance-fixed-expense-delete',
             // Inventory
             'view-inventory',
             'create-inventory',

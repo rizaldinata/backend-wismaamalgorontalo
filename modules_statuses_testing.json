@@ -1,0 +1,11 @@
+{
+    "Room": true,
+    "Finance": true,
+    "Maintenance": true,
+    "Auth": true,
+    "Inventory": true,
+    "Setting": true,
+    "Notification": true,
+    "Guest": true,
+    "Schedule": true
+}

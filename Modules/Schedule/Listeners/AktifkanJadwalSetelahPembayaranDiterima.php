@@ -3,6 +3,7 @@
 namespace Modules\Schedule\Listeners;
 
 use App\Events\Finance\PembayaranDiterima;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Schedule\Enums\ScheduleStatus;
 use Modules\Schedule\Repositories\Contracts\ScheduleRepositoryInterface;
@@ -32,15 +33,44 @@ class AktifkanJadwalSetelahPembayaranDiterima
             return;
         }
 
-        if ($schedule->status !== ScheduleStatus::PENDING) {
+        // Kasus 1: Jadwal baru (PENDING) → aktifkan
+        if ($schedule->status === ScheduleStatus::PENDING) {
+            $this->scheduleService->aktifkanJadwal($schedule->id);
+
+            Log::info('Jadwal diaktifkan setelah pembayaran Midtrans diterima.', [
+                'schedule_id' => $event->scheduleId,
+                'payment_id'  => $event->paymentId,
+            ]);
+
             return;
         }
 
-        $this->scheduleService->aktifkanJadwal($schedule->id);
+        // Kasus 2: Jadwal sudah ACTIVE → ini pembayaran perpanjangan, update end_date
+        if ($schedule->status === ScheduleStatus::ACTIVE && $event->invoiceId > 0) {
+            $this->terapkanPerpanjangan($event->invoiceId, $event->scheduleId);
 
-        Log::info('Jadwal diaktifkan setelah pembayaran Midtrans diterima.', [
-            'schedule_id' => $event->scheduleId,
-            'payment_id'  => $event->paymentId,
-        ]);
+            Log::info('end_date jadwal diperbarui setelah pembayaran perpanjangan Midtrans diterima.', [
+                'schedule_id' => $event->scheduleId,
+                'invoice_id'  => $event->invoiceId,
+                'payment_id'  => $event->paymentId,
+            ]);
+        }
+    }
+
+    private function terapkanPerpanjangan(int $invoiceId, int $scheduleId): void
+    {
+        $periodEnd = DB::table('invoices')->where('id', $invoiceId)->value('period_end');
+
+        if (! $periodEnd) {
+            return;
+        }
+
+        DB::table('room_schedules')
+            ->where('id', $scheduleId)
+            ->update(['end_date' => $periodEnd, 'updated_at' => now()]);
+
+        DB::table('finance_active_tenants')
+            ->where('schedule_id', $scheduleId)
+            ->update(['end_date' => $periodEnd, 'updated_at' => now()]);
     }
 }

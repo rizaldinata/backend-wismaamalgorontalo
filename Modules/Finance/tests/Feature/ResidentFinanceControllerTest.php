@@ -7,6 +7,7 @@ use Modules\Finance\Enums\InvoiceStatus;
 use Modules\Finance\Enums\PaymentStatus;
 use Modules\Finance\Models\Invoice;
 use Modules\Finance\Models\Payment;
+use Modules\Finance\Services\FinanceService;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -253,4 +254,189 @@ test('[GAGAL] mengembalikan 404 jika penghuni tidak memiliki invoice sama sekali
         ->getJson('/api/finance/me/payments');
 
     $response->assertNotFound();
+});
+
+// =========================================================
+// 5.5 — Perpanjang Sewa (POST /api/finance/me/leases/{id}/perpanjang)
+// =========================================================
+
+function buatKonteksPerpanjang(User $penghuni, array $overrideSchedule = []): array
+{
+    $scheduleId = DB::table('room_schedules')->insertGetId(array_merge([
+        'room_id'       => 1,
+        'type'          => 'sewa',
+        'status'        => 'active',
+        'start_date'    => now()->subMonth()->toDateString(),
+        'end_date'      => now()->addDays(10)->toDateString(),
+        'tenant_user_id'=> $penghuni->id,
+        'agreed_price'  => 1500000,
+        'activated_at'  => now()->subMonth(),
+        'created_at'    => now()->subMonth(),
+        'updated_at'    => now()->subMonth(),
+    ], $overrideSchedule));
+
+    DB::table('finance_active_tenants')->insert([
+        'schedule_id' => $scheduleId,
+        'user_id'     => $penghuni->id,
+        'room_number' => '101',
+        'tenant_name' => $penghuni->name,
+        'end_date'    => now()->addDays(10)->toDateString(),
+        'created_at'  => now(),
+        'updated_at'  => now(),
+    ]);
+
+    return ['schedule_id' => $scheduleId, 'end_date' => now()->addDays(10)->toDateString()];
+}
+
+test('[GAGAL] perpanjang ditolak jika ada tagihan perpanjangan yang belum pernah dicoba bayar', function () {
+    ['schedule_id' => $scheduleId, 'end_date' => $endDate] = buatKonteksPerpanjang($this->penghuni);
+
+    // Invoice perpanjangan ada, tapi belum ada payment sama sekali
+    Invoice::factory()->create([
+        'schedule_id'    => $scheduleId,
+        'tenant_user_id' => $this->penghuni->id,
+        'status'         => InvoiceStatus::UNPAID,
+        'invoice_number' => 'EXT-OLD-001',
+        'period_start'   => now()->addDays(11)->toDateString(),
+        'period_end'     => now()->addDays(41)->toDateString(),
+        'due_date'       => now()->toDateString(),
+    ]);
+
+    $response = $this->actingAs($this->penghuni)
+        ->postJson("/api/finance/me/leases/{$scheduleId}/perpanjang", [
+            'duration_months' => 1,
+            'payment_method'  => 'manual',
+            'payment_proof'   => \Illuminate\Http\UploadedFile::fake()->image('bukti.jpg'),
+        ]);
+
+    $response->assertUnprocessable()
+        ->assertJsonFragment(['message' => 'Masih ada tagihan perpanjangan yang belum dibayar. Selesaikan pembayaran terlebih dahulu sebelum memperpanjang kembali.']);
+});
+
+test('[GAGAL] perpanjang ditolak jika ada tagihan perpanjangan dengan pembayaran yang masih pending', function () {
+    ['schedule_id' => $scheduleId] = buatKonteksPerpanjang($this->penghuni);
+
+    $invoice = Invoice::factory()->create([
+        'schedule_id'    => $scheduleId,
+        'tenant_user_id' => $this->penghuni->id,
+        'status'         => InvoiceStatus::UNPAID,
+        'invoice_number' => 'EXT-OLD-002',
+        'period_start'   => now()->addDays(11)->toDateString(),
+        'period_end'     => now()->addDays(41)->toDateString(),
+        'due_date'       => now()->toDateString(),
+    ]);
+
+    // Ada payment yang masih PENDING (bukan failed)
+    Payment::factory()->create([
+        'invoice_id' => $invoice->id,
+        'status'     => PaymentStatus::PENDING,
+    ]);
+
+    $response = $this->actingAs($this->penghuni)
+        ->postJson("/api/finance/me/leases/{$scheduleId}/perpanjang", [
+            'duration_months' => 1,
+            'payment_method'  => 'manual',
+            'payment_proof'   => \Illuminate\Http\UploadedFile::fake()->image('bukti.jpg'),
+        ]);
+
+    $response->assertUnprocessable();
+});
+
+test('[BERHASIL] boleh perpanjang lagi setelah admin tolak pembayaran manual (rejected)', function () {
+    ['schedule_id' => $scheduleId] = buatKonteksPerpanjang($this->penghuni);
+
+    $invoiceLama = Invoice::factory()->create([
+        'schedule_id'    => $scheduleId,
+        'tenant_user_id' => $this->penghuni->id,
+        'status'         => InvoiceStatus::UNPAID,
+        'invoice_number' => 'EXT-OLD-REJ',
+        'period_start'   => now()->addDays(11)->toDateString(),
+        'period_end'     => now()->addDays(41)->toDateString(),
+        'due_date'       => now()->toDateString(),
+    ]);
+
+    Payment::factory()->create([
+        'invoice_id' => $invoiceLama->id,
+        'status'     => PaymentStatus::REJECTED,
+    ]);
+
+    $fakePayment = Payment::factory()->create(['invoice_id' => $invoiceLama->id, 'status' => PaymentStatus::PENDING]);
+    $this->mock(FinanceService::class, function ($mock) use ($fakePayment) {
+        $mock->shouldReceive('processPayment')->once()->andReturn($fakePayment);
+    });
+
+    $response = $this->actingAs($this->penghuni)
+        ->postJson("/api/finance/me/leases/{$scheduleId}/perpanjang", [
+            'duration_months' => 1,
+            'payment_method'  => 'manual',
+            'payment_proof'   => \Illuminate\Http\UploadedFile::fake()->image('bukti.jpg'),
+        ]);
+
+    $response->assertCreated();
+    expect($invoiceLama->fresh()->status)->toBe(InvoiceStatus::CANCELLED);
+});
+
+test('[BERHASIL] invoice tidak tersimpan jika processPayment gagal (atomik)', function () {
+    ['schedule_id' => $scheduleId] = buatKonteksPerpanjang($this->penghuni);
+
+    // Mock processPayment agar lempar exception (simulasi Midtrans API error)
+    $this->mock(FinanceService::class, function ($mock) {
+        $mock->shouldReceive('processPayment')->once()->andThrow(new \DomainException('Midtrans API error'));
+    });
+
+    $response = $this->actingAs($this->penghuni)
+        ->postJson("/api/finance/me/leases/{$scheduleId}/perpanjang", [
+            'duration_months' => 1,
+            'payment_method'  => 'manual',
+            'payment_proof'   => \Illuminate\Http\UploadedFile::fake()->image('bukti.jpg'),
+        ]);
+
+    // Error dari DomainException → 403
+    $response->assertForbidden();
+
+    // Invoice TIDAK boleh tersisa di DB (transaction sudah rollback)
+    $invoiceCount = DB::table('invoices')
+        ->where('schedule_id', $scheduleId)
+        ->where('status', InvoiceStatus::UNPAID->value)
+        ->count();
+
+    expect($invoiceCount)->toBe(0);
+});
+
+test('[BERHASIL] boleh perpanjang lagi setelah pembayaran gagal dan invoice lama di-cancel', function () {
+    ['schedule_id' => $scheduleId] = buatKonteksPerpanjang($this->penghuni);
+
+    $invoiceLama = Invoice::factory()->create([
+        'schedule_id'    => $scheduleId,
+        'tenant_user_id' => $this->penghuni->id,
+        'status'         => InvoiceStatus::UNPAID,
+        'invoice_number' => 'EXT-OLD-003',
+        'period_start'   => now()->addDays(11)->toDateString(),
+        'period_end'     => now()->addDays(41)->toDateString(),
+        'due_date'       => now()->toDateString(),
+    ]);
+
+    // Semua upaya bayar sudah FAILED
+    Payment::factory()->create([
+        'invoice_id' => $invoiceLama->id,
+        'status'     => PaymentStatus::FAILED,
+    ]);
+
+    // Mock FinanceService agar tidak perlu hit payment gateway sungguhan
+    $fakePayment = Payment::factory()->create(['invoice_id' => $invoiceLama->id, 'status' => PaymentStatus::PENDING]);
+    $this->mock(FinanceService::class, function ($mock) use ($fakePayment) {
+        $mock->shouldReceive('processPayment')->once()->andReturn($fakePayment);
+    });
+
+    $response = $this->actingAs($this->penghuni)
+        ->postJson("/api/finance/me/leases/{$scheduleId}/perpanjang", [
+            'duration_months' => 1,
+            'payment_method'  => 'manual',
+            'payment_proof'   => \Illuminate\Http\UploadedFile::fake()->image('bukti.jpg'),
+        ]);
+
+    $response->assertCreated();
+
+    // Invoice lama harus sudah di-cancel (bukan UNPAID lagi)
+    expect($invoiceLama->fresh()->status)->toBe(InvoiceStatus::CANCELLED);
 });

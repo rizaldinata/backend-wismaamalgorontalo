@@ -3,8 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Finance\Http\Controllers\DashboardController;
 use Modules\Finance\Http\Controllers\ExpenseController;
+use Modules\Finance\Http\Controllers\FixedExpenseController;
 use Modules\Finance\Http\Controllers\InvoiceController;
 use Modules\Finance\Http\Controllers\PaymentController;
+use Modules\Finance\Http\Controllers\PaymentMethodController;
 use Modules\Finance\Http\Controllers\ResidentFinanceController;
 use Modules\Finance\Http\Middleware\VerifyMidtransSignature;
 
@@ -12,11 +14,17 @@ Route::post('/finance/payments/midtrans/notification', [PaymentController::class
     ->middleware(VerifyMidtransSignature::class);
 
 Route::prefix('finance/')->middleware(['auth:sanctum'])->group(function () {
+    Route::get('payment-methods', [PaymentMethodController::class, 'index'])
+        ->middleware('permission:finance-me-invoice-view');
+
     Route::prefix('dashboard')->middleware('permission:finance-dashboard-view')->group(function () {
         Route::get('/kpi-summary', [DashboardController::class, 'kpiSummary']);
         Route::get('/revenue-chart', [DashboardController::class, 'revenueChart']);
         Route::get('/due-invoices', [DashboardController::class, 'dueInvoices']);
         Route::get('/pending-payments', [DashboardController::class, 'pendingPayments']);
+        Route::get('/midtrans-monitoring', [DashboardController::class, 'midtransMonitoring'])
+            ->withoutMiddleware('permission:finance-dashboard-view')
+            ->middleware('permission:finance-payment-view');
     });
 
     Route::prefix('expenses')->group(function () {
@@ -41,6 +49,14 @@ Route::prefix('finance/')->middleware(['auth:sanctum'])->group(function () {
         Route::post('/{invoiceId}/pay', [PaymentController::class, 'pay'])->middleware('permission:finance-invoice-create');
     });
 
+    Route::prefix('fixed-expenses')->group(function () {
+        Route::get('/', [FixedExpenseController::class, 'index'])->middleware('permission:finance-fixed-expense-view');
+        Route::get('/status', [FixedExpenseController::class, 'status'])->middleware('permission:finance-fixed-expense-view');
+        Route::post('/generate-bulan-ini', [FixedExpenseController::class, 'generateBulanIni'])->middleware('permission:finance-fixed-expense-update');
+        Route::get('/{id}', [FixedExpenseController::class, 'show'])->middleware('permission:finance-fixed-expense-view');
+        Route::put('/{id}', [FixedExpenseController::class, 'update'])->middleware('permission:finance-fixed-expense-update');
+    });
+
     // Resident/Member Routes
     Route::prefix('me')->group(function () {
         Route::get('/summary', [ResidentFinanceController::class, 'summary'])->middleware('permission:finance-me-summary-view');
@@ -48,5 +64,6 @@ Route::prefix('finance/')->middleware(['auth:sanctum'])->group(function () {
         Route::get('/invoices/{id}', [ResidentFinanceController::class, 'showInvoice'])->middleware('permission:finance-me-invoice-view');
         Route::get('/payments', [ResidentFinanceController::class, 'payments'])->middleware('permission:finance-me-payment-view');
         Route::post('/leases/{scheduleId}/perpanjang', [ResidentFinanceController::class, 'perpanjangSewa'])->middleware('permission:finance-me-invoice-view');
+        Route::post('/leases/{scheduleId}/perpanjang/initiate', [ResidentFinanceController::class, 'initiatePerpanjangManual'])->middleware('permission:finance-me-invoice-view');
     });
 });

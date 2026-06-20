@@ -41,6 +41,10 @@ return new class extends Migration
         $connection = config('database.default');
         $dbName = config("database.connections.{$connection}.database");
 
+        if (DB::getDriverName() === 'sqlite') {
+            return false;
+        }
+
         if (empty($dbName)) {
             return false;
         }

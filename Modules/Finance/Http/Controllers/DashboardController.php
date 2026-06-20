@@ -4,6 +4,7 @@ namespace Modules\Finance\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
+use Illuminate\Http\JsonResponse;
 use Modules\Finance\Services\FinanceDashboardService;
 
 class DashboardController extends Controller
@@ -43,5 +44,12 @@ class DashboardController extends Controller
         $data = $this->dashboardService->getPendingPaymentsWidget();
 
         return $this->apiSuccess($data, 'Data pembayaran tertunda berhasil diambil');
+    }
+
+    public function midtransMonitoring(): JsonResponse
+    {
+        $data = $this->dashboardService->getMidtransMonitoring();
+
+        return $this->apiSuccess($data, 'Data monitoring Midtrans berhasil diambil');
     }
 }

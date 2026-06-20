@@ -75,13 +75,20 @@ class MigrasiDataRentalKeJadwal extends Command
 
                 if (! $isDryRun) {
                     try {
-                        DB::transaction(function () use ($scheduleData, $lease) {
+                        DB::transaction(function () use ($scheduleData, $lease, $status) {
                             $scheduleId = DB::table('room_schedules')->insertGetId($scheduleData);
 
                             // Tautkan invoice yang ada ke schedule baru ini
                             DB::table('invoices')
                                 ->where('lease_id', $lease->id)
                                 ->update(['schedule_id' => $scheduleId]);
+
+                            // Sinkronkan status kamar agar konsisten dengan jadwal yang dimigrasikan
+                            if ($status === \Modules\Schedule\Enums\ScheduleStatus::ACTIVE->value) {
+                                DB::table('rooms')->where('id', $scheduleData['room_id'])->update(['status' => 'occupied']);
+                            } elseif ($status === \Modules\Schedule\Enums\ScheduleStatus::PENDING->value) {
+                                DB::table('rooms')->where('id', $scheduleData['room_id'])->update(['status' => 'reserved']);
+                            }
                         });
                         $migrated++;
                     } catch (\Exception $e) {

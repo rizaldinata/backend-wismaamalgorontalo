@@ -44,7 +44,7 @@ test('[BERHASIL] jadwal pending dibatalkan ketika Midtrans expire (status failed
     Event::assertDispatched(JadwalBatal::class);
 });
 
-test('[BERHASIL] jadwal aktif dibatalkan ketika refund Midtrans (status refunded)', function () {
+test('[BERHASIL] jadwal aktif TIDAK dibatalkan ketika refund perpanjangan (status refunded)', function () {
     Event::fake([JadwalBatal::class]);
 
     $schedule = Schedule::create([
@@ -59,8 +59,9 @@ test('[BERHASIL] jadwal aktif dibatalkan ketika refund Midtrans (status refunded
     $listener = app(BatalkanJadwalSetelahPembayaranGagal::class);
     $listener->handle(buatEventDibatalkan($schedule->id, 'refunded'));
 
-    expect($schedule->fresh()->status)->toBe(ScheduleStatus::CANCELLED);
-    Event::assertDispatched(JadwalBatal::class);
+    // Kamar masih ada yang sewa (ACTIVE) → jadwal tetap aktif, kamar tetap terisi
+    expect($schedule->fresh()->status)->toBe(ScheduleStatus::ACTIVE);
+    Event::assertNotDispatched(JadwalBatal::class);
 });
 
 test('[BERHASIL] jadwal aktif TIDAK dibatalkan ketika pembayaran perpanjang gagal (status failed)', function () {
@@ -71,7 +72,7 @@ test('[BERHASIL] jadwal aktif TIDAK dibatalkan ketika pembayaran perpanjang gaga
         'type' => ScheduleType::SEWA->value,
         'status' => ScheduleStatus::ACTIVE->value,
         'start_date' => '2026-06-01',
-        'end_date' => '2026-08-01', // end_date sudah di-update oleh perpanjangSewa
+        'end_date' => '2026-07-01', // end_date TIDAK berubah di flow baru (hanya berubah setelah bayar)
         'activated_at' => now(),
     ]);
 
@@ -81,13 +82,13 @@ test('[BERHASIL] jadwal aktif TIDAK dibatalkan ketika pembayaran perpanjang gaga
         'user_id'     => 1,
         'room_number' => '101',
         'tenant_name' => 'Budi',
-        'end_date'    => '2026-08-01',
+        'end_date'    => '2026-07-01',
         'start_date'  => '2026-06-01',
         'created_at'  => now(),
         'updated_at'  => now(),
     ]);
 
-    // Buat invoice perpanjangan (period_start = original_end_date + 1 hari = 2026-07-02)
+    // Buat invoice perpanjangan yang belum dibayar
     $invoiceId = DB::table('invoices')->insertGetId([
         'schedule_id'    => $schedule->id,
         'invoice_number' => 'EXT-20260601-0001-XXXX',
@@ -107,10 +108,10 @@ test('[BERHASIL] jadwal aktif TIDAK dibatalkan ketika pembayaran perpanjang gaga
     expect($schedule->fresh()->status)->toBe(ScheduleStatus::ACTIVE);
     Event::assertNotDispatched(JadwalBatal::class);
 
-    // end_date di-rollback: period_start (2026-07-02) - 1 hari = 2026-07-01
+    // end_date TIDAK berubah — perpanjangan belum pernah diaplikasikan ke jadwal
     expect($schedule->fresh()->end_date->toDateString())->toBe('2026-07-01');
 
-    // finance_active_tenants juga di-rollback
+    // finance_active_tenants juga tidak berubah
     $fat = DB::table('finance_active_tenants')->where('schedule_id', $schedule->id)->first();
     expect($fat->end_date)->toBe('2026-07-01');
 });

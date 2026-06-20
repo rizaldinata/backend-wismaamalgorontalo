@@ -21,4 +21,6 @@ interface PaymentRepositoryInterface
     public function create(array $data): Payment;
 
     public function update(Payment $payment, array $data): bool;
+
+    public function getMidtransSummary(): array;
 }

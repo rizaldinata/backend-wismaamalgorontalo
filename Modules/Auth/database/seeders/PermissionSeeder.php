@@ -59,6 +59,10 @@ class PermissionSeeder extends Seeder
             ['name' => 'finance-expense-create',    'target' => 'finance', 'description' => 'Membuat pengeluaran baru'],
             ['name' => 'finance-expense-update',    'target' => 'finance', 'description' => 'Mengubah data pengeluaran'],
             ['name' => 'finance-expense-delete',    'target' => 'finance', 'description' => 'Menghapus data pengeluaran'],
+            ['name' => 'finance-fixed-expense-view',   'target' => 'finance', 'description' => 'Melihat daftar pengeluaran tetap bulanan'],
+            ['name' => 'finance-fixed-expense-create', 'target' => 'finance', 'description' => 'Mencatat pengeluaran tetap bulanan baru'],
+            ['name' => 'finance-fixed-expense-update', 'target' => 'finance', 'description' => 'Mengubah entri pengeluaran tetap bulanan'],
+            ['name' => 'finance-fixed-expense-delete', 'target' => 'finance', 'description' => 'Menghapus entri pengeluaran tetap bulanan'],
 
             // ─── Inventory ────────────────────────────────────────────────
             ['name' => 'view-inventory',               'target' => 'inventory', 'description' => 'Melihat daftar inventaris'],

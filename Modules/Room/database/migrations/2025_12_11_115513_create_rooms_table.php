@@ -15,7 +15,11 @@ return new class extends Migration
             $table->string('type');
             $table->string('price', 12, 2);
             $table->text('description')->nullable();
-            $table->enum('status', ['available', 'occupied', 'maintenance'])->default('available');
+            if (\Illuminate\Support\Facades\DB::getDriverName() === 'sqlite') {
+                $table->string('status')->default('available');
+            } else {
+                $table->enum('status', ['available', 'occupied', 'maintenance'])->default('available');
+            }
 
             $table->timestamps();
         });

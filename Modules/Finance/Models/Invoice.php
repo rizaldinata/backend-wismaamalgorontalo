@@ -19,6 +19,7 @@ class Invoice extends Model
         'amount',
         'status',
         'due_date',
+        'payment_expires_at',
         'tenant_user_id',
         'tenant_name',
         'tenant_phone',
@@ -28,10 +29,11 @@ class Invoice extends Model
     ];
 
     protected $casts = [
-        'due_date' => 'date',
-        'period_start' => 'date',
-        'period_end' => 'date',
-        'status' => InvoiceStatus::class,
+        'due_date'           => 'date',
+        'payment_expires_at' => 'datetime',
+        'period_start'       => 'date',
+        'period_end'         => 'date',
+        'status'             => InvoiceStatus::class,
     ];
 
     public function payments()

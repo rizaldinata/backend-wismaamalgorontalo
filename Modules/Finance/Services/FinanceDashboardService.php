@@ -2,7 +2,9 @@
 
 namespace Modules\Finance\Services;
 
+use App\Contracts\ConfigProviderInterface;
 use Modules\Finance\Repositories\Contracts\ExpenseRepositoryInterface;
+use Modules\Finance\Repositories\Contracts\FixedExpenseEntryRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
 
@@ -12,6 +14,8 @@ class FinanceDashboardService
         private readonly InvoiceRepositoryInterface $invoiceRepository,
         private readonly PaymentRepositoryInterface $paymentRepository,
         private readonly ExpenseRepositoryInterface $expenseRepository,
+        private readonly FixedExpenseEntryRepositoryInterface $fixedExpenseRepository,
+        private readonly ConfigProviderInterface $settingService,
     ) {}
 
     public function getKpiSummary(?int $month = null, ?int $year = null): array
@@ -20,7 +24,7 @@ class FinanceDashboardService
         $totalExpense = $this->expenseRepository->getTotalByPeriod($month, $year);
         $netProfit = $totalRevenue - $totalExpense;
 
-        return [
+        $data = [
             'total_revenue_this_month' => $totalRevenue,
             'revenue_monthly_rents' => $this->invoiceRepository->getRevenueByRentalTypeThisMonth('monthly', $month, $year),
             'revenue_daily_rents' => $this->invoiceRepository->getRevenueByRentalTypeThisMonth('daily', $month, $year),
@@ -31,6 +35,39 @@ class FinanceDashboardService
             'overdue_invoices_count' => $this->invoiceRepository->countOverdueInvoices(),
             'pending_verification_count' => $this->paymentRepository->countPendingVerification(),
         ];
+
+        if ($this->settingService->isPengeluaranTetapEnabled()) {
+            $bulan = $month ?? (int) now()->format('n');
+            $tahun = $year  ?? (int) now()->format('Y');
+
+            $jenisAktif = $this->settingService->getJenisPengeluaranTetapAktif();
+            $statusMap  = $this->fixedExpenseRepository->getStatusBulan($jenisAktif, $bulan, $tahun);
+
+            $belumDiisi = [];
+            $detail     = [];
+
+            foreach ($jenisAktif as $jenis) {
+                $entry = $statusMap[$jenis] ?? null;
+                if ($entry === null) {
+                    $belumDiisi[]   = $jenis;
+                    $detail[$jenis] = ['filled' => false];
+                } else {
+                    $detail[$jenis] = [
+                        'filled'      => true,
+                        'entry_id'    => $entry->id,
+                        'amount'      => (float) $entry->amount,
+                    ];
+                }
+            }
+
+            $data['pengeluaran_tetap_status'] = [
+                'semua_terisi' => empty($belumDiisi),
+                'belum_diisi'  => $belumDiisi,
+                'detail'       => $detail,
+            ];
+        }
+
+        return $data;
     }
 
     public function getRevenueChartData(): array
@@ -68,5 +105,10 @@ class FinanceDashboardService
     public function getPendingPaymentsWidget(int $limit = 5)
     {
         return $this->paymentRepository->getPendingPayments($limit);
+    }
+
+    public function getMidtransMonitoring(): array
+    {
+        return $this->paymentRepository->getMidtransSummary();
     }
 }

@@ -116,6 +116,9 @@ php artisan db:seed --class=Modules\\Setting\\Database\\Seeders\\SettingDatabase
 | Seeder | Ditambahkan | Isi |
 |---|---|---|
 | `SettingDatabaseSeeder` | — | Nilai default konfigurasi: nama wisma, toggle fitur Midtrans/WhatsApp, info rekening bank (`bank_name`, `bank_account`, `bank_holder`). Wajib ada agar halaman keuangan member tidak kosong. |
+| `SettingDatabaseSeeder` | 2026-06-16 | Sekarang juga mengisi `midtrans_enabled_payment_methods` dengan default `["qris","gopay","bca_va","mandiri_va"]`. Jalankan ulang seeder di server lama agar key ini tersedia di DB. |
+| `SettingDatabaseSeeder` | 2026-06-17 | Menambah dua key baru: `feature_pengeluaran_tetap` (default: `false`) dan `pengeluaran_tetap_jenis_aktif` (default: `[]`). Jalankan ulang seeder di server lama agar key ini tersedia. Setelah itu, aktifkan fitur dan pilih jenis utilitas lewat endpoint `POST /api/v1/settings/update-bulk` atau halaman Pengaturan di admin panel. |
+| `PermissionSeeder` | 2026-06-17 | Menambah 4 permission baru: `finance-fixed-expense-view/create/update/delete`. Jalankan `php artisan db:seed --class=Modules\\Auth\\Database\\Seeders\\PermissionSeeder` lalu `php artisan db:seed --class=Modules\\Auth\\Database\\Seeders\\RolePermissionSeeder` di server lama agar role admin mendapat akses. |
 
 ---
 
@@ -125,7 +128,8 @@ Hal-hal yang harus dikonfigurasi di **[dashboard Midtrans](https://dashboard.mid
 
 1. **Payment Notification URL** → isi dengan URL webhook: `https://domain.com/api/finance/payments/midtrans/notification`
 2. **Finish / Unfinish / Error Redirect URL** → arahkan ke halaman yang sesuai di frontend
-3. **Enable payment methods** yang ingin diaktifkan (QRIS, VA, dll.)
+3. **Enable payment methods** yang ingin diaktifkan (QRIS, VA, dll.) di dashboard Midtrans — metode yang tidak diaktifkan di sisi Midtrans tidak akan berfungsi meski diaktifkan di setting aplikasi
+4. **Pilih metode aktif di aplikasi** lewat `PUT /api/v1/settings/payment-methods` atau menu admin (Setting → Metode Pembayaran). Metode yang diaktifkan di sini adalah yang akan muncul ke user.
 
 > Catatan (2026-06-14): Snap token dikonfigurasi dengan expiry 15 menit. Artinya Midtrans akan otomatis kirim webhook `expire` setelah 15 menit jika user tidak menyelesaikan pembayaran. Pastikan webhook URL terdaftar dan bisa diakses.
 
