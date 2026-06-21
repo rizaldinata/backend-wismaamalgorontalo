@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('key', 100)->unique();
             $table->string('name', 150);
             $table->text('description')->nullable();
+            $table->string('icon', 50)->nullable();
             $table->boolean('is_active')->default(true);
             $table->boolean('is_locked')->default(false);
             $table->integer('sort_order')->default(0);
