@@ -28,13 +28,22 @@ class FonnteService
             $response = Http::withHeaders([
                 'Authorization' => $this->token,
             ])->post($this->endpoint, [
-                'target' => $target,
-                'message' => $message,
+                'target'      => $target,
+                'message'     => $message,
                 'countryCode' => '62',
             ]);
 
             if (! $response->successful()) {
-                Log::error('Fonnte API Error: '.$response->body());
+                Log::error('Fonnte API HTTP Error: '.$response->body());
+
+                return false;
+            }
+
+            $body = $response->json();
+
+            if (isset($body['status']) && $body['status'] === false) {
+                $reason = $body['reason'] ?? $body['message'] ?? json_encode($body);
+                Log::warning('Fonnte rejected message: '.$reason);
 
                 return false;
             }

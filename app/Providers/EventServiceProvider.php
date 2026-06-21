@@ -9,6 +9,7 @@ use Modules\Finance\Events\PaymentSettled;
 use App\Events\Inventory\InventariBaru;
 use App\Events\Inventory\InventarisDihapus;
 use App\Events\Inventory\InventarisDiperbarui;
+use App\Events\Jadwal\DPDibayar;
 use App\Events\Jadwal\JadwalBatal;
 use App\Events\Jadwal\JadwalDibuat;
 use App\Events\Jadwal\JadwalSewaAktif;
@@ -23,6 +24,7 @@ class EventServiceProvider extends ServiceProvider
     // This global provider only declares the event catalog so Laravel knows
     // which events exist; business modules self-register their listeners.
     protected $listen = [
+        DPDibayar::class => [],
         JadwalDibuat::class => [],
         JadwalSewaAktif::class => [],
         JadwalSewaSelesai::class => [],

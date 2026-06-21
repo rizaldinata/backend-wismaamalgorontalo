@@ -6,10 +6,12 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Modules\Finance\Repositories\Contracts\ExpenseRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\FixedExpenseEntryRepositoryInterface;
+use Modules\Finance\Repositories\Contracts\FineRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
 use Modules\Finance\Repositories\ExpenseRepository;
 use Modules\Finance\Repositories\FixedExpenseEntryRepository;
+use Modules\Finance\Repositories\FineRepository;
 use Modules\Finance\Repositories\InvoiceRepository;
 use Modules\Finance\Repositories\PaymentRepository;
 use Modules\Finance\Console\Commands\ExpireManualPaymentInvoices;
@@ -65,6 +67,11 @@ class FinanceServiceProvider extends ServiceProvider
         $this->app->bind(
             FixedExpenseEntryRepositoryInterface::class,
             FixedExpenseEntryRepository::class,
+        );
+
+        $this->app->bind(
+            FineRepositoryInterface::class,
+            FineRepository::class,
         );
     }
 

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Finance\Http\Controllers\DashboardController;
 use Modules\Finance\Http\Controllers\ExpenseController;
+use Modules\Finance\Http\Controllers\FineController;
 use Modules\Finance\Http\Controllers\FixedExpenseController;
 use Modules\Finance\Http\Controllers\InvoiceController;
 use Modules\Finance\Http\Controllers\PaymentController;
@@ -57,6 +58,16 @@ Route::prefix('finance/')->middleware(['auth:sanctum'])->group(function () {
         Route::put('/{id}', [FixedExpenseController::class, 'update'])->middleware('permission:finance-fixed-expense-update');
     });
 
+    // Admin: manajemen denda
+    Route::prefix('fines')->group(function () {
+        Route::get('/', [FineController::class, 'index'])->middleware('permission:finance-fine-view');
+        Route::get('/eligible-users', [FineController::class, 'eligibleUsers'])->middleware('permission:finance-fine-create');
+        Route::post('/', [FineController::class, 'store'])->middleware('permission:finance-fine-create');
+        Route::get('/{id}', [FineController::class, 'show'])->middleware('permission:finance-fine-view');
+        Route::post('/{id}/waive', [FineController::class, 'waive'])->middleware('permission:finance-fine-waive');
+        Route::post('/{id}/cancel', [FineController::class, 'cancel'])->middleware('permission:finance-fine-waive');
+    });
+
     // Resident/Member Routes
     Route::prefix('me')->group(function () {
         Route::get('/summary', [ResidentFinanceController::class, 'summary'])->middleware('permission:finance-me-summary-view');
@@ -65,5 +76,7 @@ Route::prefix('finance/')->middleware(['auth:sanctum'])->group(function () {
         Route::get('/payments', [ResidentFinanceController::class, 'payments'])->middleware('permission:finance-me-payment-view');
         Route::post('/leases/{scheduleId}/perpanjang', [ResidentFinanceController::class, 'perpanjangSewa'])->middleware('permission:finance-me-invoice-view');
         Route::post('/leases/{scheduleId}/perpanjang/initiate', [ResidentFinanceController::class, 'initiatePerpanjangManual'])->middleware('permission:finance-me-invoice-view');
+        Route::get('/fines', [ResidentFinanceController::class, 'myFines'])->middleware('permission:finance-me-fine-view');
+        Route::post('/fines/bayar', [ResidentFinanceController::class, 'bayarDenda'])->middleware('permission:finance-me-fine-view');
     });
 });

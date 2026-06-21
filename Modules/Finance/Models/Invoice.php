@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Finance\database\factories\InvoiceFactory;
 use Modules\Finance\Enums\InvoiceStatus;
+use Modules\Finance\Enums\InvoiceType;
 use Modules\Schedule\Models\Schedule;
 
 class Invoice extends Model
@@ -15,6 +16,7 @@ class Invoice extends Model
     protected $fillable = [
         'lease_id',
         'schedule_id',
+        'type',
         'invoice_number',
         'amount',
         'status',
@@ -34,6 +36,7 @@ class Invoice extends Model
         'period_start'       => 'date',
         'period_end'         => 'date',
         'status'             => InvoiceStatus::class,
+        'type'               => InvoiceType::class,
     ];
 
     public function payments()
@@ -44,6 +47,11 @@ class Invoice extends Model
     public function schedule()
     {
         return $this->belongsTo(Schedule::class);
+    }
+
+    public function fines()
+    {
+        return $this->belongsToMany(Fine::class, 'fine_invoice');
     }
 
     public static function newFactory()

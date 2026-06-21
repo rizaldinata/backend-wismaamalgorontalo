@@ -11,6 +11,7 @@ class InvoiceResource extends JsonResource
         return [
             'id' => $this->id,
             'invoice_number' => $this->invoice_number,
+            'type' => is_object($this->type) ? $this->type->value : $this->type,
             'amount' => (float) $this->amount,
             'status' => is_object($this->status) ? $this->status->value : $this->status,
             'due_date' => $this->due_date ? $this->due_date->format('Y-m-d') : null,

@@ -77,6 +77,73 @@ test('aktifkanJadwal hanya bisa dari status pending', function () {
         ->toThrow(\Symfony\Component\HttpKernel\Exception\HttpException::class);
 });
 
+test('[BERHASIL] aktifkanJadwal berhasil dari status terkonfirmasi', function () {
+    Event::fake([JadwalSewaAktif::class]);
+
+    $schedule = Schedule::create([
+        'room_id'    => 1,
+        'type'       => ScheduleType::SEWA->value,
+        'status'     => ScheduleStatus::TERKONFIRMASI->value,
+        'start_date' => now()->toDateString(),
+        'end_date'   => now()->addDays(30)->toDateString(),
+    ]);
+
+    $service = app(ScheduleService::class);
+    $updated = $service->aktifkanJadwal($schedule->id);
+
+    expect($updated->status)->toBe(ScheduleStatus::ACTIVE);
+    expect($updated->activated_at)->not->toBeNull();
+    Event::assertDispatched(JadwalSewaAktif::class);
+});
+
+test('[BERHASIL] konfirmasiJadwal mengubah status pending ke terkonfirmasi', function () {
+    Event::fake([JadwalSewaAktif::class]);
+
+    $schedule = Schedule::create([
+        'room_id'    => 2,
+        'type'       => ScheduleType::SEWA->value,
+        'status'     => ScheduleStatus::PENDING->value,
+        'start_date' => now()->addDays(10)->toDateString(),
+        'end_date'   => now()->addDays(40)->toDateString(),
+    ]);
+
+    $service = app(ScheduleService::class);
+    $updated = $service->konfirmasiJadwal($schedule->id);
+
+    expect($updated->status)->toBe(ScheduleStatus::TERKONFIRMASI);
+    Event::assertNotDispatched(JadwalSewaAktif::class);
+});
+
+test('[BERHASIL] konfirmasiJadwal mengubah status dp_terbayar ke terkonfirmasi', function () {
+    $schedule = Schedule::create([
+        'room_id'        => 3,
+        'type'           => ScheduleType::SEWA->value,
+        'status'         => ScheduleStatus::DP_TERBAYAR->value,
+        'start_date'     => now()->addDays(10)->toDateString(),
+        'end_date'       => now()->addDays(40)->toDateString(),
+    ]);
+
+    $service = app(ScheduleService::class);
+    $updated = $service->konfirmasiJadwal($schedule->id);
+
+    expect($updated->status)->toBe(ScheduleStatus::TERKONFIRMASI);
+});
+
+test('[GAGAL] konfirmasiJadwal gagal jika status sudah active', function () {
+    $schedule = Schedule::create([
+        'room_id'    => 4,
+        'type'       => ScheduleType::SEWA->value,
+        'status'     => ScheduleStatus::ACTIVE->value,
+        'start_date' => '2026-06-01',
+        'end_date'   => '2026-07-01',
+    ]);
+
+    $service = app(ScheduleService::class);
+
+    expect(fn () => $service->konfirmasiJadwal($schedule->id))
+        ->toThrow(\DomainException::class);
+});
+
 test('selesaikanJadwal mengubah status ke finished dan mengirim event JadwalSewaSelesai', function () {
     Event::fake([JadwalSewaSelesai::class]);
 

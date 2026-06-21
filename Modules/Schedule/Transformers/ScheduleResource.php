@@ -2,7 +2,9 @@
 
 namespace Modules\Schedule\Transformers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Modules\Schedule\Enums\ScheduleStatus;
 
 class ScheduleResource extends JsonResource
 {
@@ -29,9 +31,16 @@ class ScheduleResource extends JsonResource
                 'title' => $this->room->title,
                 'price' => $this->room->price,
             ]),
+            'payment_scheme'     => $this->payment_scheme?->value,
+            'dp_amount'          => $this->dp_amount !== null ? (float) $this->dp_amount : null,
+            'dp_paid_at'         => $this->dp_paid_at?->toDateTimeString(),
+            'dp_refund_eligible' => in_array($this->status, [ScheduleStatus::DP_TERBAYAR, ScheduleStatus::TERKONFIRMASI])
+                && $this->payment_scheme?->value === 'dp'
+                    ? Carbon::now()->lt(Carbon::parse($this->start_date)->subDays(3))
+                    : null,
             'activated_at' => $this->activated_at?->toDateTimeString(),
-            'finished_at' => $this->finished_at?->toDateTimeString(),
-            'created_at' => $this->created_at?->toDateTimeString(),
+            'finished_at'  => $this->finished_at?->toDateTimeString(),
+            'created_at'   => $this->created_at?->toDateTimeString(),
         ];
     }
 }
