@@ -63,7 +63,12 @@ class ScheduleRepository implements ScheduleRepositoryInterface
     public function hasPendingOrActiveByRoomId(int $roomId): bool
     {
         return Schedule::where('room_id', $roomId)
-            ->whereIn('status', [ScheduleStatus::PENDING->value, ScheduleStatus::ACTIVE->value])
+            ->whereIn('status', [
+                ScheduleStatus::PENDING->value,
+                ScheduleStatus::DP_TERBAYAR->value,
+                ScheduleStatus::TERKONFIRMASI->value,
+                ScheduleStatus::ACTIVE->value,
+            ])
             ->exists();
     }
 

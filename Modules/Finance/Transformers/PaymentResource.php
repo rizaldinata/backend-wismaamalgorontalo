@@ -13,6 +13,7 @@ class PaymentResource extends JsonResource
             'id' => $this->id,
             'invoice_id' => $this->invoice_id,
             'invoice_number' => $this->invoice->invoice_number ?? null,
+            'invoice_type' => is_object($this->invoice?->type) ? $this->invoice->type->value : $this->invoice?->type,
             'amount'       => (float) ($this->invoice->amount ?? 0),
             'midtrans_fee' => (int) ($this->midtrans_fee ?? 0),
             'fee_bearer'   => $this->fee_bearer,

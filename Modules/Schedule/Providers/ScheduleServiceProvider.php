@@ -2,6 +2,7 @@
 
 namespace Modules\Schedule\Providers;
 
+use Illuminate\Console\Scheduling\Schedule as ConsoleSchedule;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use App\Contracts\ActiveTenantCheckerInterface;
@@ -54,6 +55,8 @@ class ScheduleServiceProvider extends ServiceProvider
             \Modules\Schedule\Console\Commands\MigrasiDataRentalKeJadwal::class,
             \Modules\Schedule\Console\Commands\MigrasiDataResidentKeJadwal::class,
             \Modules\Schedule\Console\Commands\ExpirePendingSchedules::class,
+            \Modules\Schedule\Console\Commands\FinishExpiredSchedules::class,
+            \Modules\Schedule\Console\Commands\AktifkanJadwalYangMulaiHariIni::class,
         ]);
     }
 
@@ -62,10 +65,11 @@ class ScheduleServiceProvider extends ServiceProvider
      */
     protected function registerCommandSchedules(): void
     {
-        // $this->app->booted(function () {
-        //     $schedule = $this->app->make(Schedule::class);
-        //     $schedule->command('inspire')->hourly();
-        // });
+        $this->app->booted(function () {
+            $schedule = $this->app->make(ConsoleSchedule::class);
+            $schedule->command('schedule:finish-expired')->hourly();
+            $schedule->command('schedule:aktifkan-hari-ini')->dailyAt('00:05');
+        });
     }
 
     /**

@@ -5,11 +5,15 @@ namespace Modules\Finance\Providers;
 use App\Events\Inventory\InventariBaru;
 use App\Events\Inventory\InventarisDihapus;
 use App\Events\Inventory\InventarisDiperbarui;
+use App\Events\Jadwal\DPDibayar;
 use App\Events\Jadwal\JadwalBatal;
 use App\Events\Jadwal\JadwalDibuat;
 use App\Events\Jadwal\JadwalSewaAktif;
 use App\Events\Jadwal\JadwalSewaSelesai;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Modules\Finance\Events\PaymentSettled;
+use Modules\Finance\Listeners\BatalkanInvoiceSetelahJadwalBatal;
+use Modules\Finance\Listeners\BuatInvoicePelunasanSetelahDPDibayar;
 use Modules\Finance\Listeners\BuatInvoiceSetelahJadwalDibuat;
 use Modules\Finance\Listeners\CatatPengeluaranInventariBaru;
 use Modules\Finance\Listeners\CatatTenantAktifSetelahJadwalSewaAktif;
@@ -17,6 +21,7 @@ use Modules\Finance\Listeners\HapusPengeluaranInventaris;
 use Modules\Finance\Listeners\HapusTenantAktifSetelahJadwalBatal;
 use Modules\Finance\Listeners\HapusTenantAktifSetelahSewaSelesai;
 use Modules\Finance\Listeners\SinkronisasiPengeluaranInventaris;
+use Modules\Finance\Listeners\TandaiDendaLunas;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -32,6 +37,10 @@ class EventServiceProvider extends ServiceProvider
         ],
         JadwalBatal::class => [
             HapusTenantAktifSetelahJadwalBatal::class,
+            BatalkanInvoiceSetelahJadwalBatal::class,
+        ],
+        DPDibayar::class => [
+            BuatInvoicePelunasanSetelahDPDibayar::class,
         ],
         InventariBaru::class => [
             CatatPengeluaranInventariBaru::class,
@@ -41,6 +50,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         InventarisDihapus::class => [
             HapusPengeluaranInventaris::class,
+        ],
+        PaymentSettled::class => [
+            TandaiDendaLunas::class,
         ],
     ];
 

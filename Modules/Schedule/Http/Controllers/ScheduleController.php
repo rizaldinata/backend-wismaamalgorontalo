@@ -29,16 +29,37 @@ class ScheduleController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        $maxDate = now()->addDays(30)->toDateString();
+
         $validated = $request->validate([
-            'room_id' => 'required|integer',
-            'type' => 'required|in:sewa,maintenance,kebersihan,blokir',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'tenant_name' => 'nullable|string|max:255',
+            'room_id'          => 'required|integer',
+            'type'             => 'required|in:sewa,maintenance,kebersihan,blokir',
+            'start_date'       => [
+                'required', 'date', 'after_or_equal:today',
+                'before_or_equal:' . $maxDate,
+            ],
+            'end_date'         => 'required|date|after_or_equal:start_date',
+            'tenant_name'      => 'nullable|string|max:255',
             'tenant_id_number' => 'nullable|string|max:50',
-            'tenant_phone' => 'nullable|string|max:20',
-            'tenant_user_id' => 'nullable|integer|exists:users,id',
-            'agreed_price' => 'nullable|numeric|min:0',
+            'tenant_phone'     => 'nullable|string|max:20',
+            'tenant_user_id'   => 'nullable|integer|exists:users,id',
+            'agreed_price'     => 'nullable|numeric|min:0',
+            'payment_scheme'   => 'nullable|in:full,dp',
+        ], [
+            'room_id.required'              => 'Kamar wajib dipilih.',
+            'type.required'                 => 'Jenis jadwal wajib diisi.',
+            'type.in'                       => 'Jenis jadwal tidak valid.',
+            'start_date.required'           => 'Tanggal mulai wajib diisi.',
+            'start_date.date'               => 'Format tanggal mulai tidak valid.',
+            'start_date.after_or_equal'     => 'Tanggal mulai tidak boleh sebelum hari ini.',
+            'start_date.before_or_equal'    => 'Tanggal mulai maksimal 30 hari ke depan (' . $maxDate . ').',
+            'end_date.required'             => 'Tanggal selesai wajib diisi.',
+            'end_date.date'                 => 'Format tanggal selesai tidak valid.',
+            'end_date.after_or_equal'       => 'Tanggal selesai tidak boleh sebelum tanggal mulai.',
+            'agreed_price.numeric'          => 'Harga sewa harus berupa angka.',
+            'agreed_price.min'              => 'Harga sewa tidak boleh negatif.',
+            'payment_scheme.in'             => 'Skema pembayaran tidak valid. Gunakan "full" atau "dp".',
+            'tenant_user_id.exists'         => 'Akun penghuni tidak ditemukan.',
         ]);
 
         $validated['created_by'] = Auth::id();

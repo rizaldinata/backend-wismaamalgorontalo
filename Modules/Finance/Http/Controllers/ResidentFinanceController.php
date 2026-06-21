@@ -11,11 +11,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Modules\Finance\Enums\InvoiceStatus;
 use Modules\Finance\Enums\PaymentStatus;
+use Modules\Finance\Http\Requests\BayarDendaRequest;
 use Modules\Finance\Http\Requests\InitiatePerpanjangSewaRequest;
 use Modules\Finance\Http\Requests\PerpanjangSewaRequest;
+use Modules\Finance\Repositories\Contracts\FineRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
 use Modules\Finance\Services\FinanceService;
+use Modules\Finance\Services\FineService;
+use Modules\Finance\Transformers\FineResource;
 use Modules\Finance\Transformers\InvoiceResource;
 use Modules\Finance\Transformers\PaymentResource;
 
@@ -27,6 +31,8 @@ class ResidentFinanceController extends Controller
         private readonly InvoiceRepositoryInterface $invoiceRepository,
         private readonly PaymentRepositoryInterface $paymentRepository,
         private readonly FinanceService $financeService,
+        private readonly FineRepositoryInterface $fineRepository,
+        private readonly FineService $fineService,
     ) {}
 
     public function summary()
@@ -313,6 +319,46 @@ class ResidentFinanceController extends Controller
         return $this->apiSuccess(
             new PaymentResource($payment),
             'Perpanjangan sewa berhasil diproses',
+            201
+        );
+    }
+
+    public function myFines(Request $request): JsonResponse
+    {
+        $userId = Auth::id();
+        $status = $request->query('status');
+
+        $fines = $this->fineRepository->getByUser(
+            $userId,
+            $status ? ['status' => $status] : []
+        );
+
+        return FineResource::collection($fines)
+            ->additional(['success' => true, 'message' => 'Daftar denda berhasil dimuat.'])
+            ->response();
+    }
+
+    public function bayarDenda(BayarDendaRequest $request): JsonResponse
+    {
+        $userId = Auth::id();
+        $data   = $request->validated();
+
+        $paymentData = [
+            'payment_method'         => $data['payment_method'],
+            'preferred_payment_type' => $data['preferred_payment_type'] ?? null,
+        ];
+
+        if ($request->hasFile('payment_proof')) {
+            $file = $request->file('payment_proof');
+            $paymentData['payment_proof_bytes'] = $file->get();
+            $paymentData['payment_proof_name']  = $file->getClientOriginalName();
+        }
+
+        $payment = $this->fineService->bayarDenda($userId, $data['fine_ids'], $paymentData);
+
+        return $this->apiSuccess(
+            new PaymentResource($payment),
+            'Pembayaran denda berhasil diproses.',
             201
         );
     }

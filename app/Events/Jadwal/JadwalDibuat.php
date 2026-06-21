@@ -21,5 +21,7 @@ class JadwalDibuat
         public readonly ?float $agreedPrice = null,
         public readonly string $source = 'lease', // 'lease' | 'schedule'
         public readonly ?int $tenantUserId = null,
+        public readonly ?string $paymentScheme = null, // 'full' | 'dp'
+        public readonly ?float $dpAmount = null,       // diisi jika paymentScheme='dp'
     ) {}
 }

@@ -22,6 +22,14 @@ class AktifkanJadwalSetelahPembayaranDiverifikasi
             return;
         }
 
+        // Invoice DP dan pelunasan ditangani listener khusus
+        if ($event->invoiceId > 0) {
+            $invoiceType = DB::table('invoices')->where('id', $event->invoiceId)->value('type');
+            if (in_array($invoiceType, ['dp', 'pelunasan'])) {
+                return;
+            }
+        }
+
         try {
             $schedule = $this->scheduleRepository->findById($event->scheduleId);
         } catch (\Throwable) {
@@ -33,14 +41,25 @@ class AktifkanJadwalSetelahPembayaranDiverifikasi
             return;
         }
 
-        // Kasus 1: Jadwal baru (PENDING) → aktifkan
+        // Kasus 1: Jadwal baru (PENDING) — cek apakah start_date sudah tiba
         if ($schedule->status === ScheduleStatus::PENDING) {
-            $this->scheduleService->aktifkanJadwal($schedule->id);
+            if ($schedule->start_date->gt(today())) {
+                // Start date belum tiba → konfirmasi dulu, aktifkan via command harian
+                $this->scheduleService->konfirmasiJadwal($schedule->id);
 
-            Log::info('Jadwal diaktifkan setelah pembayaran diverifikasi.', [
-                'schedule_id' => $event->scheduleId,
-                'payment_id' => $event->paymentId,
-            ]);
+                Log::info('Jadwal dikonfirmasi (start_date belum tiba) setelah pembayaran diverifikasi.', [
+                    'schedule_id' => $event->scheduleId,
+                    'start_date'  => $schedule->start_date->toDateString(),
+                ]);
+            } else {
+                // Start date sudah tiba atau hari ini → aktifkan langsung
+                $this->scheduleService->aktifkanJadwal($schedule->id);
+
+                Log::info('Jadwal diaktifkan setelah pembayaran diverifikasi.', [
+                    'schedule_id' => $event->scheduleId,
+                    'payment_id'  => $event->paymentId,
+                ]);
+            }
 
             return;
         }
