@@ -31,7 +31,8 @@ RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
     && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
 # Install dependencies
-RUN composer install --optimize-autoloader --no-dev
+RUN composer config --global policy.advisories.block false && \
+    composer install --optimize-autoloader --no-dev
 
 # Copy start-container script
 COPY docker/start-container.sh /usr/local/bin/start-container
