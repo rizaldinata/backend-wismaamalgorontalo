@@ -23,10 +23,15 @@ class CheckModuleStatus
         // Hanya memetakan modul yang bisa ditoggle (bisnis & core)
         $modulesMap = [
             // Granular Finance Features (Lebih spesifik, taruh di atas)
+            'api/v1/finance/fines' => 'finance_fine',
+            'api/v1/finance/invoices' => 'finance_invoice',
             'api/finance/expenses' => 'finance_expense',
             'api/finance/fixed-expenses' => 'finance_fixed_expense',
             'api/finance/me/leases' => 'finance_lease',
             'api/finance/dashboard' => 'finance_dashboard',
+            
+            // Granular Auth
+            'api/v1/auth/register' => 'auth_registration',
 
             // Modul Utama
             'api/finance' => 'finance',

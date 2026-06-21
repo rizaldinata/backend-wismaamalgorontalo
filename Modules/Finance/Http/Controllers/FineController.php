@@ -22,6 +22,12 @@ class FineController extends Controller
         private readonly FineService $fineService,
     ) {}
 
+    /**
+     * Daftar Denda
+     *
+     * Mengambil daftar semua denda (fines) yang dibebankan kepada penghuni. (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(Request $request): JsonResponse
     {
         $perPage = (int) $request->query('per_page', 15);
@@ -37,6 +43,12 @@ class FineController extends Controller
             ->response();
     }
 
+    /**
+     * Buat Denda Baru
+     *
+     * Menambahkan denda baru untuk penghuni tertentu. (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(StoreFineRequest $request): JsonResponse
     {
         $fine = $this->fineService->buatDenda($request->validated());
@@ -44,6 +56,12 @@ class FineController extends Controller
         return $this->apiSuccess(new FineResource($fine), 'Denda berhasil dibuat.', 201);
     }
 
+    /**
+     * Detail Denda
+     *
+     * Melihat detail lengkap sebuah denda. (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show(int $id): JsonResponse
     {
         $fine = $this->fineRepository->findById($id);
@@ -55,6 +73,12 @@ class FineController extends Controller
         return $this->apiSuccess(new FineResource($fine), 'Detail denda berhasil dimuat.');
     }
 
+    /**
+     * Maafkan Denda (Waive)
+     *
+     * Menghapus kewajiban bayar denda dengan alasan tertentu (waive). (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function waive(WaiveFineRequest $request, int $id): JsonResponse
     {
         $fine = $this->fineService->maafkanDenda($id, $request->validated('waive_reason'));
@@ -62,6 +86,12 @@ class FineController extends Controller
         return $this->apiSuccess(new FineResource($fine), 'Denda berhasil dimaafkan.');
     }
 
+    /**
+     * Batalkan Denda
+     *
+     * Membatalkan denda yang salah kirim/input. (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function cancel(int $id): JsonResponse
     {
         $fine = $this->fineService->batalkanDenda($id);
@@ -69,6 +99,12 @@ class FineController extends Controller
         return $this->apiSuccess(new FineResource($fine), 'Denda berhasil dibatalkan.');
     }
 
+    /**
+     * Calon Penerima Denda
+     *
+     * Mendapatkan daftar user/penghuni yang valid untuk diberikan denda. (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function eligibleUsers(): JsonResponse
     {
         $users = DB::table('users')

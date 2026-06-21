@@ -17,9 +17,34 @@ class FeatureToggleSeeder extends Seeder
         FeatureToggle::truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
+        // 1. AUTH (Core)
+        $authModule = FeatureToggle::create([
+            'name' => 'Login Akun',
+            'key' => 'auth',
+            'description' => 'Autentikasi, Hak Akses, & Role (Wajib)',
+            'icon' => 'lock',
+            'is_active' => true,
+            'is_locked' => true,
+        ]);
+
+        $authFeatures = [
+            ['name' => 'Registrasi Akun', 'key' => 'auth_registration', 'description' => 'Mengizinkan pendaftaran calon penghuni langsung lewat aplikasi.', 'icon' => 'app_registration'],
+        ];
+
+        foreach ($authFeatures as $feat) {
+            FeatureToggle::create([
+                'parent_id' => $authModule->id,
+                'name' => $feat['name'],
+                'key' => $feat['key'],
+                'description' => $feat['description'],
+                'icon' => $feat['icon'],
+                'is_active' => true,
+                'is_locked' => false,
+            ]);
+        }
+
         // 1. CORE MODULES (Locked)
         $coreModules = [
-            ['name' => 'Auth', 'key' => 'auth', 'description' => 'Autentikasi, Hak Akses, & Role (Wajib)', 'icon' => 'lock'],
             ['name' => 'Room', 'key' => 'room', 'description' => 'Manajemen Kamar & Fasilitas (Wajib)', 'icon' => 'meeting_room'],
             ['name' => 'Schedule', 'key' => 'schedule', 'description' => 'Pencatatan Penghuni & Reservasi (Wajib)', 'icon' => 'calendar_month'],
             ['name' => 'Setting', 'key' => 'setting', 'description' => 'Pengaturan Utama Sistem (Wajib)', 'icon' => 'settings'],
@@ -79,6 +104,8 @@ class FeatureToggleSeeder extends Seeder
             ['name' => 'Pembayaran Midtrans (Online)', 'key' => 'finance_midtrans', 'description' => 'Integrasi Midtrans untuk pembayaran Virtual Account, QRIS, dsb.', 'icon' => 'payment'],
             ['name' => 'Manajemen Pengeluaran (Expense)', 'key' => 'finance_expense', 'description' => 'Pencatatan pengeluaran operasional kos.', 'icon' => 'receipt_long'],
             ['name' => 'Pengeluaran Tetap Bulanan', 'key' => 'finance_fixed_expense', 'description' => 'Pengingat dan pencatatan tagihan tetap (PLN, PDAM, WiFi).', 'icon' => 'bolt'],
+            ['name' => 'Manajemen Denda Keterlambatan', 'key' => 'finance_fine', 'description' => 'Sistem denda otomatis untuk keterlambatan pembayaran sewa.', 'icon' => 'warning'],
+            ['name' => 'Daftar Tagihan & Pembayaran', 'key' => 'finance_invoice', 'description' => 'Manajemen invoice tagihan sewa dan verifikasi pembayaran.', 'icon' => 'receipt'],
             ['name' => 'Sewa/Perpanjang Kamar Otomatis', 'key' => 'finance_lease', 'description' => 'Penagihan sewa otomatis ke penghuni di dalam aplikasi.', 'icon' => 'autorenew'],
             ['name' => 'Dashboard Finansial (KPI)', 'key' => 'finance_dashboard', 'description' => 'Grafik pendapatan, laporan laba rugi, dan performa keuangan.', 'icon' => 'bar_chart'],
         ];

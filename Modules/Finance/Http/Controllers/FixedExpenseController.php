@@ -21,6 +21,12 @@ class FixedExpenseController extends Controller
         private readonly FixedExpenseEntryRepositoryInterface $repository,
     ) {}
 
+    /**
+     * Daftar Pengeluaran Tetap
+     *
+     * Mengambil daftar pengeluaran rutin bulanan (listrik, air, kebersihan, dll). (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(Request $request): JsonResponse
     {
         $perPage  = min((int) $request->query('per_page', 20), 100);
@@ -34,6 +40,12 @@ class FixedExpenseController extends Controller
             ->setStatusCode(200);
     }
 
+    /**
+     * Detail Pengeluaran Tetap
+     *
+     * Melihat detail dari satu record pengeluaran bulanan. (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show(int $id): JsonResponse
     {
         $entry = $this->repository->findById($id);
@@ -45,6 +57,12 @@ class FixedExpenseController extends Controller
         return $this->apiSuccess(new FixedExpenseEntryResource($entry), 'Detail pengeluaran tetap.');
     }
 
+    /**
+     * Update Pengeluaran Tetap
+     *
+     * Memasukkan jumlah nominal/tagihan real untuk pengeluaran di bulan terkait. (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(UpdateFixedExpenseRequest $request, int $id): JsonResponse
     {
         $entry = $this->repository->findById($id);
@@ -58,6 +76,12 @@ class FixedExpenseController extends Controller
         return $this->apiSuccess(new FixedExpenseEntryResource($updated), 'Pengeluaran tetap berhasil diperbarui.');
     }
 
+    /**
+     * Generate Pengeluaran Bulan Ini
+     *
+     * Meng-generate secara otomatis kerangka tagihan rutin untuk bulan/tahun berjalan. (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function generateBulanIni(Request $request): JsonResponse
     {
         $bulan = $request->query('bulan') ? (int) $request->query('bulan') : null;
@@ -68,6 +92,12 @@ class FixedExpenseController extends Controller
         return $this->apiSuccess(['jumlah_dibuat' => $jumlah], "Berhasil membuat {$jumlah} entri pengeluaran tetap.");
     }
 
+    /**
+     * Status Pengisian Pengeluaran
+     *
+     * Mengecek apakah admin sudah melengkapi/mengisi semua tagihan rutin bulan ini. (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function status(Request $request): JsonResponse
     {
         $bulan = $request->query('bulan') ? (int) $request->query('bulan') : null;

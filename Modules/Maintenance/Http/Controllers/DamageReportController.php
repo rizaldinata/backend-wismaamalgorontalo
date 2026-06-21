@@ -17,6 +17,12 @@ class DamageReportController extends Controller
         private readonly DamageReportService $maintenanceService
     ) {}
 
+    /**
+     * Laporan Kerusakan Saya
+     *
+     * Melihat riwayat laporan kerusakan (maintenance) milik pengguna saat ini.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function myReports()
     {
         $reports = $this->maintenanceService->getResidentReports(Auth::id());
@@ -24,6 +30,12 @@ class DamageReportController extends Controller
         return $this->apiSuccess(MaintenanceRequestResource::collection($reports), 'Berhasil mengambil data laporan kerusakan.');
     }
 
+    /**
+     * Buat Laporan Kerusakan
+     *
+     * Membuat laporan kerusakan baru (sebagai penghuni).
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(StoreMaintenanceRequest $request)
     {
         $validated = $request->validated();
@@ -34,6 +46,12 @@ class DamageReportController extends Controller
         return $this->apiSuccess(new MaintenanceRequestResource($report), 'Laporan kerusakan berhasil dibuat.', 201);
     }
 
+    /**
+     * Detail Laporan Kerusakan
+     *
+     * Melihat detail dari sebuah laporan kerusakan beserta progress pekerjaannya.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show($id)
     {
         $report = $this->maintenanceService->getReportById($id);

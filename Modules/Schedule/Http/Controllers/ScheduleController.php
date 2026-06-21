@@ -17,6 +17,12 @@ class ScheduleController extends Controller
 
     public function __construct(private readonly ScheduleService $scheduleService) {}
 
+    /**
+     * Daftar Semua Jadwal
+     *
+     * Melihat daftar semua jadwal (sewa, maintenance, dll). (Hanya Admin)
+     * @return Response|JsonResponse
+     */
     public function index(Request $request): Response|JsonResponse
     {
         $schedules = $this->scheduleService->ambilSemuaJadwal($request->only(['room_id', 'type', 'status', 'per_page']));
@@ -27,6 +33,12 @@ class ScheduleController extends Controller
             ->setStatusCode(200);
     }
 
+    /**
+     * Buat Jadwal Baru
+     *
+     * Membuat jadwal baru untuk kamar (contoh: sewa, maintenance, dll). (Hanya Admin)
+     * @return JsonResponse
+     */
     public function store(Request $request): JsonResponse
     {
         $maxDate = now()->addDays(30)->toDateString();
@@ -69,6 +81,12 @@ class ScheduleController extends Controller
         return $this->apiSuccess(new ScheduleResource($schedule), 'Jadwal berhasil dibuat', 201);
     }
 
+    /**
+     * Detail Jadwal
+     *
+     * Mengambil data lengkap suatu jadwal berdasarkan ID.
+     * @return JsonResponse
+     */
     public function show(int $id): JsonResponse
     {
         $schedule = $this->scheduleService->ambilJadwalById($id);
@@ -76,6 +94,12 @@ class ScheduleController extends Controller
         return $this->apiSuccess(new ScheduleResource($schedule), 'Detail jadwal');
     }
 
+    /**
+     * Aktifkan Jadwal
+     *
+     * Mengubah status jadwal menjadi aktif (contoh: masa sewa dimulai). (Hanya Admin)
+     * @return JsonResponse
+     */
     public function aktifkan(int $id): JsonResponse
     {
         $schedule = $this->scheduleService->aktifkanJadwal($id);
@@ -83,6 +107,12 @@ class ScheduleController extends Controller
         return $this->apiSuccess(new ScheduleResource($schedule), 'Jadwal berhasil diaktifkan');
     }
 
+    /**
+     * Selesaikan Jadwal
+     *
+     * Menandai jadwal telah selesai (contoh: masa sewa habis/checkout). (Hanya Admin)
+     * @return JsonResponse
+     */
     public function selesaikan(int $id): JsonResponse
     {
         $schedule = $this->scheduleService->selesaikanJadwal($id);
@@ -90,6 +120,12 @@ class ScheduleController extends Controller
         return $this->apiSuccess(new ScheduleResource($schedule), 'Jadwal berhasil diselesaikan');
     }
 
+    /**
+     * Batalkan Jadwal
+     *
+     * Membatalkan jadwal sebelum dimulai (contoh: penghuni batal booking). (Hanya Admin)
+     * @return JsonResponse
+     */
     public function batalkan(int $id): JsonResponse
     {
         $schedule = $this->scheduleService->batalkanJadwal($id);
@@ -97,6 +133,12 @@ class ScheduleController extends Controller
         return $this->apiSuccess(new ScheduleResource($schedule), 'Jadwal berhasil dibatalkan');
     }
 
+    /**
+     * Jadwal Saya
+     *
+     * Melihat daftar jadwal (riwayat sewa) milik pengguna yang sedang login.
+     * @return Response|JsonResponse
+     */
     public function mySchedules(Request $request): Response|JsonResponse
     {
         $filters = array_merge(
@@ -112,6 +154,12 @@ class ScheduleController extends Controller
             ->setStatusCode(200);
     }
 
+    /**
+     * Jadwal per Kamar
+     *
+     * Mengambil semua jadwal yang terkait dengan ID kamar tertentu.
+     * @return JsonResponse
+     */
     public function byKamar(int $roomId): JsonResponse
     {
         $schedules = $this->scheduleService->ambilJadwalKamar($roomId);

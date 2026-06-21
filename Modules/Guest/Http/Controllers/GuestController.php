@@ -20,6 +20,12 @@ class GuestController extends Controller
         private readonly GuestService $guestService
     ) {}
 
+    /**
+     * Daftar Tamu Saya
+     *
+     * Mengambil daftar tamu yang didaftarkan oleh pengguna saat ini.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index()
     {
         try {
@@ -33,6 +39,12 @@ class GuestController extends Controller
         }
     }
 
+    /**
+     * Tambah Tamu Baru
+     *
+     * Mendaftarkan tamu baru untuk pengguna saat ini.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(StoreGuestRequest $request)
     {
         try {
@@ -46,6 +58,12 @@ class GuestController extends Controller
         }
     }
 
+    /**
+     * Hapus Data Tamu
+     *
+     * Menghapus data tamu berdasarkan ID milik pengguna saat ini.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy(int $id)
     {
         try {

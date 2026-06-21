@@ -15,6 +15,12 @@ class UserProfileController extends Controller
 
     public function __construct(private readonly ImageService $imageService) {}
 
+    /**
+     * Lihat Profil User
+     *
+     * Mengambil detail profil dari user yang sedang login.
+     * @return JsonResponse
+     */
     public function show(Request $request): JsonResponse
     {
         $profile = UserProfile::where('user_id', $request->user()->id)->first();
@@ -26,6 +32,12 @@ class UserProfileController extends Controller
         return $this->apiSuccess($this->transform($profile), 'Profil berhasil diambil');
     }
 
+    /**
+     * Simpan/Update Profil User
+     *
+     * Menyimpan profil lengkap (termasuk KTP) dari user yang sedang login.
+     * @return JsonResponse
+     */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([

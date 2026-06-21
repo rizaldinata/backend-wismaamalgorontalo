@@ -21,6 +21,12 @@ class PaymentController extends Controller
         private readonly PaymentRepositoryInterface $paymentRepository
     ) {}
 
+    /**
+     * Daftar Pembayaran
+     *
+     * Mengambil daftar log pembayaran yang masuk ke sistem. (Hanya Admin)
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
     public function index(Request $request)
     {
         $request->validate([
@@ -40,6 +46,12 @@ class PaymentController extends Controller
         ]);
     }
 
+    /**
+     * Detail Pembayaran
+     *
+     * Melihat detail dari sebuah pembayaran. (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show(int $id)
     {
         $payment = $this->paymentRepository->findOrFail($id);
@@ -48,6 +60,12 @@ class PaymentController extends Controller
         return $this->apiSuccess(new PaymentResource($payment), 'Detail pembayaran berhasil diambil');
     }
 
+    /**
+     * Lakukan Pembayaran Tagihan
+     *
+     * Memproses pembayaran manual atau Midtrans untuk tagihan (invoice) tertentu.
+     * @return JsonResponse
+     */
     public function pay(PayInvoiceRequest $request, int $invoiceId): JsonResponse
     {
         $payment = $this->financeService->processPayment($invoiceId, $request->validated());
@@ -59,6 +77,12 @@ class PaymentController extends Controller
         );
     }
 
+    /**
+     * Verifikasi Pembayaran Manual
+     *
+     * Menerima atau menolak pembayaran manual (transfer bank) yang diupload pengguna. (Hanya Admin)
+     * @return JsonResponse
+     */
     public function verify(VerifyPaymentRequest $request, int $paymentId): JsonResponse
     {
         $payment = $this->financeService->verifyPayment(
@@ -74,6 +98,12 @@ class PaymentController extends Controller
         return $this->apiSuccess(new PaymentResource($payment), $message);
     }
 
+    /**
+     * Refund Pembayaran
+     *
+     * Mengembalikan dana pembayaran. (Hanya Admin)
+     * @return JsonResponse
+     */
     public function refund(Request $request, int $paymentId): JsonResponse
     {
         $request->validate([
@@ -85,6 +115,13 @@ class PaymentController extends Controller
         return $this->apiSuccess(new PaymentResource($payment), 'Dana berhasil dikembalikan');
     }
 
+    /**
+     * Webhook Midtrans (Invoice)
+     *
+     * Endpoint untuk menerima update otomatis dari Midtrans (khusus pembayaran invoice utama).
+     * @unauthenticated
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function midtransNotification(Request $request)
     {
         $this->financeService->handleMidtransNotification($request->all());
