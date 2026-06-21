@@ -35,6 +35,12 @@ class ResidentFinanceController extends Controller
         private readonly FineService $fineService,
     ) {}
 
+    /**
+     * Ringkasan Keuangan Penghuni
+     *
+     * Menampilkan ringkasan tagihan belum bayar (unpaid) dan informasi sewa aktif pengguna saat ini.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function summary()
     {
         $userId = Auth::id();
@@ -76,6 +82,12 @@ class ResidentFinanceController extends Controller
         ], 'Ringkasan keuangan berhasil diambil');
     }
 
+    /**
+     * Daftar Tagihan Saya
+     *
+     * Melihat semua tagihan yang dibebankan kepada penghuni yang sedang login.
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
     public function invoices(Request $request)
     {
         $userId = Auth::id();
@@ -95,6 +107,12 @@ class ResidentFinanceController extends Controller
         ]);
     }
 
+    /**
+     * Detail Tagihan Saya
+     *
+     * Melihat detail satu tagihan spesifik milik penghuni yang sedang login.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function showInvoice(int $id)
     {
         $userId = Auth::id();
@@ -110,6 +128,12 @@ class ResidentFinanceController extends Controller
         ]);
     }
 
+    /**
+     * Riwayat Pembayaran Saya
+     *
+     * Melihat daftar transaksi/pembayaran yang pernah dilakukan oleh penghuni yang sedang login.
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
     public function payments(Request $request)
     {
         $userId = Auth::id();
@@ -141,6 +165,12 @@ class ResidentFinanceController extends Controller
         ]);
     }
 
+    /**
+     * Inisiasi Perpanjang Sewa (Manual)
+     *
+     * Mengajukan perpanjangan masa sewa dan generate tagihan untuk pembayaran manual (transfer bank).
+     * @return JsonResponse
+     */
     public function initiatePerpanjangManual(InitiatePerpanjangSewaRequest $request, int $scheduleId): JsonResponse
     {
         $userId = Auth::id();
@@ -228,6 +258,12 @@ class ResidentFinanceController extends Controller
         );
     }
 
+    /**
+     * Perpanjang Sewa (Otomatis/Midtrans)
+     *
+     * Mengajukan perpanjangan masa sewa dan langsung memproses pembayaran via payment gateway (Midtrans).
+     * @return JsonResponse
+     */
     public function perpanjangSewa(PerpanjangSewaRequest $request, int $scheduleId): JsonResponse
     {
         $userId = Auth::id();

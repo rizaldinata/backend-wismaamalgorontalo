@@ -18,6 +18,13 @@ class RoomController extends Controller
         private readonly RoomService $roomService
     ) {}
 
+    /**
+     * Daftar Kamar
+     *
+     * Mengambil daftar seluruh kamar berserta status ketersediaannya.
+     * @unauthenticated
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(Request $request)
     {
         $rooms = $this->roomService->getAllRooms($request->query());
@@ -28,6 +35,13 @@ class RoomController extends Controller
         );
     }
 
+    /**
+     * Jadwal Kamar (Public)
+     *
+     * Mengambil daftar kamar beserta jadwal kosong terdekat untuk ditampilkan di katalog aplikasi.
+     * @unauthenticated
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function schedules()
     {
         $rooms = $this->roomService->getRoomSchedules();
@@ -38,6 +52,12 @@ class RoomController extends Controller
         );
     }
 
+    /**
+     * Tambah Kamar Baru
+     *
+     * Membuat data kamar baru beserta foto dan fasilitasnya. (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(StoreRoomRequest $request)
     {
         $room = $this->roomService->createRoom(
@@ -48,6 +68,13 @@ class RoomController extends Controller
         return $this->apiSuccess(new RoomResource($room), 'Kamar berhasil dibuat', 201);
     }
 
+    /**
+     * Detail Kamar
+     *
+     * Mengambil detail lengkap suatu kamar berdasarkan ID.
+     * @unauthenticated
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show($id)
     {
         $room = $this->roomService->getRoomDetails($id);
@@ -55,6 +82,12 @@ class RoomController extends Controller
         return $this->apiSuccess(new RoomResource($room), 'Detail kamar berhasil diambil');
     }
 
+    /**
+     * Update Kamar
+     *
+     * Memperbarui data kamar berdasarkan ID. (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(UpdateRoomRequest $request, $id)
     {
         $updatedRoom = $this->roomService->updateRoom(
@@ -66,6 +99,12 @@ class RoomController extends Controller
         return $this->apiSuccess(new RoomResource($updatedRoom), 'Kamar berhasil diupdate');
     }
 
+    /**
+     * Hapus Kamar
+     *
+     * Menghapus data kamar berdasarkan ID secara permanen. (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy($id)
     {
         $this->roomService->deleteRoom($id);
@@ -73,6 +112,12 @@ class RoomController extends Controller
         return $this->apiSuccess(null, 'Kamar berhasil dihapus');
     }
 
+    /**
+     * Upload Foto Kamar
+     *
+     * Menambahkan foto-foto baru ke kamar yang sudah ada. (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function uploadImages(Request $request, $id)
     {
         $request->validate(['images' => 'required|array', 'images.*' => 'image|max:5120']);
@@ -83,6 +128,12 @@ class RoomController extends Controller
         return $this->apiSuccess(new RoomResource($room->refresh()), 'Foto berhasil ditambahkan');
     }
 
+    /**
+     * Hapus Foto Kamar
+     *
+     * Menghapus foto kamar tertentu. (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function deleteImage($roomId, $imageId)
     {
         $this->roomService->deleteImage($imageId);

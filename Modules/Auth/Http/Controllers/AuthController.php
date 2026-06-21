@@ -23,7 +23,13 @@ class AuthController extends Controller
         $this->authService = $authService;
     }
 
-    // membuat user baru untuk pengguna aplikasi
+    /**
+     * Registrasi Pengguna
+     *
+     * Membuat akun baru untuk pengguna/calon penghuni.
+     * @unauthenticated
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function register(RegisterRequest $request)
     {
         try {
@@ -35,7 +41,13 @@ class AuthController extends Controller
         }
     }
 
-    // login user
+    /**
+     * Login Pengguna
+     *
+     * Melakukan autentikasi pengguna dan mengembalikan token Sanctum.
+     * @unauthenticated
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function login(LoginRequest $request)
     {
         try {
@@ -52,7 +64,12 @@ class AuthController extends Controller
         }
     }
 
-    // Logout user
+    /**
+     * Logout Pengguna
+     *
+     * Menghapus token autentikasi pengguna saat ini.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function logout(Request $request)
     {
         $this->authService->logout($request->user());
@@ -60,13 +77,25 @@ class AuthController extends Controller
         return $this->apiSuccess(null, 'Logout berhasil');
     }
 
-    // mengambil data user yang sedang login
+    /**
+     * Data Pengguna Saat Ini
+     *
+     * Mengambil profil pengguna yang sedang terautentikasi.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function me(Request $request)
     {
         return $this->apiSuccess($request->user(), 'Data user berhasil diambil');
     }
 
-    // daftar permission use yang sedang login
+    /**
+     * Hak Akses Pengguna
+     *
+     * Mengambil daftar peran (roles) dan izin (permissions) pengguna saat ini.
+     * Jika tidak login, akan mengembalikan role guest.
+     * @unauthenticated
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function myPermissions(Request $request)
     {
         /** @var \App\Models\User $user */
@@ -88,6 +117,12 @@ class AuthController extends Controller
         ], 'User permissions retrieved successfully');
     }
 
+    /**
+     * Update Profil
+     *
+     * Memperbarui nama dan email pengguna saat ini.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateProfile(Request $request)
     {
         $user = $request->user();
@@ -102,6 +137,12 @@ class AuthController extends Controller
         return $this->apiSuccess($user, 'Profil berhasil diperbarui');
     }
 
+    /**
+     * Ubah Password
+     *
+     * Memperbarui password pengguna saat ini.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function changePassword(Request $request)
     {
         $request->validate([

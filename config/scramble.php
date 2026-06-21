@@ -99,9 +99,13 @@ return [
      * ],
      * ```
      */
+    // 'servers' => [
+    //     'Local' => env('APP_URL', 'http://localhost:8000').'/api',
+    //     'Production' => 'https://api-wismaamal.allvvnt.my.id/api',
+    // ],
     'servers' => [
-        'Local' => env('APP_URL', 'http://localhost:8000').'/api',
-        'Production' => 'https://alfian.taild9066e.ts.net/be/api',
+        'Local' => 'http://localhost:8000',
+        'Production' => env('APP_URL', 'http://localhost:8000').'/api',
     ],
 
     /**

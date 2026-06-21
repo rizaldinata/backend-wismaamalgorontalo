@@ -18,6 +18,12 @@ class PaymentMethodController extends Controller
         private readonly MidtransStatusService $statusService,
     ) {}
 
+    /**
+     * Daftar Metode Pembayaran (Midtrans)
+     *
+     * Mengambil daftar metode pembayaran yang sedang aktif beserta status maintenance-nya dari Midtrans.
+     * @return JsonResponse
+     */
     public function index(): JsonResponse
     {
         $catalog  = SettingService::midtransMethodCatalog();
