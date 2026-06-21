@@ -24,7 +24,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_PAT }}
+          password: ${{ secrets.PAT_FOR_DISPATCH }}
 
       - name: Build and push Backend App
         uses: docker/build-push-action@v5
@@ -81,7 +81,7 @@ jobs:
             echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env
             
             # Login to GHCR (Server needs to be authenticated to pull)
-            echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            echo "${{ secrets.PAT_FOR_DISPATCH }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             
             # Pull latest images and restart containers
             docker compose pull backend-app backend-web
