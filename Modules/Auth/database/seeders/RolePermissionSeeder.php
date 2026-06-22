@@ -200,6 +200,8 @@ class RolePermissionSeeder extends Seeder
         // ─── Resident: penghuni aktif dengan sewa yang sudah dibayar ─────
         $resident = Role::firstOrCreate(['name' => 'resident', 'guard_name' => 'api']);
         $residentPermissions = [
+            // Dashboard Penghuni
+            'view-resident-dashboard',
             // Room (masih bisa lihat kamar)
             'view-room',
             // Lease (melihat sewa sendiri, buat sewa baru, perpanjang sewa aktif)
