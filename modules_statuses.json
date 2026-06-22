@@ -11,5 +11,6 @@
     "Notification": true,
     "Guest": true,
     "Schedule": true,
-    "Facility_management": true
+    "Facility_management": true,
+    "Dashboard": true
 }

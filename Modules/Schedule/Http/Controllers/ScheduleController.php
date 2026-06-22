@@ -27,8 +27,18 @@ class ScheduleController extends Controller
     {
         $schedules = $this->scheduleService->ambilSemuaJadwal($request->only(['room_id', 'type', 'status', 'per_page']));
 
+        $stats = [
+            'penghuni_aktif' => \Modules\Schedule\Models\Schedule::where('type', 'sewa')->where('status', 'active')->count(),
+            'kontrak_pending' => \Modules\Schedule\Models\Schedule::where('type', 'sewa')->where('status', 'pending')->count(),
+            'kamar_tersedia' => 0,
+        ];
+
+        if (\Nwidart\Modules\Facades\Module::has('Room') && \Nwidart\Modules\Facades\Module::isEnabled('Room')) {
+            $stats['kamar_tersedia'] = \Modules\Room\Models\Room::where('status', 'available')->count();
+        }
+
         return ScheduleResource::collection($schedules)
-            ->additional(['success' => true])
+            ->additional(['success' => true, 'stats' => $stats])
             ->response()
             ->setStatusCode(200);
     }
