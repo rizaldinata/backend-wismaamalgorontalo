@@ -86,4 +86,6 @@ jobs:
             # Pull latest images and restart containers
             docker compose pull backend-app backend-web
             docker compose up -d backend-app backend-web
+            docker exec -it wismaamal_backend_app php artisan migrate
+            docker exec -it wismaamal_backend_app php artisan db:seed
           EOF

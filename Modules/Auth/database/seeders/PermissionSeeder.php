@@ -14,6 +14,7 @@ class PermissionSeeder extends Seeder
         $permissions = [
             // ─── Dashboard ───────────────────────────────────────────────
             ['name' => 'view-dashboard',       'target' => 'dashboard', 'description' => 'Melihat halaman dashboard utama'],
+            ['name' => 'view-resident-dashboard', 'target' => 'dashboard', 'description' => 'Melihat halaman dashboard khusus penghuni'],
 
             // ─── Permission Management ────────────────────────────────────
             ['name' => 'view-permission',              'target' => 'permission', 'description' => 'Melihat daftar permission'],
