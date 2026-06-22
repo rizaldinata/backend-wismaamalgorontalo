@@ -3,6 +3,7 @@
 namespace Modules\Schedule\Listeners;
 
 use App\Events\Finance\PembayaranDibatalkan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Schedule\Enums\ScheduleStatus;
 use Modules\Schedule\Repositories\Contracts\ScheduleRepositoryInterface;
@@ -55,6 +56,20 @@ class BatalkanJadwalSetelahPembayaranGagal
             ]);
 
             return;
+        }
+
+        // Jika pembayaran pelunasan gagal, jadwal tetap di DP_TERBAYAR — penghuni bisa coba lagi
+        if ($schedule->status === ScheduleStatus::DP_TERBAYAR) {
+            $invoiceType = DB::table('invoices')->where('id', $event->invoiceId)->value('type');
+            if ($invoiceType === 'pelunasan') {
+                Log::info('Pembayaran pelunasan gagal. Jadwal tetap dp_terbayar.', [
+                    'schedule_id'    => $event->scheduleId,
+                    'invoice_id'     => $event->invoiceId,
+                    'payment_status' => $event->paymentStatus,
+                ]);
+
+                return;
+            }
         }
 
         $this->scheduleService->batalkanJadwal($schedule->id);

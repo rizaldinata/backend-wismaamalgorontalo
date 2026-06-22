@@ -10,5 +10,6 @@
     "Rental": false,
     "Notification": true,
     "Guest": true,
-    "Schedule": true
+    "Schedule": true,
+    "Facility_management": true
 }

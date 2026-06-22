@@ -80,3 +80,23 @@ test('[BERHASIL] listener diabaikan jika schedule_id tidak ada di database', fun
     expect(fn () => $listener->handle(buatEventPembayaranDiterima(99999)))
         ->not->toThrow(\Throwable::class);
 });
+
+test('[BERHASIL] jadwal dikonfirmasi (terkonfirmasi) jika start_date belum tiba saat pembayaran Midtrans diterima', function () {
+    Event::fake([JadwalSewaAktif::class]);
+
+    $schedule = Schedule::create([
+        'room_id'     => 50,
+        'type'        => ScheduleType::SEWA->value,
+        'status'      => ScheduleStatus::PENDING->value,
+        'start_date'  => now()->addDays(5)->toDateString(), // masa depan
+        'end_date'    => now()->addDays(35)->toDateString(),
+        'tenant_name' => 'Budi Santoso',
+    ]);
+
+    $listener = app(AktifkanJadwalSetelahPembayaranDiterima::class);
+    $listener->handle(buatEventPembayaranDiterima($schedule->id));
+
+    $schedule->refresh();
+    expect($schedule->status)->toBe(ScheduleStatus::TERKONFIRMASI);
+    Event::assertNotDispatched(JadwalSewaAktif::class);
+});

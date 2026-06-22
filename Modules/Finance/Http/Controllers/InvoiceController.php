@@ -19,6 +19,12 @@ class InvoiceController extends Controller
         private readonly ConfigProviderInterface $settingService,
     ) {}
 
+    /**
+     * Daftar Semua Tagihan
+     *
+     * Mengambil daftar seluruh tagihan (Invoice) di sistem. (Hanya Admin)
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
     public function index(Request $request)
     {
         $request->validate([
@@ -37,6 +43,12 @@ class InvoiceController extends Controller
         ]);
     }
 
+    /**
+     * Detail Tagihan
+     *
+     * Melihat detail lengkap suatu tagihan beserta status pembayarannya. (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show(int $id)
     {
         $invoice = $this->invoiceRepository->findById($id);
@@ -53,6 +65,12 @@ class InvoiceController extends Controller
         return $this->apiSuccess(new InvoiceResource($invoice), 'Detail tagihan berhasil diambil');
     }
 
+    /**
+     * Dapatkan Link Cetak Tagihan
+     *
+     * Membuat tautan sementara (sementara 2 jam) untuk mencetak/download PDF tagihan. (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getPrintLink(int $id)
     {
         $invoice = $this->invoiceRepository->findById($id);
@@ -70,6 +88,12 @@ class InvoiceController extends Controller
         return $this->apiSuccess(['url' => $url], 'Link cetak berhasil dibuat');
     }
 
+    /**
+     * Cetak PDF Tagihan
+     *
+     * Endpoint internal/web untuk mencetak invoice. Tidak ditujukan untuk konsumsi API JSON.
+     * @unauthenticated
+     */
     public function printPdf(int $id)
     {
         $invoice = $this->invoiceRepository->findById($id);

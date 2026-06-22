@@ -14,12 +14,14 @@ use Modules\Finance\Enums\PaymentStatus;
 use Modules\Finance\Models\Invoice;
 use Modules\Finance\Models\Payment;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
+use Modules\Finance\Services\MidtransFeeCalculator;
 
 class MidtransPaymentStrategy implements PaymentStrategyInterface
 {
     public function __construct(
         private readonly PaymentRepositoryInterface $paymentRepository,
         private readonly ConfigProviderInterface $settingService,
+        private readonly MidtransFeeCalculator $feeCalculator,
     ) {
         Config::$serverKey = config('finance.midtrans.server_key');
         Config::$isProduction = config('finance.midtrans.is_production', false);
@@ -30,38 +32,59 @@ class MidtransPaymentStrategy implements PaymentStrategyInterface
 
     public function process(Invoice $invoice, array $data): Payment
     {
+        // Hitung fee di awal sebelum apapun agar bisa disimpan ke payment record
+        $paymentType    = $data['payment_type'] ?? null;
+        $originalAmount = (int) $invoice->amount;
+        $isCustomer     = $this->feeCalculator->isCustomerBearer();
+        $calculatedFee  = $paymentType ? $this->feeCalculator->calculateFee($paymentType, $originalAmount) : 0;
+        $chargedToUser  = $isCustomer ? $calculatedFee : 0;  // ditambahkan ke tagihan user
+        $merchantFee    = $isCustomer ? 0 : $calculatedFee;  // dipotong dari penerimaan merchant
+
         $transactionId = 'TRX-'.time().'-'.$invoice->id;
 
         $payment = $this->paymentRepository->create([
-            'invoice_id' => $invoice->id,
+            'invoice_id'     => $invoice->id,
             'payment_method' => PaymentMethod::MIDTRANS->value,
-            'status' => PaymentStatus::PENDING->value,
+            'status'         => PaymentStatus::PENDING->value,
             'transaction_id' => $transactionId,
+            'midtrans_fee'   => $merchantFee,
+            'fee_bearer'     => $isCustomer ? 'customer' : 'merchant',
         ]);
 
         $invoice->loadMissing('schedule');
-        $schedule = $invoice->schedule;
+        $schedule   = $invoice->schedule;
         $tenantUser = $schedule?->tenant_user_id ? User::find($schedule->tenant_user_id) : null;
+
+        $grossAmount = $originalAmount + $chargedToUser;
+        $itemDetails = [[
+            'id'       => $invoice->id,
+            'price'    => $originalAmount,
+            'quantity' => 1,
+            'name'     => 'Pembayaran Tagihan #'.$invoice->invoice_number,
+        ]];
+
+        if ($chargedToUser > 0) {
+            $itemDetails[] = [
+                'id'       => 'FEE-'.$invoice->id,
+                'price'    => $chargedToUser,
+                'quantity' => 1,
+                'name'     => 'Biaya Transaksi Midtrans',
+            ];
+        }
 
         $baseParams = [
             'transaction_details' => [
-                'order_id' => $payment->transaction_id,
-                'gross_amount' => (int) $invoice->amount,
+                'order_id'     => $payment->transaction_id,
+                'gross_amount' => $grossAmount,
             ],
             'customer_details' => [
                 'first_name' => $schedule?->tenant_name ?? '',
-                'email' => $tenantUser?->email ?? '',
-                'phone' => $schedule?->tenant_phone ?? '',
+                'email'      => $tenantUser?->email ?? '',
+                'phone'      => $schedule?->tenant_phone ?? '',
             ],
-            'item_details' => [[
-                'id' => $invoice->id,
-                'price' => (int) $invoice->amount,
-                'quantity' => 1,
-                'name' => 'Pembayaran Tagihan #'.$invoice->invoice_number,
-            ]],
+            'item_details' => $itemDetails,
         ];
 
-        $paymentType = $data['payment_type'] ?? null;
         $coreApiExtra = $paymentType ? $this->resolveCoreApiParams($paymentType) : null;
 
         try {
@@ -83,10 +106,16 @@ class MidtransPaymentStrategy implements PaymentStrategyInterface
                 ]);
             } else {
                 // ── Snap: fallback untuk metode yang tidak didukung Core API ──
-                $enabledPayments = $this->settingService->getEnabledMidtransPaymentMethods();
+                // Jika metode spesifik diketahui (mis. dana, ovo), kunci Snap ke metode itu
+                // saja agar fee yang sudah dihitung tetap akurat dan penghuni tidak bisa ganti metode.
                 $snapParams = $baseParams;
-                if (! empty($enabledPayments)) {
-                    $snapParams['enabled_payments'] = $enabledPayments;
+                if ($paymentType) {
+                    $snapParams['enabled_payments'] = [$paymentType];
+                } else {
+                    $enabledPayments = $this->settingService->getEnabledMidtransPaymentMethods();
+                    if (! empty($enabledPayments)) {
+                        $snapParams['enabled_payments'] = $enabledPayments;
+                    }
                 }
 
                 $snapParams['expiry'] = [

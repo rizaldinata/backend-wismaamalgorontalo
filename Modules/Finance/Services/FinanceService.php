@@ -39,6 +39,10 @@ class FinanceService
                 throw new \DomainException('Tagihan ini sudah lunas.');
             }
 
+            if ($invoice->payment_expires_at && $invoice->payment_expires_at->isPast()) {
+                throw new \DomainException('Batas waktu pembayaran telah habis. Silakan buat tagihan baru.');
+            }
+
             $strategy = $this->resolveStrategy($data['payment_method']);
 
             return $strategy->process($invoice, $data);

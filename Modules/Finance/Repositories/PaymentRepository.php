@@ -82,16 +82,20 @@ class PaymentRepository implements PaymentRepositoryInterface
             ->whereYear('updated_at', $currentYear)
             ->get();
 
+        $netAmount = fn ($p) => ($p->invoice?->amount ?? 0) - ($p->fee_bearer === 'merchant' ? $p->midtrans_fee : 0);
+
         return [
-            'total_transaksi'      => Payment::where('payment_method', 'midtrans')->count(),
-            'total_settlement'     => (float) $settled->sum(fn ($p) => $p->invoice?->amount ?? 0),
-            'jumlah_settlement'    => $settled->count(),
-            'jumlah_pending'       => Payment::where('payment_method', 'midtrans')
-                                        ->where('status', PaymentStatus::PENDING->value)
-                                        ->count(),
-            'settlement_bulan_ini' => (float) $settledBulanIni->sum(fn ($p) => $p->invoice?->amount ?? 0),
-            'bulan'                => $currentMonth,
-            'tahun'                => $currentYear,
+            'total_transaksi'         => Payment::where('payment_method', 'midtrans')->count(),
+            'total_settlement_bersih' => (float) $settled->sum($netAmount),
+            'total_settlement_gross'  => (float) $settled->sum(fn ($p) => $p->invoice?->amount ?? 0),
+            'total_biaya_midtrans'    => (float) $settled->sum(fn ($p) => $p->fee_bearer === 'merchant' ? $p->midtrans_fee : 0),
+            'jumlah_settlement'       => $settled->count(),
+            'jumlah_pending'          => Payment::where('payment_method', 'midtrans')
+                                            ->where('status', PaymentStatus::PENDING->value)
+                                            ->count(),
+            'settlement_bulan_ini'    => (float) $settledBulanIni->sum($netAmount),
+            'bulan'                   => $currentMonth,
+            'tahun'                   => $currentYear,
         ];
     }
 }

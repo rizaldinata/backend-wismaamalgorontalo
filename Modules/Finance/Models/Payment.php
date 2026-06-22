@@ -14,6 +14,8 @@ class Payment extends Model
     protected $fillable = [
         'invoice_id',
         'payment_method',
+        'midtrans_fee',
+        'fee_bearer',
         'payment_proof_path',
         'transaction_id',
         'status',

@@ -8,21 +8,16 @@ use Modules\Setting\Repositories\Contracts\SettingRepositoryInterface;
 class SettingService implements ConfigProviderInterface
 {
     public function __construct(
-        private readonly SettingRepositoryInterface $settingRepository
+        private readonly SettingRepositoryInterface $settingRepository,
+        private readonly FeatureToggleService $featureToggleService
     ) {}
 
     public function isFeatureEnabled(string $featureKey): bool
     {
-        $value = $this->settingRepository->getValueByKey($featureKey, 'false');
-
-        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+        return $this->featureToggleService->isEnabled($featureKey);
     }
 
-    public function setFeatureState(string $featureKey, bool $isEnabled, string $description = ''): void
-    {
-        $valueString = $isEnabled ? 'true' : 'false';
-        $this->settingRepository->updateOrCreate($featureKey, $valueString, $description);
-    }
+
 
     public function updateSetting(string $key, $value, string $description = ''): void
     {
@@ -88,12 +83,13 @@ class SettingService implements ConfigProviderInterface
             'bank_holder' => $this->getSettingValue('bank_holder', ''),
             'feature_pengeluaran_tetap' => $this->isPengeluaranTetapEnabled(),
             'pengeluaran_tetap_jenis_aktif' => $this->getJenisPengeluaranTetapAktif(),
+            'midtrans_fee_config' => $this->getMidtransFeeConfig(),
         ];
     }
 
     public function isPengeluaranTetapEnabled(): bool
     {
-        return $this->isFeatureEnabled('feature_pengeluaran_tetap');
+        return $this->isFeatureEnabled('finance_fixed_expense');
     }
 
     public function getJenisPengeluaranTetapAktif(): array
@@ -120,16 +116,62 @@ class SettingService implements ConfigProviderInterface
 
     public function isWhatsAppReceiptEnabled(): bool
     {
-        return $this->isFeatureEnabled('feature_whatsapp_receipt');
+        return $this->isFeatureEnabled('notif_receipt');
     }
 
     public function isWhatsAppPdfLinkEnabled(): bool
     {
-        return $this->isFeatureEnabled('feature_whatsapp_pdf_link');
+        return $this->isFeatureEnabled('notif_pdf_link');
     }
 
     public function isMidtransEnabled(): bool
     {
-        return $this->isFeatureEnabled('feature_payment_midtrans');
+        return $this->isFeatureEnabled('finance_midtrans');
+    }
+
+    public static function midtransFeeCatalog(): array
+    {
+        return [
+            'bank_transfer' => ['label' => 'Transfer Bank (VA)',  'type' => 'flat'],
+            'gopay'         => ['label' => 'GoPay',               'type' => 'percent'],
+            'qris'          => ['label' => 'QRIS',                'type' => 'percent'],
+            'shopeepay'     => ['label' => 'ShopeePay',           'type' => 'percent'],
+            'dana'          => ['label' => 'DANA',                'type' => 'percent'],
+            'ovo'           => ['label' => 'OVO',                 'type' => 'percent'],
+            'linkaja'       => ['label' => 'LinkAja',             'type' => 'percent'],
+        ];
+    }
+
+    public static function defaultMidtransFeeConfig(): array
+    {
+        return [
+            'bearer' => 'merchant',
+            'fees'   => [
+                'bank_transfer' => ['type' => 'flat',    'amount' => 4000],
+                'gopay'         => ['type' => 'percent', 'rate'   => 2.0],
+                'qris'          => ['type' => 'percent', 'rate'   => 0.7],
+                'shopeepay'     => ['type' => 'percent', 'rate'   => 2.0],
+                'dana'          => ['type' => 'percent', 'rate'   => 1.5],
+                'ovo'           => ['type' => 'percent', 'rate'   => 1.5],
+                'linkaja'       => ['type' => 'percent', 'rate'   => 1.5],
+            ],
+        ];
+    }
+
+    public function getMidtransFeeConfig(): array
+    {
+        $raw     = $this->settingRepository->getValueByKey('midtrans_fee_config', null);
+        $decoded = $raw ? json_decode(is_string($raw) ? $raw : '{}', true) : null;
+
+        return is_array($decoded) ? $decoded : self::defaultMidtransFeeConfig();
+    }
+
+    public function setMidtransFeeConfig(array $config): void
+    {
+        $this->settingRepository->updateOrCreate(
+            'midtrans_fee_config',
+            json_encode($config),
+            'Konfigurasi biaya transaksi Midtrans (bearer + tarif per metode)'
+        );
     }
 }

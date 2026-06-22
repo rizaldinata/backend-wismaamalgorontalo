@@ -5,6 +5,7 @@ namespace Modules\Finance\Repositories;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Modules\Finance\Enums\InvoiceStatus;
+use Modules\Finance\Enums\PaymentStatus;
 use Modules\Finance\Models\Invoice;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 
@@ -50,14 +51,23 @@ class InvoiceRepository implements InvoiceRepositoryInterface
     {
         $year = $year ?? now()->year;
 
-        $query = Invoice::where('status', InvoiceStatus::PAID->value)
-            ->whereYear('updated_at', $year);
+        $query = Invoice::where('invoices.status', InvoiceStatus::PAID->value)
+            ->whereYear('invoices.updated_at', $year)
+            ->selectRaw(
+                'COALESCE(SUM(invoices.amount - COALESCE(
+                    (SELECT p.midtrans_fee FROM payments p
+                     WHERE p.invoice_id = invoices.id
+                       AND p.fee_bearer = ?
+                       AND p.status = ?
+                     LIMIT 1), 0)), 0) as net_revenue',
+                ['merchant', PaymentStatus::PAID->value]
+            );
 
         if ($month !== null) {
-            $query->whereMonth('updated_at', $month);
+            $query->whereMonth('invoices.updated_at', $month);
         }
 
-        return $query->sum('amount');
+        return (float) ($query->value('net_revenue') ?? 0);
     }
 
     public function getTotalUnpaid(): float
@@ -74,13 +84,23 @@ class InvoiceRepository implements InvoiceRepositoryInterface
         }
 
         $year = $year ?? now()->year;
-        $query = Invoice::where('status', InvoiceStatus::PAID->value)->whereYear('updated_at', $year);
+        $query = Invoice::where('invoices.status', InvoiceStatus::PAID->value)
+            ->whereYear('invoices.updated_at', $year)
+            ->selectRaw(
+                'COALESCE(SUM(invoices.amount - COALESCE(
+                    (SELECT p.midtrans_fee FROM payments p
+                     WHERE p.invoice_id = invoices.id
+                       AND p.fee_bearer = ?
+                       AND p.status = ?
+                     LIMIT 1), 0)), 0) as net_revenue',
+                ['merchant', PaymentStatus::PAID->value]
+            );
 
         if ($month !== null) {
-            $query->whereMonth('updated_at', $month);
+            $query->whereMonth('invoices.updated_at', $month);
         }
 
-        return (float) $query->sum('amount');
+        return (float) ($query->value('net_revenue') ?? 0);
     }
 
     public function getTotalOverdueAmount(): float
@@ -104,17 +124,25 @@ class InvoiceRepository implements InvoiceRepositoryInterface
         for ($i = $months - 1; $i >= 0; $i--) {
             $date = now()->subMonths($i);
 
-            $monthlyQuery = Invoice::where('status', InvoiceStatus::PAID->value)
-                ->whereMonth('updated_at', $date->month)
-                ->whereYear('updated_at', $date->year);
-
-            $total = (clone $monthlyQuery)->sum('amount');
+            $total = (float) Invoice::where('invoices.status', InvoiceStatus::PAID->value)
+                ->whereMonth('invoices.updated_at', $date->month)
+                ->whereYear('invoices.updated_at', $date->year)
+                ->selectRaw(
+                    'COALESCE(SUM(invoices.amount - COALESCE(
+                        (SELECT p.midtrans_fee FROM payments p
+                         WHERE p.invoice_id = invoices.id
+                           AND p.fee_bearer = ?
+                           AND p.status = ?
+                         LIMIT 1), 0)), 0) as net_revenue',
+                    ['merchant', PaymentStatus::PAID->value]
+                )
+                ->value('net_revenue') ?? 0;
 
             $revenueData[] = [
-                'date_instance' => clone $date,
-                'total' => (float) $total,
-                'monthly_rent_revenue' => (float) $total,
-                'daily_rent_revenue' => 0.0,
+                'date_instance'        => clone $date,
+                'total'                => $total,
+                'monthly_rent_revenue' => $total,
+                'daily_rent_revenue'   => 0.0,
             ];
         }
 

@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AuthDatabaseSeeder::class,
             SettingDatabaseSeeder::class,
+            FeatureToggleSeeder::class,
             RoomDatabaseSeeder::class,
             \Modules\Room\database\seeders\RoomImagePlaceholderSeeder::class,
             GuestDatabaseSeeder::class,

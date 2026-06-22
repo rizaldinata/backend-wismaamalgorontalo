@@ -63,6 +63,10 @@ class PermissionSeeder extends Seeder
             ['name' => 'finance-fixed-expense-create', 'target' => 'finance', 'description' => 'Mencatat pengeluaran tetap bulanan baru'],
             ['name' => 'finance-fixed-expense-update', 'target' => 'finance', 'description' => 'Mengubah entri pengeluaran tetap bulanan'],
             ['name' => 'finance-fixed-expense-delete', 'target' => 'finance', 'description' => 'Menghapus entri pengeluaran tetap bulanan'],
+            ['name' => 'finance-fine-view',            'target' => 'finance', 'description' => 'Melihat daftar denda (admin)'],
+            ['name' => 'finance-fine-create',          'target' => 'finance', 'description' => 'Membuat denda untuk pengguna'],
+            ['name' => 'finance-fine-waive',           'target' => 'finance', 'description' => 'Memaafkan atau membatalkan denda'],
+            ['name' => 'finance-me-fine-view',         'target' => 'finance', 'description' => 'Melihat daftar denda pribadi dan membayar'],
 
             // ─── Inventory ────────────────────────────────────────────────
             ['name' => 'view-inventory',               'target' => 'inventory', 'description' => 'Melihat daftar inventaris'],
@@ -86,6 +90,10 @@ class PermissionSeeder extends Seeder
             ['name' => 'update-resident',             'target' => 'resident', 'description' => 'Mengubah data penghuni'],
             ['name' => 'delete-resident',             'target' => 'resident', 'description' => 'Menghapus data penghuni'],
             ['name' => 'complete-resident-profile',   'target' => 'resident', 'description' => 'Melengkapi profil untuk menjadi penghuni resmi'],
+
+            // ─── Notification ─────────────────────────────────────────────
+            ['name' => 'notification-log-view',  'target' => 'notification', 'description' => 'Melihat riwayat log notifikasi WhatsApp'],
+            ['name' => 'notification-send',      'target' => 'notification', 'description' => 'Mengirim notifikasi kustom dan mengirim ulang notifikasi gagal'],
 
             // ─── Setting ──────────────────────────────────────────────────
             ['name' => 'setting-view',               'target' => 'setting', 'description' => 'Melihat detail pengaturan'],

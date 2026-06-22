@@ -21,7 +21,7 @@ readonly class NotificationService
         $isSent = $this->whatsAppProvider->sendMessage($target, $message);
 
         $status = $isSent ? NotificationStatus::SENT->value : NotificationStatus::FAILED->value;
-        $error = $isSent ? null : 'Failed to send via provider';
+        $error  = $isSent ? null : ($this->whatsAppProvider->getLastError() ?? 'Failed to send via provider');
 
         $this->repository->logNotification($type, $target, $message, $status, $error);
 
@@ -108,9 +108,32 @@ readonly class NotificationService
         return $msg;
     }
 
-    public function getLogHistory(int $perPage = 15)
+    public function getLogHistory(int $perPage = 15, array $filters = [])
     {
-        return $this->repository->getLogsPaginated($perPage);
+        return $this->repository->getLogsPaginated($perPage, $filters);
+    }
+
+    public function getSummary(): array
+    {
+        return $this->repository->getSummary();
+    }
+
+    public function getRecipients(): \Illuminate\Support\Collection
+    {
+        return $this->repository->getRecipients();
+    }
+
+    public function sendToUser(int $userId, string $message): bool
+    {
+        $profile = \Illuminate\Support\Facades\DB::table('user_profiles')
+            ->where('user_id', $userId)
+            ->value('phone_number');
+
+        if (! $profile) {
+            throw new \DomainException('Pengguna tidak memiliki nomor telepon terdaftar.');
+        }
+
+        return $this->sendCustomNotification($profile, $message);
     }
 
     public function resendFailedNotification(int $logId): bool

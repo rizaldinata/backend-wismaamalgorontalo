@@ -11,11 +11,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Modules\Finance\Enums\InvoiceStatus;
 use Modules\Finance\Enums\PaymentStatus;
+use Modules\Finance\Http\Requests\BayarDendaRequest;
 use Modules\Finance\Http\Requests\InitiatePerpanjangSewaRequest;
 use Modules\Finance\Http\Requests\PerpanjangSewaRequest;
+use Modules\Finance\Repositories\Contracts\FineRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
 use Modules\Finance\Services\FinanceService;
+use Modules\Finance\Services\FineService;
+use Modules\Finance\Transformers\FineResource;
 use Modules\Finance\Transformers\InvoiceResource;
 use Modules\Finance\Transformers\PaymentResource;
 
@@ -27,8 +31,16 @@ class ResidentFinanceController extends Controller
         private readonly InvoiceRepositoryInterface $invoiceRepository,
         private readonly PaymentRepositoryInterface $paymentRepository,
         private readonly FinanceService $financeService,
+        private readonly FineRepositoryInterface $fineRepository,
+        private readonly FineService $fineService,
     ) {}
 
+    /**
+     * Ringkasan Keuangan Penghuni
+     *
+     * Menampilkan ringkasan tagihan belum bayar (unpaid) dan informasi sewa aktif pengguna saat ini.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function summary()
     {
         $userId = Auth::id();
@@ -70,6 +82,12 @@ class ResidentFinanceController extends Controller
         ], 'Ringkasan keuangan berhasil diambil');
     }
 
+    /**
+     * Daftar Tagihan Saya
+     *
+     * Melihat semua tagihan yang dibebankan kepada penghuni yang sedang login.
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
     public function invoices(Request $request)
     {
         $userId = Auth::id();
@@ -89,6 +107,12 @@ class ResidentFinanceController extends Controller
         ]);
     }
 
+    /**
+     * Detail Tagihan Saya
+     *
+     * Melihat detail satu tagihan spesifik milik penghuni yang sedang login.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function showInvoice(int $id)
     {
         $userId = Auth::id();
@@ -104,6 +128,12 @@ class ResidentFinanceController extends Controller
         ]);
     }
 
+    /**
+     * Riwayat Pembayaran Saya
+     *
+     * Melihat daftar transaksi/pembayaran yang pernah dilakukan oleh penghuni yang sedang login.
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
     public function payments(Request $request)
     {
         $userId = Auth::id();
@@ -135,6 +165,12 @@ class ResidentFinanceController extends Controller
         ]);
     }
 
+    /**
+     * Inisiasi Perpanjang Sewa (Manual)
+     *
+     * Mengajukan perpanjangan masa sewa dan generate tagihan untuk pembayaran manual (transfer bank).
+     * @return JsonResponse
+     */
     public function initiatePerpanjangManual(InitiatePerpanjangSewaRequest $request, int $scheduleId): JsonResponse
     {
         $userId = Auth::id();
@@ -222,6 +258,12 @@ class ResidentFinanceController extends Controller
         );
     }
 
+    /**
+     * Perpanjang Sewa (Otomatis/Midtrans)
+     *
+     * Mengajukan perpanjangan masa sewa dan langsung memproses pembayaran via payment gateway (Midtrans).
+     * @return JsonResponse
+     */
     public function perpanjangSewa(PerpanjangSewaRequest $request, int $scheduleId): JsonResponse
     {
         $userId = Auth::id();
@@ -313,6 +355,46 @@ class ResidentFinanceController extends Controller
         return $this->apiSuccess(
             new PaymentResource($payment),
             'Perpanjangan sewa berhasil diproses',
+            201
+        );
+    }
+
+    public function myFines(Request $request): JsonResponse
+    {
+        $userId = Auth::id();
+        $status = $request->query('status');
+
+        $fines = $this->fineRepository->getByUser(
+            $userId,
+            $status ? ['status' => $status] : []
+        );
+
+        return FineResource::collection($fines)
+            ->additional(['success' => true, 'message' => 'Daftar denda berhasil dimuat.'])
+            ->response();
+    }
+
+    public function bayarDenda(BayarDendaRequest $request): JsonResponse
+    {
+        $userId = Auth::id();
+        $data   = $request->validated();
+
+        $paymentData = [
+            'payment_method'         => $data['payment_method'],
+            'preferred_payment_type' => $data['preferred_payment_type'] ?? null,
+        ];
+
+        if ($request->hasFile('payment_proof')) {
+            $file = $request->file('payment_proof');
+            $paymentData['payment_proof_bytes'] = $file->get();
+            $paymentData['payment_proof_name']  = $file->getClientOriginalName();
+        }
+
+        $payment = $this->fineService->bayarDenda($userId, $data['fine_ids'], $paymentData);
+
+        return $this->apiSuccess(
+            new PaymentResource($payment),
+            'Pembayaran denda berhasil diproses.',
             201
         );
     }

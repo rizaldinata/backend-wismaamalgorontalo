@@ -1,56 +1,65 @@
-services:
-  # Backend (Laravel)
-  app:
-    image: ghcr.io/alfian-code/backend-wisma-amal:latest
-    restart: unless-stopped
-    volumes:
-      - ./.env:/var/www/.env
-      - ./storage:/var/www/storage
-    depends_on:
-      - db
-    networks:
-      - app-network
+version: '3.8'
 
-  # Database (MariaDB)
-  db:
-    image: mariadb:10.11
+services:
+  mysql:
+    image: mysql:8
+    container_name: wismaamal_mysql
     restart: unless-stopped
     environment:
-      MARIADB_DATABASE: ${DB_DATABASE:-wisma_amal}
-      MARIADB_USER: ${DB_USERNAME:-root}
-      MARIADB_PASSWORD: ${DB_PASSWORD}
-      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_DATABASE: wismaamal
+      MYSQL_USER: wismaamal
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
     volumes:
-      - db-data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
     networks:
-      - app-network
+      - wismaamal_network
 
-  # Web Server (Nginx)
-  nginx:
-    image: nginx:alpine
+  backend-app:
+    image: ghcr.io/alfian-code/wismaamal-backend-app:latest
+    container_name: wismaamal_backend_app
+    restart: unless-stopped
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_URL=https://api-wismaamal.allvvnt.my.id
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=wismaamal
+      - DB_USERNAME=wismaamal
+      - DB_PASSWORD=${DB_PASSWORD:-secret}
+      - APP_KEY=${APP_KEY:-base64:E4B2ZkG1s...} # SET THIS IN ENV!
+    depends_on:
+      - mysql
+    networks:
+      - wismaamal_network
+
+  backend-web:
+    image: ghcr.io/alfian-code/wismaamal-backend-web:latest
+    container_name: wismaamal_backend_web
     restart: unless-stopped
     ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
-      - ./public:/var/www/public
-      - ./storage:/var/www/storage
+      - "8001:80"
     depends_on:
-      - app
-      - frontend
+      - backend-app
     networks:
-      - app-network
+      - wismaamal_network
 
-  # Frontend (Flutter Web)
-  frontend:
-    image: ghcr.io/alfian-code/frontend-wisma-amal:latest
+  frontend-web:
+    image: ghcr.io/alfian-code/wismaamal-frontend-web:latest
+    container_name: wismaamal_frontend_web
     restart: unless-stopped
+    ports:
+      - "8002:80"
     networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
+      - wismaamal_network
 
 volumes:
-  db-data:
+  mysql_data:
+
+networks:
+  wismaamal_network:
+    driver: bridge

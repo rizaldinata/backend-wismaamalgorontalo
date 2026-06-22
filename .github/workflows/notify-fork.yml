@@ -13,6 +13,6 @@ jobs:
       - name: Send Trigger to Fork
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.FORK_TOKEN }}
+          token: ${{ secrets.PAT_FOR_DISPATCH }}
           repository: ALFIAN-code/backend-wismaamalgorontalo
           event-type: trigger-sync

@@ -44,6 +44,17 @@ test('gagal memproses pembayaran jika invoice sudah lunas', function () {
         ->toThrow(\DomainException::class, 'Tagihan ini sudah lunas.');
 });
 
+test('[GAGAL] processPayment menolak invoice yang sudah melewati batas waktu pembayaran', function () {
+    $invoice = Invoice::factory()->create([
+        'status'             => InvoiceStatus::UNPAID,
+        'payment_expires_at' => now()->subMinutes(1),
+    ]);
+    $service = app(FinanceService::class);
+
+    expect(fn () => $service->processPayment($invoice->id, ['payment_method' => 'manual']))
+        ->toThrow(\DomainException::class, 'Batas waktu pembayaran telah habis.');
+});
+
 test('admin dapat menyetujui pembayaran dan melunasi invoice', function () {
     $invoice = Invoice::factory()->create(['status' => InvoiceStatus::UNPAID]);
     $payment = Payment::factory()->create([

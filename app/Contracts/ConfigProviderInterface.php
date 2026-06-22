@@ -17,4 +17,6 @@ interface ConfigProviderInterface
     public function isPengeluaranTetapEnabled(): bool;
 
     public function getJenisPengeluaranTetapAktif(): array;
+
+    public function getMidtransFeeConfig(): array;
 }

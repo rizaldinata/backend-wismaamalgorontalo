@@ -20,6 +20,12 @@ class ExpenseController extends Controller
         private readonly ExpenseRepositoryInterface $expenseRepository
     ) {}
 
+    /**
+     * Daftar Pengeluaran (Expense)
+     *
+     * Melihat semua pengeluaran keuangan wisma, baik dari maintenance rutin maupun pengeluaran manual. (Hanya Admin)
+     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     */
     public function index(Request $request)
     {
         $request->validate([
@@ -36,6 +42,12 @@ class ExpenseController extends Controller
         ]);
     }
 
+    /**
+     * Catat Pengeluaran Manual
+     *
+     * Menambahkan data pengeluaran secara manual (di luar jadwal maintenance/pengeluaran tetap). (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(StoreExpenseRequest $request)
     {
         $expense = $this->expenseService->createManualExpense($request->validated());
@@ -47,6 +59,12 @@ class ExpenseController extends Controller
         );
     }
 
+    /**
+     * Detail Pengeluaran
+     *
+     * Melihat detail dari satu transaksi pengeluaran. (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show(int $id)
     {
         $expense = $this->expenseRepository->findOrFail($id);
@@ -54,6 +72,12 @@ class ExpenseController extends Controller
         return $this->apiSuccess(new ExpenseResource($expense), 'Detail pengeluaran berhasil diambil');
     }
 
+    /**
+     * Edit Pengeluaran Manual
+     *
+     * Mengubah nominal atau deskripsi pada pengeluaran manual. (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(UpdateExpenseRequest $request, int $id)
     {
         $expense = $this->expenseRepository->findOrFail($id);
@@ -63,6 +87,12 @@ class ExpenseController extends Controller
         return $this->apiSuccess(new ExpenseResource($updatedExpense), 'Data pengeluaran berhasil diperbarui');
     }
 
+    /**
+     * Hapus Pengeluaran Manual
+     *
+     * Menghapus transaksi pengeluaran manual. (Hanya Admin)
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy(int $id)
     {
         $expense = $this->expenseRepository->findOrFail($id);

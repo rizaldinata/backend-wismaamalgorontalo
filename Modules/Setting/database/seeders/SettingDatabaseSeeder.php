@@ -10,15 +10,12 @@ class SettingDatabaseSeeder extends Seeder
     public function run(): void
     {
         $settingService = app(SettingService::class);
+        $this->call([
+            FeatureToggleSeeder::class,
+        ]);
 
         $settings = [
             'wisma_name' => 'Wisma Amal Gorontalo',
-            'feature_daily_rental' => 'true',
-
-            'feature_whatsapp_receipt' => 'true',
-            'feature_whatsapp_pdf_link' => 'true',
-            'feature_payment_midtrans' => 'true',
-
             'bank_name' => 'Bank BSI',
             'bank_account' => '7123456789',
             'bank_holder' => 'Wisma Amal Gorontalo',
@@ -29,9 +26,9 @@ class SettingDatabaseSeeder extends Seeder
         }
 
         $settingService->setEnabledMidtransPaymentMethods(['qris', 'gopay', 'bca_va', 'mandiri_va']);
+        $settingService->setMidtransFeeConfig(SettingService::defaultMidtransFeeConfig());
 
         // Pengeluaran Tetap (default: nonaktif)
-        $settingService->setFeatureState('feature_pengeluaran_tetap', false, 'Aktifkan pencatatan pengeluaran tetap bulanan (listrik, air, wifi)');
         $settingService->setJenisPengeluaranTetapAktif([]);
     }
 }

@@ -20,6 +20,12 @@ class InventoryController extends Controller
         private readonly InventoryRepositoryInterface $inventoryRepository
     ) {}
 
+    /**
+     * Daftar Inventaris
+     *
+     * Melihat semua daftar barang inventaris (Hanya Admin).
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index()
     {
         $inventories = $this->inventoryRepository->getAll();
@@ -27,6 +33,12 @@ class InventoryController extends Controller
         return $this->apiSuccess(InventoryResource::collection($inventories), 'Data inventory berhasil diambil');
     }
 
+    /**
+     * Tambah Inventaris
+     *
+     * Mendaftarkan barang inventaris baru. (Hanya Admin).
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(StoreInventoryRequest $request)
     {
         $inventory = $this->inventoryService->createInventory($request->validated());
@@ -38,6 +50,12 @@ class InventoryController extends Controller
         );
     }
 
+    /**
+     * Detail Inventaris
+     *
+     * Melihat detail spesifik suatu barang inventaris. (Hanya Admin).
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show(int $id)
     {
         $inventory = $this->inventoryRepository->findById($id);
@@ -49,6 +67,12 @@ class InventoryController extends Controller
         return $this->apiSuccess(new InventoryResource($inventory), 'Detail barang berhasil diambil');
     }
 
+    /**
+     * Update Inventaris
+     *
+     * Mengubah data barang inventaris. (Hanya Admin).
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(UpdateInventoryRequest $request, int $id)
     {
         $inventory = $this->inventoryRepository->findById($id);
@@ -65,6 +89,12 @@ class InventoryController extends Controller
         );
     }
 
+    /**
+     * Hapus Inventaris
+     *
+     * Menghapus barang inventaris. (Hanya Admin).
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy(int $id)
     {
         $inventory = $this->inventoryRepository->findById($id);

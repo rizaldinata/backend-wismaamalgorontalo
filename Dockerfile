@@ -1,81 +1,43 @@
-# Stage 1: Build stage
-FROM php:8.2-fpm-alpine as build
+FROM php:8.2-fpm
 
-# Install dependencies
-RUN apk add --no-cache \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
     git \
-    unzip \
-    libxml2-dev \
+    curl \
     libpng-dev \
-    libwebp-dev \
-    libjpeg-turbo-dev \
-    freetype-dev
-     \
-    libzip-dev \
-    icu-dev \
-    oniguruma-dev \
-    mariadb-client \
-    $PHPIZE_DEPS
-
-# Configure and Install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-    && docker-php-ext-install \
-    pdo_mysql \
-    mbstring \
-    exif \
-    pcntl \
-    bcmath \
-    gd \
+    libonig-dev \
+    libxml2-dev \
     zip \
-    intl
+    unzip \
+    libzip-dev
+
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Set working directory
 WORKDIR /var/www
 
 # Copy existing application directory contents
-COPY . .
+COPY . /var/www
+
+# Set permissions for storage and cache
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
+    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
 # Install dependencies
-RUN composer install --no-interaction --optimize-autoloader --no-dev
+RUN composer config --global policy.advisories.block false && \
+    composer install --optimize-autoloader --no-dev
 
-# Stage 2: Production stage
-FROM php:8.2-fpm-alpine
-
-# Install runtime dependencies
-RUN apk add --no-cache \
-    libpng \
-    libwebp \
-    libjpeg-turbo \
-    freetype \
-    libzip \
-    icu-libs \
-    oniguruma \
-    mariadb-client
-
-# Copy PHP extensions from build stage
-COPY --from=build /usr/local/lib/php/extensions /usr/local/lib/php/extensions
-COPY --from=build /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
-
-# Set PHP upload limits
-RUN echo "upload_max_filesize=40M" > /usr/local/etc/php/conf.d/uploads.ini \
-    && echo "post_max_size=40M" >> /usr/local/etc/php/conf.d/uploads.ini \
-    && echo "memory_limit=256M" >> /usr/local/etc/php/conf.d/uploads.ini
-
-WORKDIR /var/www
-
-# Copy application from build stage
-COPY --from=build /var/www /var/www
-
-# Set permissions
-RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
-
-# Copy entrypoint script
-COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Copy start-container script
+COPY docker/start-container.sh /usr/local/bin/start-container
+RUN chmod +x /usr/local/bin/start-container
 
 EXPOSE 9000
 
-ENTRYPOINT ["entrypoint.sh"]
-CMD ["php-fpm"]
+ENTRYPOINT ["start-container"]

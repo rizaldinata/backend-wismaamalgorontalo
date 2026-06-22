@@ -59,6 +59,9 @@ class RolePermissionSeeder extends Seeder
             'finance-fixed-expense-create',
             'finance-fixed-expense-update',
             'finance-fixed-expense-delete',
+            'finance-fine-view',
+            'finance-fine-create',
+            'finance-fine-waive',
             // Inventory
             'view-inventory',
             'create-inventory',
@@ -78,6 +81,9 @@ class RolePermissionSeeder extends Seeder
             'create-resident',
             'update-resident',
             'delete-resident',
+            // Notification
+            'notification-log-view',
+            'notification-send',
             // Setting
             'setting-view',
             'setting-update',
@@ -133,6 +139,9 @@ class RolePermissionSeeder extends Seeder
             'finance-fixed-expense-create',
             'finance-fixed-expense-update',
             'finance-fixed-expense-delete',
+            'finance-fine-view',
+            'finance-fine-create',
+            'finance-fine-waive',
             // Inventory
             'view-inventory',
             'create-inventory',
@@ -151,6 +160,9 @@ class RolePermissionSeeder extends Seeder
             'create-resident',
             'update-resident',
             'delete-resident',
+            // Notification
+            'notification-log-view',
+            'notification-send',
             // Setting
             'setting-view',
             'setting-update',
@@ -174,6 +186,7 @@ class RolePermissionSeeder extends Seeder
             'finance-me-summary-view',
             'finance-me-invoice-view',
             'finance-me-payment-view',
+            'finance-me-fine-view',
             // Profil (melengkapi biodata KTP sebelum sewa)
             'complete-resident-profile',
             // Guest (menambahkan dan mengelola tamu)
@@ -198,6 +211,7 @@ class RolePermissionSeeder extends Seeder
             'finance-me-summary-view',
             'finance-me-invoice-view',
             'finance-me-payment-view',
+            'finance-me-fine-view',
             // Maintenance & Damage Report (laporan sendiri)
             'view-maintenance',
             'create-damage-report',
