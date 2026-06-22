@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Collection;
 use Modules\Guest\Models\Guest;
 use Modules\Guest\Models\GuestActiveContext;
 use Modules\Guest\Repositories\Contracts\GuestRepositoryInterface;
+use Modules\Notification\Services\NotificationService;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+    use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class GuestService
 {

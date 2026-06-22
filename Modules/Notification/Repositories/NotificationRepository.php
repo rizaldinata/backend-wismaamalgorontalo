@@ -37,4 +37,17 @@ class NotificationRepository implements NotificationRepositoryInterface
             'error_response' => $error,
         ]);
     }
+
+    public function markAllAsRead(): int
+    {
+        // Assuming 'unread' is a status. This might need adjustment
+        // based on the actual status values used in the application.
+        return NotificationLog::where('status', 'sent')->update(['status' => 'read']);
+    }
+
+    public function countUnread(): int
+    {
+        // Assuming 'unread' is a status. This might need adjustment.
+        return NotificationLog::where('status', 'sent')->count();
+    }
 }
