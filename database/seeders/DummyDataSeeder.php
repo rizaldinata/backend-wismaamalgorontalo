@@ -321,7 +321,8 @@ class DummyDataSeeder extends Seeder
 
                 // Generate physical file
                 $fullpath = storage_path('app/public/' . $imagePath);
-                $this->generatePlaceholder($fullpath, 'Room ' . $room->number, $room->status, 800, 600);
+                $statusText = $room->status instanceof \BackedEnum ? $room->status->value : (string) $room->status;
+                $this->generatePlaceholder($fullpath, 'Room ' . $room->number, $statusText, 800, 600);
             }
         }
 
