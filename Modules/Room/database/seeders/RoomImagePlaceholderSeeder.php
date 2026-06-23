@@ -19,6 +19,13 @@ class RoomImagePlaceholderSeeder extends Seeder
 
         $rooms = \Modules\Room\Models\Room::with('images')->get();
 
+        // Get all dummy images
+        $dummyImagesPath = __DIR__ . '/dummy_images';
+        $dummyImages = [];
+        if (is_dir($dummyImagesPath)) {
+            $dummyImages = glob($dummyImagesPath . '/*.*');
+        }
+
         foreach ($rooms as $room) {
             foreach ($room->images as $image) {
                 $filename = basename($image->image_path);
@@ -34,43 +41,36 @@ class RoomImagePlaceholderSeeder extends Seeder
                 if (file_exists($path) && filesize($path) > 0) {
                     // Cek thumbnail juga
                     if (! file_exists($thumbPath) || filesize($thumbPath) == 0) {
-                        $this->generatePlaceholder($thumbPath, $room->number, 'Thumb', 400, 300);
+                        $this->copyPlaceholder($thumbPath, $dummyImages);
                     }
 
                     continue;
                 }
 
                 // Generate Main Image
-                $this->generatePlaceholder($path, $room->number, 'Image', 800, 600);
+                $this->copyPlaceholder($path, $dummyImages);
 
                 // Generate Thumbnail
-                $this->generatePlaceholder($thumbPath, $room->number, 'Thumb', 400, 300);
+                $this->copyPlaceholder($thumbPath, $dummyImages);
             }
         }
 
-        $this->command->info('✅ Berhasil generate placeholder images & thumbnails untuk rooms!');
+        $this->command->info('✅ Berhasil menyalin dummy images & thumbnails untuk rooms!');
     }
 
-    private function generatePlaceholder($path, $text1, $text2, $width, $height)
+    private function copyPlaceholder($path, $dummyImages)
     {
         $directory = dirname($path);
         if (! is_dir($directory)) {
             mkdir($directory, 0755, true);
         }
 
-        if (function_exists('imagecreatetruecolor') && function_exists('imagejpeg')) {
-            $img = \imagecreatetruecolor($width, $height);
-            $bgColor = \imagecolorallocate($img, 240, 240, 240);
-            \imagefill($img, 0, 0, $bgColor);
-            $textColor = \imagecolorallocate($img, 100, 100, 100);
-
-            \imagestring($img, 5, ($width / 2) - 50, ($height / 2) - 20, 'Room '.$text1, $textColor);
-            \imagestring($img, 4, ($width / 2) - 40, ($height / 2) + 10, $text2, $textColor);
-
-            \imagejpeg($img, $path, 80);
-            \imagedestroy($img);
+        if (count($dummyImages) > 0) {
+            // Ambil gambar acak dari folder dummy_images
+            $randomImage = $dummyImages[array_rand($dummyImages)];
+            copy($randomImage, $path);
         } else {
-            // Fallback if GD is not installed
+            // Fallback jika tidak ada gambar dummy
             file_put_contents($path, '');
         }
     }
