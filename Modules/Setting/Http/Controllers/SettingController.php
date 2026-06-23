@@ -38,6 +38,8 @@ class SettingController extends Controller
             'settings.wisma_name' => 'nullable|string|max:100',
             'settings.wisma_address' => 'nullable|string',
             'settings.wisma_phone' => 'nullable|string|max:20',
+            'settings.wisma_email' => 'nullable|string|max:100',
+            'settings.wisma_maps_link' => 'nullable|string',
             'settings.wisma_operational_hours' => 'nullable|string',
             'settings.feature_daily_rental' => 'nullable|boolean',
             'settings.feature_whatsapp_receipt' => 'nullable|boolean',
@@ -46,11 +48,14 @@ class SettingController extends Controller
             'settings.bank_name' => 'nullable|string|max:100',
             'settings.bank_account' => 'nullable|string|max:50',
             'settings.bank_holder' => 'nullable|string|max:100',
+            'settings.landing_header_title' => 'nullable|string',
+            'settings.landing_header_subtitle' => 'nullable|string',
+            'settings.landing_facilities' => 'nullable|string',
+            'settings.landing_highlighted_rooms' => 'nullable|array',
             'settings.feature_pengeluaran_tetap' => 'nullable|boolean',
             'settings.pengeluaran_tetap_jenis_aktif' => [
                 'nullable',
                 'array',
-                $fiturPengeluaranTetapAktif ? 'min:1' : '',
             ],
             'settings.pengeluaran_tetap_jenis_aktif.*' => 'in:listrik,air,wifi',
         ]);
@@ -58,10 +63,9 @@ class SettingController extends Controller
         if ($fiturPengeluaranTetapAktif) {
             $jenis = $validated['settings']['pengeluaran_tetap_jenis_aktif'] ?? [];
             if (empty($jenis)) {
-                return $this->apiError(
-                    'Minimal satu jenis pengeluaran tetap (listrik, air, atau wifi) harus dipilih jika fitur diaktifkan.',
-                    422
-                );
+                // Auto-disable feature if no types selected to avoid errors on unrelated updates
+                $validated['settings']['feature_pengeluaran_tetap'] = false;
+                $request->merge(['settings' => array_merge($request->input('settings', []), ['feature_pengeluaran_tetap' => false])]);
             }
         }
 

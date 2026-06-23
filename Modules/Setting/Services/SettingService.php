@@ -75,6 +75,8 @@ class SettingService implements ConfigProviderInterface
             'wisma_name' => $this->getSettingValue('wisma_name', 'Sistem Manajemen Kos'),
             'wisma_address' => $this->getSettingValue('wisma_address', 'Jl. Wisma Amal No. 1, Gorontalo'),
             'wisma_phone' => $this->getSettingValue('wisma_phone', '0811-4300-XXX'),
+            'wisma_email' => $this->getSettingValue('wisma_email', 'wismaamal@email.com'),
+            'wisma_maps_link' => $this->getSettingValue('wisma_maps_link', 'https://maps.google.com'),
             'wisma_operational_hours' => $this->getSettingValue('wisma_operational_hours', 'Senin - Sabtu, 08.00 - 17.00 WITA'),
             'feature_daily_rental' => $this->isDailyRentalEnabled(),
             'feature_whatsapp_receipt' => $this->isFeatureEnabled('notif_receipt'),
@@ -87,6 +89,10 @@ class SettingService implements ConfigProviderInterface
             'feature_pengeluaran_tetap' => $this->isPengeluaranTetapEnabled(),
             'pengeluaran_tetap_jenis_aktif' => $this->getJenisPengeluaranTetapAktif(),
             'midtrans_fee_config' => $this->getMidtransFeeConfig(),
+            'landing_header_title' => $this->getSettingValue('landing_header_title', ''),
+            'landing_header_subtitle' => $this->getSettingValue('landing_header_subtitle', ''),
+            'landing_facilities' => $this->getSettingValue('landing_facilities', ''),
+            'landing_highlighted_rooms' => $this->getSettingValue('landing_highlighted_rooms', '[]'),
         ];
     }
 

@@ -19,6 +19,15 @@ class RoomRepository implements RoomRepositoryInterface
             ->when(isset($filters['status']), function ($q) use ($filters) {
                 $q->where('status', $filters['status']);
             })
+            ->when(isset($filters['is_highlighted']) && filter_var($filters['is_highlighted'], FILTER_VALIDATE_BOOLEAN), function ($q) {
+                $raw = app(\Modules\Setting\Services\SettingService::class)->getSettingValue('landing_highlighted_rooms', '[]');
+                $highlightedIds = json_decode(is_string($raw) ? $raw : '[]', true);
+                if (is_array($highlightedIds) && count($highlightedIds) > 0) {
+                    $q->whereIn('id', $highlightedIds);
+                } else {
+                    $q->limit(3); // Fallback to 3 newest rooms if no highlighted rooms are configured
+                }
+            })
             ->with(['images', 'activeSchedule'])
             ->latest()
             ->get();
