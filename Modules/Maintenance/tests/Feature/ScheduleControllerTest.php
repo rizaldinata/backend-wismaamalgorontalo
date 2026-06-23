@@ -1,19 +1,30 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Modules\Auth\Models\User;
 use Modules\Maintenance\Enums\ScheduleStatus;
 use Modules\Maintenance\Enums\ScheduleType;
 use Modules\Maintenance\Models\MaintenanceSchedule;
+use Modules\Setting\Models\FeatureToggle;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
-    // Setup permissions
+    Cache::flush();
     Permission::firstOrCreate(['name' => 'schedule-maintenance', 'guard_name' => 'api']);
     Permission::firstOrCreate(['name' => 'view-maintenance', 'guard_name' => 'api']);
+
+    $facilityParent = FeatureToggle::firstOrCreate(
+        ['key' => 'facility_management'],
+        ['name' => 'Fasilitas & Pemeliharaan', 'is_active' => true, 'is_locked' => false],
+    );
+    FeatureToggle::firstOrCreate(
+        ['key' => 'maintenance_schedule'],
+        ['name' => 'Jadwal Maintenance', 'is_active' => true, 'is_locked' => false, 'parent_id' => $facilityParent->id],
+    );
 });
 
 test('[BERHASIL] admin dapat membuat jadwal pemeliharaan', function () {

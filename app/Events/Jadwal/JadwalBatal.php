@@ -17,5 +17,6 @@ class JadwalBatal
         public readonly ?string $tenantPhone = null,
         public readonly ?string $tipeJadwal = null,
         public readonly ?int $userId = null,
+        public readonly bool $masihAdaSewaAktif = false,
     ) {}
 }

@@ -1,18 +1,23 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Modules\Setting\Models\AppSetting;
+use Modules\Setting\Models\FeatureToggle;
 use Modules\Setting\Services\SettingService;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
+beforeEach(fn () => Cache::flush());
+
 // =========================================================
 // isFeatureEnabled / isMidtransEnabled / isDailyRentalEnabled
 // =========================================================
 
-test('[BERHASIL] isMidtransEnabled mengembalikan true jika setting di-enable', function () {
-    AppSetting::create(['key' => 'feature_payment_midtrans', 'value' => 'true']);
+test('[BERHASIL] isMidtransEnabled mengembalikan true jika toggle finance_midtrans aktif', function () {
+    $parent = FeatureToggle::create(['key' => 'finance', 'name' => 'Keuangan', 'is_active' => true, 'is_locked' => false]);
+    FeatureToggle::create(['key' => 'finance_midtrans', 'name' => 'Midtrans', 'is_active' => true, 'is_locked' => false, 'parent_id' => $parent->id]);
 
     expect(app(SettingService::class)->isMidtransEnabled())->toBeTrue();
 });
@@ -27,14 +32,13 @@ test('[BERHASIL] isMidtransEnabled mengembalikan false jika setting belum ada di
     expect(app(SettingService::class)->isMidtransEnabled())->toBeFalse();
 });
 
-test('[BERHASIL] isDailyRentalEnabled mengembalikan true jika sewa harian aktif', function () {
-    AppSetting::create(['key' => 'feature_daily_rental', 'value' => 'true']);
-
-    expect(app(SettingService::class)->isDailyRentalEnabled())->toBeTrue();
+test('[BERHASIL] isDailyRentalEnabled selalu mengembalikan false karena fitur sewa harian dihapus dari toggle', function () {
+    expect(app(SettingService::class)->isDailyRentalEnabled())->toBeFalse();
 });
 
-test('[BERHASIL] isWhatsAppReceiptEnabled mengembalikan true jika notifikasi kwitansi aktif', function () {
-    AppSetting::create(['key' => 'feature_whatsapp_receipt', 'value' => 'true']);
+test('[BERHASIL] isWhatsAppReceiptEnabled mengembalikan true jika toggle notif_receipt aktif', function () {
+    $parent = FeatureToggle::create(['key' => 'notification', 'name' => 'Notifikasi', 'is_active' => true, 'is_locked' => false]);
+    FeatureToggle::create(['key' => 'notif_receipt', 'name' => 'Struk WA', 'is_active' => true, 'is_locked' => false, 'parent_id' => $parent->id]);
 
     expect(app(SettingService::class)->isWhatsAppReceiptEnabled())->toBeTrue();
 });
@@ -89,8 +93,8 @@ test('[BERHASIL] getPublicSettings mengembalikan semua key keuangan yang dibutuh
 });
 
 test('[BERHASIL] getPublicSettings mencerminkan nilai terkini dari database', function () {
-    AppSetting::create(['key' => 'feature_payment_midtrans', 'value' => 'true']);
-    AppSetting::create(['key' => 'feature_daily_rental',     'value' => 'false']);
+    $parent = FeatureToggle::create(['key' => 'finance', 'name' => 'Keuangan', 'is_active' => true, 'is_locked' => false]);
+    FeatureToggle::create(['key' => 'finance_midtrans', 'name' => 'Midtrans', 'is_active' => true, 'is_locked' => false, 'parent_id' => $parent->id]);
 
     $result = app(SettingService::class)->getPublicSettings();
 

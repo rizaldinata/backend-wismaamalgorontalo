@@ -73,9 +73,12 @@ class SettingService implements ConfigProviderInterface
     {
         return [
             'wisma_name' => $this->getSettingValue('wisma_name', 'Sistem Manajemen Kos'),
+            'wisma_address' => $this->getSettingValue('wisma_address', 'Jl. Wisma Amal No. 1, Gorontalo'),
+            'wisma_phone' => $this->getSettingValue('wisma_phone', '0811-4300-XXX'),
+            'wisma_operational_hours' => $this->getSettingValue('wisma_operational_hours', 'Senin - Sabtu, 08.00 - 17.00 WITA'),
             'feature_daily_rental' => $this->isDailyRentalEnabled(),
-            'feature_whatsapp_receipt' => $this->isFeatureEnabled('feature_whatsapp_receipt'),
-            'feature_whatsapp_pdf_link' => $this->isFeatureEnabled('feature_whatsapp_pdf_link'),
+            'feature_whatsapp_receipt' => $this->isFeatureEnabled('notif_receipt'),
+            'feature_whatsapp_pdf_link' => $this->isFeatureEnabled('notif_pdf_link'),
             'feature_payment_midtrans' => $this->isMidtransEnabled(),
             'midtrans_enabled_payments' => $this->getEnabledMidtransPaymentMethods(),
             'bank_name' => $this->getSettingValue('bank_name', ''),

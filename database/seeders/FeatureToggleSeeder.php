@@ -100,22 +100,28 @@ class FeatureToggleSeeder extends Seeder
             'is_locked' => false,
         ]);
 
+        // Pengeluaran umum: inti, tidak bisa dimatikan
+        FeatureToggle::create([
+            'name'        => 'Pencatatan Pengeluaran',
+            'key'         => 'finance_expense',
+            'description' => 'Pencatatan pengeluaran operasional kos (wajib).',
+            'icon'        => 'receipt_long',
+            'is_active'   => true,
+            'is_locked'   => true,
+            'parent_id'   => $financeModule->id,
+        ]);
+
         $financeFeatures = [
             ['name' => 'Pembayaran Midtrans (Online)', 'key' => 'finance_midtrans', 'description' => 'Integrasi Midtrans untuk pembayaran Virtual Account, QRIS, dsb.', 'icon' => 'payment'],
-            ['name' => 'Manajemen Pengeluaran (Expense)', 'key' => 'finance_expense', 'description' => 'Pencatatan pengeluaran operasional kos.', 'icon' => 'receipt_long'],
             ['name' => 'Pengeluaran Tetap Bulanan', 'key' => 'finance_fixed_expense', 'description' => 'Pengingat dan pencatatan tagihan tetap (PLN, PDAM, WiFi).', 'icon' => 'bolt'],
-            ['name' => 'Manajemen Denda Keterlambatan', 'key' => 'finance_fine', 'description' => 'Sistem denda otomatis untuk keterlambatan pembayaran sewa.', 'icon' => 'warning'],
-            ['name' => 'Daftar Tagihan & Pembayaran', 'key' => 'finance_invoice', 'description' => 'Manajemen invoice tagihan sewa dan verifikasi pembayaran.', 'icon' => 'receipt'],
-            ['name' => 'Sewa/Perpanjang Kamar Otomatis', 'key' => 'finance_lease', 'description' => 'Penagihan sewa otomatis ke penghuni di dalam aplikasi.', 'icon' => 'autorenew'],
-            ['name' => 'Dashboard Finansial (KPI)', 'key' => 'finance_dashboard', 'description' => 'Grafik pendapatan, laporan laba rugi, dan performa keuangan.', 'icon' => 'bar_chart'],
         ];
 
         foreach ($financeFeatures as $feat) {
             FeatureToggle::create([
-                'name' => $feat['name'],
-                'key' => $feat['key'],
+                'name'      => $feat['name'],
+                'key'       => $feat['key'],
                 'description' => $feat['description'],
-                'icon' => $feat['icon'],
+                'icon'      => $feat['icon'],
                 'is_active' => true,
                 'is_locked' => false,
                 'parent_id' => $financeModule->id,
@@ -144,7 +150,7 @@ class FeatureToggleSeeder extends Seeder
 
         $notifFeatures = [
             ['name' => 'WhatsApp Struk Pembayaran', 'key' => 'notif_receipt', 'description' => 'Otomatis mengirim WhatsApp bukti pembayaran setelah verifikasi.', 'icon' => 'mark_chat_read'],
-            ['name' => 'Pengingat Jatuh Tempo (Reminder)', 'key' => 'notif_due_reminder', 'description' => 'Mengirim WA otomatis sebelum masa sewa kamar habis.', 'icon' => 'alarm'],
+            ['name' => 'Pengingat Jatuh Tempo (Reminder)', 'key' => 'notif_due_reminder', 'description' => 'Mengirim WA otomatis H-7, H-3, H-2, H-1, dan hari-H sebelum masa sewa habis.', 'icon' => 'alarm'],
             ['name' => 'Sertakan Link PDF Invoice di WA', 'key' => 'notif_pdf_link', 'description' => 'Menyertakan link download struk PDF di dalam pesan WhatsApp.', 'icon' => 'picture_as_pdf'],
         ];
 

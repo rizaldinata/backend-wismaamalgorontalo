@@ -162,6 +162,10 @@ class ScheduleService
         );
 
         if ($updated->type === ScheduleType::SEWA) {
+            $masihAdaSewaAktif = $updated->tenant_user_id
+                ? $this->scheduleRepository->getActiveByTenantUserId($updated->tenant_user_id) !== null
+                : false;
+
             event(new JadwalSewaSelesai(
                 scheduleId: $updated->id,
                 roomId: $updated->room_id,
@@ -170,6 +174,7 @@ class ScheduleService
                 tenantPhone: $updated->tenant_phone ?? '',
                 endDate: $updated->end_date->toDateString(),
                 userId: $updated->tenant_user_id,
+                masihAdaSewaAktif: $masihAdaSewaAktif,
             ));
         }
 
@@ -190,6 +195,10 @@ class ScheduleService
             ['finished_at' => now()]
         );
 
+        $masihAdaSewaAktif = $updated->tenant_user_id && $updated->type === ScheduleType::SEWA
+            ? $this->scheduleRepository->getActiveByTenantUserId($updated->tenant_user_id) !== null
+            : false;
+
         event(new JadwalBatal(
             scheduleId: $updated->id,
             roomId: $updated->room_id,
@@ -198,6 +207,7 @@ class ScheduleService
             tenantName: $updated->tenant_name ?? '',
             tenantPhone: $updated->tenant_phone ?? '',
             userId: $updated->tenant_user_id,
+            masihAdaSewaAktif: $masihAdaSewaAktif,
         ));
 
         return $updated;

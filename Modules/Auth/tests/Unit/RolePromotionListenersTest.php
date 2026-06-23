@@ -162,7 +162,7 @@ test('[BERHASIL] TurunkanKeRoleMember tidak turunkan role jika user masih punya 
         'updated_at'     => now(),
     ]);
 
-    // Event dari sewa yang baru saja selesai (scheduleId berbeda dari yang aktif)
+    // Event sudah membawa info bahwa user masih punya sewa aktif lain
     $event = new JadwalSewaSelesai(
         scheduleId: 1,
         roomId: 1,
@@ -171,6 +171,7 @@ test('[BERHASIL] TurunkanKeRoleMember tidak turunkan role jika user masih punya 
         tenantPhone: '',
         endDate: now()->toDateString(),
         userId: $user->id,
+        masihAdaSewaAktif: true,
     );
 
     (new TurunkanKeRoleMember())->handle($event);

@@ -52,8 +52,8 @@ class SendWhatsAppReceiptTest extends TestCase
         $this->settingService
             ->method('isFeatureEnabled')
             ->willReturnMap([
-                ['feature_whatsapp_receipt', true],
-                ['feature_whatsapp_pdf_link', false],
+                ['notif_receipt', true],
+                ['notif_pdf_link', false],
             ]);
 
         $this->notificationService
@@ -80,8 +80,8 @@ class SendWhatsAppReceiptTest extends TestCase
         $this->settingService
             ->method('isFeatureEnabled')
             ->willReturnMap([
-                ['feature_whatsapp_receipt', false],
-                ['feature_whatsapp_pdf_link', false],
+                ['notif_receipt', false],
+                ['notif_pdf_link', false],
             ]);
 
         $this->notificationService->expects($this->never())->method('sendReceiptFromPrimitives');
@@ -96,8 +96,8 @@ class SendWhatsAppReceiptTest extends TestCase
         $this->settingService
             ->method('isFeatureEnabled')
             ->willReturnMap([
-                ['feature_whatsapp_receipt', true],
-                ['feature_whatsapp_pdf_link', true],
+                ['notif_receipt', true],
+                ['notif_pdf_link', true],
             ]);
 
         URL::shouldReceive('temporarySignedRoute')
@@ -129,8 +129,8 @@ class SendWhatsAppReceiptTest extends TestCase
         $this->settingService
             ->method('isFeatureEnabled')
             ->willReturnMap([
-                ['feature_whatsapp_receipt', true],
-                ['feature_whatsapp_pdf_link', false],
+                ['notif_receipt', true],
+                ['notif_pdf_link', false],
             ]);
 
         $this->notificationService

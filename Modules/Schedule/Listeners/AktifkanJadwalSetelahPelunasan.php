@@ -4,7 +4,6 @@ namespace Modules\Schedule\Listeners;
 
 use App\Events\Finance\PembayaranDiterima;
 use App\Events\Finance\PembayaranDiverifikasi;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Schedule\Enums\ScheduleStatus;
 use Modules\Schedule\Repositories\Contracts\ScheduleRepositoryInterface;
@@ -23,9 +22,7 @@ class AktifkanJadwalSetelahPelunasan
             return;
         }
 
-        $invoiceType = DB::table('invoices')->where('id', $event->invoiceId)->value('type');
-
-        if ($invoiceType !== 'pelunasan') {
+        if ($event->invoiceType !== 'pelunasan') {
             return;
         }
 

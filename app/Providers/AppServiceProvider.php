@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Contracts\ActiveTenantCheckerInterface;
 use App\Contracts\ConfigProviderInterface;
+use App\Contracts\PaymentStatusCheckerInterface;
+use App\Services\NullPaymentStatusChecker;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
 use Dedoc\Scramble\Support\Generator\SecurityScheme;
@@ -17,6 +19,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(ConfigProviderInterface::class, SettingService::class);
+        // Null default — overridden by FinanceServiceProvider when Finance module is ON
+        $this->app->bind(PaymentStatusCheckerInterface::class, NullPaymentStatusChecker::class);
     }
 
     public function boot(): void

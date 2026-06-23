@@ -17,5 +17,6 @@ class JadwalSewaSelesai
         public readonly string $tenantPhone,
         public readonly string $endDate,
         public readonly ?int $userId = null,
+        public readonly bool $masihAdaSewaAktif = false,
     ) {}
 }

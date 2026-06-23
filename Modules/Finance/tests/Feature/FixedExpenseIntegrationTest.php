@@ -1,25 +1,47 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Modules\Finance\Models\FixedExpenseEntry;
 use Modules\Finance\Services\FinanceDashboardService;
 use Modules\Finance\Services\FixedExpenseService;
 use Modules\Setting\Models\AppSetting;
+use Modules\Setting\Models\FeatureToggle;
 use Modules\Setting\Services\SettingService;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
+beforeEach(fn () => Cache::flush());
+
 function setupFiturAktif(array $jenis = ['listrik', 'wifi']): void
 {
     AppSetting::updateOrCreate(['key' => 'feature_pengeluaran_tetap'], ['value' => 'true']);
     AppSetting::updateOrCreate(['key' => 'pengeluaran_tetap_jenis_aktif'], ['value' => json_encode($jenis)]);
+
+    $parent = FeatureToggle::firstOrCreate(
+        ['key' => 'finance'],
+        ['name' => 'Manajemen Keuangan', 'is_active' => true, 'is_locked' => false],
+    );
+    FeatureToggle::updateOrCreate(
+        ['key' => 'finance_fixed_expense'],
+        ['name' => 'Pengeluaran Tetap Bulanan', 'is_active' => true, 'is_locked' => false, 'parent_id' => $parent->id],
+    );
 }
 
 function setupFiturNonaktif(): void
 {
     AppSetting::updateOrCreate(['key' => 'feature_pengeluaran_tetap'], ['value' => 'false']);
     AppSetting::updateOrCreate(['key' => 'pengeluaran_tetap_jenis_aktif'], ['value' => '[]']);
+
+    $parent = FeatureToggle::firstOrCreate(
+        ['key' => 'finance'],
+        ['name' => 'Manajemen Keuangan', 'is_active' => true, 'is_locked' => false],
+    );
+    FeatureToggle::updateOrCreate(
+        ['key' => 'finance_fixed_expense'],
+        ['name' => 'Pengeluaran Tetap Bulanan', 'is_active' => false, 'is_locked' => false, 'parent_id' => $parent->id],
+    );
 }
 
 // Dashboard KPI

@@ -2,6 +2,7 @@
 
 namespace Modules\Notification\Providers;
 
+use App\Events\Finance\DendaDibuat;
 use App\Events\Finance\PembayaranDibatalkan;
 use App\Events\Finance\PembayaranDiverifikasi;
 use App\Events\Jadwal\DPDibayar;
@@ -11,6 +12,7 @@ use App\Events\Jadwal\JadwalSewaAktif;
 use App\Events\Jadwal\JadwalSewaSelesai;
 use App\Events\Maintenance\LaporanKerusakanMasuk;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Modules\Notification\Listeners\KirimNotifikasiDenda;
 use Modules\Notification\Listeners\KirimNotifikasiDPDibayar;
 use Modules\Notification\Listeners\KirimNotifikasiJadwalBatal;
 use Modules\Notification\Listeners\KirimNotifikasiJadwalDibuat;
@@ -23,6 +25,9 @@ use Modules\Notification\Listeners\SendWhatsAppReceipt;
 class EventServiceProvider extends ServiceProvider
 {
     protected $listen = [
+        DendaDibuat::class => [
+            KirimNotifikasiDenda::class,
+        ],
         JadwalDibuat::class => [
             KirimNotifikasiJadwalDibuat::class,
         ],

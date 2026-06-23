@@ -16,5 +16,9 @@ class PembayaranDiterima
         public readonly float $amount,
         public readonly string $tenantName,
         public readonly string $tenantPhone,
+        public readonly string $invoiceType = 'sewa',
+        public readonly ?string $periodStart = null,
+        public readonly ?string $periodEnd = null,
+        public readonly ?string $roomNumber = null,
     ) {}
 }
