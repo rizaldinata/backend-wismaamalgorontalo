@@ -2,14 +2,14 @@
 
 namespace Modules\Notification\Listeners;
 
-use App\Events\Finance\PembayaranDibatalkan;
+use App\Events\Finance\DendaDibuat;
+use App\Contracts\ConfigProviderInterface;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Modules\Notification\Enums\NotificationType;
 use Modules\Notification\Services\NotificationService;
-use App\Contracts\ConfigProviderInterface;
 
-class KirimNotifikasiPembayaranDibatalkan implements ShouldQueue
+class KirimNotifikasiDenda implements ShouldQueue
 {
     use InteractsWithQueue;
 
@@ -18,33 +18,28 @@ class KirimNotifikasiPembayaranDibatalkan implements ShouldQueue
         private readonly ConfigProviderInterface $settingService,
     ) {}
 
-    public function handle(PembayaranDibatalkan $event): void
+    public function handle(DendaDibuat $event): void
     {
         if (! $this->settingService->isFeatureEnabled('notif_receipt')) {
             return;
         }
 
-        if (empty($event->tenantPhone)) {
-            return;
-        }
+        $nominal = 'Rp ' . number_format($event->amount, 0, ',', '.');
 
-        $amount = $event->amount !== null
-            ? 'Rp' . number_format($event->amount, 0, ',', '.')
-            : '';
-
-        $amountLine = $amount ? "sebesar *{$amount}* " : '';
-
-        $message = "*PEMBAYARAN TIDAK BERHASIL*\n"
+        $message = "*PEMBERITAHUAN DENDA*\n"
             . "Wisma Amal Gorontalo\n\n"
             . "Yth. Bpk/Ibu {$event->tenantName},\n\n"
-            . "Pembayaran {$amountLine}Anda tidak dapat diproses atau telah dibatalkan.\n\n"
-            . "Mohon hubungi admin atau lakukan pembayaran ulang melalui aplikasi.\n\n"
+            . "Anda mendapatkan denda dengan rincian berikut:\n\n"
+            . "Nominal  : *{$nominal}*\n"
+            . "Alasan   : {$event->reason}\n\n"
+            . "Silakan lakukan pembayaran denda melalui aplikasi Wisma Amal Gorontalo.\n"
+            . "Jika ada keberatan, harap hubungi manajemen.\n\n"
             . "Hormat kami,\n*Manajemen Wisma Amal Gorontalo*";
 
         $this->notificationService->sendNotification(
-            NotificationType::PEMBAYARAN_DIBATALKAN,
+            NotificationType::DENDA_DIBUAT,
             $event->tenantPhone,
-            $message
+            $message,
         );
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Modules\Notification\Console;
 
+use App\Contracts\ConfigProviderInterface;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -13,11 +14,16 @@ class SendLeaseRemindersCommand extends Command
 
     protected $description = 'Send WhatsApp reminders for active sewa schedules expiring in 7, 3, 2, or 0 days.';
 
-    public function handle(NotificationService $notificationService): int
+    public function handle(NotificationService $notificationService, ConfigProviderInterface $settingService): int
     {
+        if (! $settingService->isFeatureEnabled('notif_due_reminder')) {
+            $this->info('Fitur pengingat jatuh tempo dinonaktifkan. Command dibatalkan.');
+            return Command::SUCCESS;
+        }
+
         $this->info('Finding active sewa schedules going to expire...');
 
-        $targetDays = [7, 3, 2, 0];
+        $targetDays = [7, 3, 2, 1, 0];
         $today = Carbon::today();
 
         $schedules = DB::table('room_schedules')

@@ -24,7 +24,7 @@ class KirimNotifikasiDPDibayar implements ShouldQueue
             return;
         }
 
-        if (! $this->settingService->isFeatureEnabled('feature_whatsapp_receipt')) {
+        if (! $this->settingService->isFeatureEnabled('notif_receipt')) {
             return;
         }
 

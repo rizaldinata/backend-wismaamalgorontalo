@@ -36,7 +36,7 @@ function buatInvoiceDP(int $scheduleId, string $type = 'dp'): Invoice
     ]);
 }
 
-function buatEventVerifikasi(int $invoiceId, int $scheduleId): PembayaranDiverifikasi
+function buatEventVerifikasi(int $invoiceId, int $scheduleId, string $invoiceType = 'sewa'): PembayaranDiverifikasi
 {
     return new PembayaranDiverifikasi(
         paymentId:     1,
@@ -50,6 +50,7 @@ function buatEventVerifikasi(int $invoiceId, int $scheduleId): PembayaranDiverif
         roomNumber:    'A-01',
         startDate:     now()->addDays(8)->toDateString(),
         endDate:       now()->addDays(38)->toDateString(),
+        invoiceType:   $invoiceType,
     );
 }
 
@@ -71,7 +72,7 @@ test('[BERHASIL] TandaiDPTerbayarSetelahPembayaranDP mengubah status ke dp_terba
 
     $invoice  = buatInvoiceDP($schedule->id, 'dp');
     $listener = app(TandaiDPTerbayarSetelahPembayaranDP::class);
-    $listener->handle(buatEventVerifikasi($invoice->id, $schedule->id));
+    $listener->handle(buatEventVerifikasi($invoice->id, $schedule->id, 'dp'));
 
     $schedule->refresh();
     expect($schedule->status)->toBe(ScheduleStatus::DP_TERBAYAR);
@@ -97,7 +98,7 @@ test('[DIABAIKAN] TandaiDPTerbayarSetelahPembayaranDP tidak melakukan apapun jik
 
     $invoice  = buatInvoiceDP($schedule->id, 'sewa');
     $listener = app(TandaiDPTerbayarSetelahPembayaranDP::class);
-    $listener->handle(buatEventVerifikasi($invoice->id, $schedule->id));
+    $listener->handle(buatEventVerifikasi($invoice->id, $schedule->id, 'sewa'));
 
     $schedule->refresh();
     expect($schedule->status)->toBe(ScheduleStatus::PENDING);
@@ -134,7 +135,7 @@ test('[BERHASIL] AktifkanJadwalSetelahPelunasan mengaktifkan langsung jika start
     ]);
 
     $listener = app(AktifkanJadwalSetelahPelunasan::class);
-    $listener->handle(buatEventVerifikasi($invoice->id, $schedule->id));
+    $listener->handle(buatEventVerifikasi($invoice->id, $schedule->id, 'pelunasan'));
 
     $schedule->refresh();
     expect($schedule->status)->toBe(ScheduleStatus::ACTIVE);
@@ -171,7 +172,7 @@ test('[BERHASIL] AktifkanJadwalSetelahPelunasan mengkonfirmasi jika start_date b
     ]);
 
     $listener = app(AktifkanJadwalSetelahPelunasan::class);
-    $listener->handle(buatEventVerifikasi($invoice->id, $schedule->id));
+    $listener->handle(buatEventVerifikasi($invoice->id, $schedule->id, 'pelunasan'));
 
     $schedule->refresh();
     expect($schedule->status)->toBe(ScheduleStatus::TERKONFIRMASI);
@@ -192,7 +193,7 @@ test('[DIABAIKAN] AktifkanJadwalSetelahPembayaranDiverifikasi melewati invoice t
 
     $invoice  = buatInvoiceDP($schedule->id, 'dp');
     $listener = app(AktifkanJadwalSetelahPembayaranDiverifikasi::class);
-    $listener->handle(buatEventVerifikasi($invoice->id, $schedule->id));
+    $listener->handle(buatEventVerifikasi($invoice->id, $schedule->id, 'dp'));
 
     $schedule->refresh();
     expect($schedule->status)->toBe(ScheduleStatus::PENDING);

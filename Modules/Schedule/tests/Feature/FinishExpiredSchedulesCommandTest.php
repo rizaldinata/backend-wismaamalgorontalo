@@ -1,8 +1,10 @@
 <?php
 
+use App\Contracts\PaymentStatusCheckerInterface;
 use App\Events\Jadwal\JadwalSewaSelesai;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Modules\Finance\Services\PaymentStatusChecker;
 use Modules\Room\Models\Room;
 use Modules\Schedule\Enums\ScheduleStatus;
 use Modules\Schedule\Enums\ScheduleType;
@@ -10,6 +12,11 @@ use Modules\Schedule\Models\Schedule;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
+
+// Bind real PaymentStatusChecker so tests that insert invoices can be properly checked
+beforeEach(function () {
+    $this->app->bind(PaymentStatusCheckerInterface::class, PaymentStatusChecker::class);
+});
 
 test('[BERHASIL] command menyelesaikan jadwal yang masa sewanya sudah berakhir', function () {
     Event::fake([JadwalSewaSelesai::class]);
