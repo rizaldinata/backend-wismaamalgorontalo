@@ -17,4 +17,5 @@ enum NotificationType: string
     case SYSTEM_ALERT = 'system_alert';
     case GUEST_REGISTERED = 'guest_registered';
     case GUEST_STAY_ENDED = 'guest_stay_ended';
+    case GUEST_STAY_EXTENDED = 'guest_stay_extended';
 }

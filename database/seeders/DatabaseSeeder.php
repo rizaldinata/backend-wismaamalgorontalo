@@ -26,5 +26,7 @@ class DatabaseSeeder extends Seeder
             MaintenanceDatabaseSeeder::class,
             FinanceDatabaseSeeder::class,
         ]);
+
+        \Illuminate\Support\Facades\Artisan::call('app:fix-guest-context');
     }
 }

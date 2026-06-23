@@ -53,7 +53,7 @@ class GuestBillingService
             return null;
         }
 
-        $billNumber = 'GB-'.date('Ymd').'-'.str_pad($guest->id, 5, '0', STR_PAD_LEFT);
+        $billNumber = 'GB-'.date('Ymd').'-'.str_pad($guest->id, 5, '0', STR_PAD_LEFT).'-'.time();
 
         return $this->billRepository->create([
             'guest_id' => $guest->id,

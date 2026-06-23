@@ -93,4 +93,34 @@ class GuestController extends Controller
             return $this->apiError('Terjadi kesalahan sistem.', 500);
         }
     }
+
+    public function extend(\Illuminate\Http\Request $request, int $id)
+    {
+        $request->validate([
+            'check_out_at' => 'required|date|after:today',
+        ]);
+
+        try {
+            // Kita gunakan GuestService yang akan melakukan validasi di dalamnya
+            // Tapi pastikan user memiliki akses ke guest tersebut (resolveOwnedGuest)
+            // Namun karena logic extendGuestStay hanya butuh guestId, mari tambahkan verifikasi ownership
+            $guest = \Modules\Guest\Models\Guest::find($id);
+            if (!$guest) throw new NotFoundHttpException('Tamu tidak ditemukan.');
+            
+            $ownerId = $guest->user_id ?? $guest->lease?->resident?->user_id;
+            if ($ownerId !== Auth::id()) {
+                throw new HttpException(403, 'Anda tidak memiliki akses ke data tamu ini.');
+            }
+
+            $extendedGuest = $this->guestService->extendGuestStay($id, $request->check_out_at);
+
+            return $this->apiSuccess(new GuestResource($extendedGuest), 'Waktu menginap tamu berhasil diperpanjang.');
+        } catch (NotFoundHttpException $e) {
+            return $this->apiError($e->getMessage(), 404);
+        } catch (HttpException $e) {
+            return $this->apiError($e->getMessage(), $e->getStatusCode());
+        } catch (Exception $e) {
+            return $this->apiError('Terjadi kesalahan sistem.', 500);
+        }
+    }
 }
