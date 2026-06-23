@@ -79,6 +79,13 @@ jobs:
             # Create .env for docker-compose overrides
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" > .env
             echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env
+            echo "MIDTRANS_MERCHANT_ID=G045418980" >> .env
+            echo "MIDTRANS_CLIENT_KEY=Mid-client-CorcePo_OJtrK_fY" >> .env
+            echo "MIDTRANS_SERVER_KEY=Mid-server-WMqN8otZpwOxYnC6g-6uyquB" >> .env
+            echo "MIDTRANS_IS_PRODUCTION=false" >> .env
+            echo "MIDTRANS_NOTIFICATION_URL=https://api-wismaamal.allvvnt.my.id//api/finance/payments/midtrans/notification" >> .env
+            echo "MIDTRANS_ENABLED_PAYMENTS=qris,gopay,shopeepay,bca_va,bni_va,bri_va,echannel,permata_va,other_va,indomaret,alfamart,credit_card,akulaku,kredivo" >> .env
+            echo "FONNTE_TOKEN=zzwAQDkusmmAaMNckynk" >> .env
             
             # Login to GHCR (Server needs to be authenticated to pull)
             echo "${{ secrets.PAT_FOR_DISPATCH }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
