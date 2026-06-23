@@ -94,4 +94,5 @@ jobs:
             docker compose pull backend-app backend-web
             docker compose up -d backend-app backend-web
             docker exec wismaamal_backend_app php artisan migrate --force
+            docker exec wismaamal_backend_app php artisan db:seed --class="Database\\Seeders\\FeatureToggleSeeder" --force
           EOF
