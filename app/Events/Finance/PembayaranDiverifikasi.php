@@ -21,5 +21,6 @@ class PembayaranDiverifikasi
         public readonly string $roomNumber,
         public readonly string $startDate,
         public readonly string $endDate,
+        public readonly string $invoiceType = 'sewa',
     ) {}
 }

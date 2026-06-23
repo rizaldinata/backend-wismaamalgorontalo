@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Events\Finance\DendaDibuat;
 use App\Events\Finance\PembayaranDibatalkan;
 use App\Events\Finance\PembayaranDiterima;
 use App\Events\Finance\PembayaranDiverifikasi;
@@ -24,6 +25,7 @@ class EventServiceProvider extends ServiceProvider
     // This global provider only declares the event catalog so Laravel knows
     // which events exist; business modules self-register their listeners.
     protected $listen = [
+        DendaDibuat::class => [],
         DPDibayar::class => [],
         JadwalDibuat::class => [],
         JadwalSewaAktif::class => [],

@@ -1,19 +1,30 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Modules\Auth\Models\User;
 use Modules\Maintenance\Enums\MaintenanceStatus;
 use Modules\Maintenance\Models\MaintenanceRequest;
 use Modules\Room\Models\Room;
+use Modules\Setting\Models\FeatureToggle;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
-    // Setup permissions
+    Cache::flush();
     Permission::firstOrCreate(['name' => 'create-damage-report', 'guard_name' => 'api']);
     Permission::firstOrCreate(['name' => 'view-damage-report', 'guard_name' => 'api']);
+
+    $facilityParent = FeatureToggle::firstOrCreate(
+        ['key' => 'facility_management'],
+        ['name' => 'Fasilitas & Pemeliharaan', 'is_active' => true, 'is_locked' => false],
+    );
+    FeatureToggle::firstOrCreate(
+        ['key' => 'damage_report'],
+        ['name' => 'Laporan Kerusakan', 'is_active' => true, 'is_locked' => false, 'parent_id' => $facilityParent->id],
+    );
 });
 
 test('[BERHASIL] resident dapat mengirim laporan kerusakan baru', function () {

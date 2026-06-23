@@ -10,9 +10,6 @@ class SettingDatabaseSeeder extends Seeder
     public function run(): void
     {
         $settingService = app(SettingService::class);
-        $this->call([
-            FeatureToggleSeeder::class,
-        ]);
 
         $settings = [
             'wisma_name' => 'Wisma Amal Gorontalo',

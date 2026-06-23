@@ -20,7 +20,7 @@ class KirimNotifikasiJadwalSewaAktif implements ShouldQueue
 
     public function handle(JadwalSewaAktif $event): void
     {
-        if (! $this->settingService->isFeatureEnabled('feature_whatsapp_receipt')) {
+        if (! $this->settingService->isFeatureEnabled('notif_receipt')) {
             return;
         }
 

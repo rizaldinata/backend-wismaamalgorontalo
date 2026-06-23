@@ -17,5 +17,6 @@ class PembayaranDibatalkan
         public readonly ?string $tenantPhone = null,
         public readonly ?float $amount = null,
         public readonly ?string $paymentStatus = null,
+        public readonly string $invoiceType = 'sewa',
     ) {}
 }
