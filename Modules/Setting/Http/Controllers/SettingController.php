@@ -36,6 +36,9 @@ class SettingController extends Controller
         $validated = $request->validate([
             'settings' => 'required|array',
             'settings.wisma_name' => 'nullable|string|max:100',
+            'settings.wisma_address' => 'nullable|string',
+            'settings.wisma_phone' => 'nullable|string|max:20',
+            'settings.wisma_operational_hours' => 'nullable|string',
             'settings.feature_daily_rental' => 'nullable|boolean',
             'settings.feature_whatsapp_receipt' => 'nullable|boolean',
             'settings.feature_whatsapp_pdf_link' => 'nullable|boolean',
