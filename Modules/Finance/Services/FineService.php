@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Services;
 
+use App\Events\Finance\DendaDibuat;
 use Illuminate\Support\Facades\DB;
 use Modules\Auth\Models\User;
 use Modules\Finance\Enums\FineStatus;
@@ -10,7 +11,6 @@ use Modules\Finance\Models\Fine;
 use Modules\Finance\Models\Payment;
 use Modules\Finance\Repositories\Contracts\FineRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
-use Modules\Notification\Services\NotificationService;
 
 class FineService
 {
@@ -18,7 +18,6 @@ class FineService
         private readonly FineRepositoryInterface $fineRepository,
         private readonly InvoiceRepositoryInterface $invoiceRepository,
         private readonly FinanceService $financeService,
-        private readonly NotificationService $notificationService,
     ) {}
 
     public function buatDenda(array $data): Fine
@@ -35,7 +34,13 @@ class FineService
         ]);
 
         if ($phone) {
-            $this->kirimNotifikasiDenda($fine, $user->name, $phone);
+            event(new DendaDibuat(
+                fineId: $fine->id,
+                tenantName: $user->name,
+                tenantPhone: $phone,
+                amount: (float) $fine->amount,
+                reason: $fine->reason,
+            ));
         }
 
         return $fine;
@@ -154,20 +159,4 @@ class FineService
             ]);
     }
 
-    private function kirimNotifikasiDenda(Fine $fine, string $tenantName, string $phone): void
-    {
-        $nominal = 'Rp ' . number_format((float) $fine->amount, 0, ',', '.');
-
-        $message = "*PEMBERITAHUAN DENDA*\n"
-            . "Wisma Amal Gorontalo\n\n"
-            . "Yth. Bpk/Ibu {$tenantName},\n\n"
-            . "Anda mendapatkan denda dengan rincian berikut:\n\n"
-            . "Nominal  : *{$nominal}*\n"
-            . "Alasan   : {$fine->reason}\n\n"
-            . "Silakan lakukan pembayaran denda melalui aplikasi Wisma Amal Gorontalo.\n"
-            . "Jika ada keberatan, harap hubungi manajemen.\n\n"
-            . "Hormat kami,\n*Manajemen Wisma Amal Gorontalo*";
-
-        $this->notificationService->sendCustomNotification($phone, $message);
-    }
 }

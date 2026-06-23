@@ -22,12 +22,8 @@ class AktifkanJadwalSetelahPembayaranDiverifikasi
             return;
         }
 
-        // Invoice DP dan pelunasan ditangani listener khusus
-        if ($event->invoiceId > 0) {
-            $invoiceType = DB::table('invoices')->where('id', $event->invoiceId)->value('type');
-            if (in_array($invoiceType, ['dp', 'pelunasan'])) {
-                return;
-            }
+        if (in_array($event->invoiceType, ['dp', 'pelunasan'])) {
+            return;
         }
 
         try {
@@ -66,7 +62,7 @@ class AktifkanJadwalSetelahPembayaranDiverifikasi
 
         // Kasus 2: Jadwal sudah ACTIVE → ini pembayaran perpanjangan, update end_date
         if ($schedule->status === ScheduleStatus::ACTIVE && $event->invoiceId > 0) {
-            $this->terapkanPerpanjangan($event->invoiceId, $event->scheduleId);
+            $this->terapkanPerpanjangan($event->scheduleId, $event->endDate ?: null);
 
             Log::info('end_date jadwal diperbarui setelah pembayaran perpanjangan diverifikasi admin.', [
                 'schedule_id' => $event->scheduleId,
@@ -76,10 +72,8 @@ class AktifkanJadwalSetelahPembayaranDiverifikasi
         }
     }
 
-    private function terapkanPerpanjangan(int $invoiceId, int $scheduleId): void
+    private function terapkanPerpanjangan(int $scheduleId, ?string $periodEnd): void
     {
-        $periodEnd = DB::table('invoices')->where('id', $invoiceId)->value('period_end');
-
         if (! $periodEnd) {
             return;
         }

@@ -40,13 +40,49 @@ class AdminGuestController extends Controller
     {
         try {
             $data = $request->validated();
-            $leaseId = (int) $data['lease_id'];
-            unset($data['lease_id']);
+            $scheduleId = (int) $data['schedule_id'];
+            unset($data['schedule_id']);
 
-            $guest = $this->guestService->addGuestByLease($leaseId, $data);
-            $guest->loadMissing(['lease.resident.user', 'lease.room']);
+            $guest = $this->guestService->addGuestBySchedule($scheduleId, $data);
+            $guest->loadMissing(['schedule.tenant', 'schedule.room']);
 
             return $this->apiSuccess(new AdminGuestResource($guest), 'Data tamu berhasil ditambahkan.', 201);
+        } catch (NotFoundHttpException $e) {
+            return $this->apiError($e->getMessage(), 404);
+        } catch (HttpException $e) {
+            return $this->apiError($e->getMessage(), $e->getStatusCode());
+        } catch (Exception $e) {
+            return $this->apiError('Terjadi kesalahan sistem.', 500);
+        }
+    }
+
+    public function checkout(int $id)
+    {
+        try {
+            $guest = $this->guestService->checkoutGuest($id);
+            $guest->loadMissing(['schedule.tenant', 'schedule.room']);
+
+            return $this->apiSuccess(new AdminGuestResource($guest), 'Tamu berhasil ditandai keluar.');
+        } catch (NotFoundHttpException $e) {
+            return $this->apiError($e->getMessage(), 404);
+        } catch (HttpException $e) {
+            return $this->apiError($e->getMessage(), $e->getStatusCode());
+        } catch (Exception $e) {
+            return $this->apiError('Terjadi kesalahan sistem.', 500);
+        }
+    }
+
+    public function extend(\Illuminate\Http\Request $request, int $id)
+    {
+        $request->validate([
+            'check_out_at' => 'required|date|after:today',
+        ]);
+
+        try {
+            $extendedGuest = $this->guestService->extendGuestStay($id, $request->check_out_at);
+            $extendedGuest->loadMissing(['schedule.tenant', 'schedule.room']);
+
+            return $this->apiSuccess(new AdminGuestResource($extendedGuest), 'Waktu menginap tamu berhasil diperpanjang.');
         } catch (NotFoundHttpException $e) {
             return $this->apiError($e->getMessage(), 404);
         } catch (HttpException $e) {

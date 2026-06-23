@@ -95,6 +95,7 @@ class RolePermissionSeeder extends Seeder
             'pay-guest-bill',
             'verify-guest-bill',
             'view-guest-bill',
+            'checkout-guest',
         ];
 
         // ─── Admin: manajemen operasional, tanpa akses setting sistem ─────
@@ -170,6 +171,7 @@ class RolePermissionSeeder extends Seeder
             'create-guest',
             'verify-guest-bill',
             'view-guest-bill',
+            'checkout-guest',
         ];
 
         // ─── Member: tamu terdaftar, belum memiliki kamar ────────────────
@@ -192,6 +194,7 @@ class RolePermissionSeeder extends Seeder
             'create-guest',
             'delete-guest',
             'pay-guest-bill',
+            'checkout-guest',
         ];
 
         // ─── Resident: penghuni aktif dengan sewa yang sudah dibayar ─────
@@ -222,6 +225,7 @@ class RolePermissionSeeder extends Seeder
             'create-guest',
             'delete-guest',
             'pay-guest-bill',
+            'checkout-guest',
         ];
 
         $superAdmin->syncPermissions($superAdminPermissions);

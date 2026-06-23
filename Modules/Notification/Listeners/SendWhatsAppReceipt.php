@@ -19,14 +19,14 @@ class SendWhatsAppReceipt implements ShouldQueue
 
     public function handle(PembayaranDiverifikasi $event): void
     {
-        if (! $this->settingService->isFeatureEnabled('feature_whatsapp_receipt')) {
+        if (! $this->settingService->isFeatureEnabled('notif_receipt')) {
             return;
         }
 
         $periode = $event->startDate.' - '.$event->endDate;
 
         $pdfLink = null;
-        if ($this->settingService->isFeatureEnabled('feature_whatsapp_pdf_link')) {
+        if ($this->settingService->isFeatureEnabled('notif_pdf_link')) {
             $pdfLink = \Illuminate\Support\Facades\URL::temporarySignedRoute(
                 'finance.invoice.print',
                 now()->addHours(48),

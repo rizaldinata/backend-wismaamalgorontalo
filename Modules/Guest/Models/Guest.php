@@ -20,6 +20,7 @@ class Guest extends Model
         'name',
         'check_in_at',
         'check_out_at',
+        'stay_completed_notified_at',
         'relationship',
         'total_days',
         'billable_days',
@@ -35,6 +36,16 @@ class Guest extends Model
 
     public function bill()
     {
-        return $this->hasOne(GuestBill::class);
+        return $this->hasOne(GuestBill::class)->latestOfMany();
+    }
+
+    public function bills()
+    {
+        return $this->hasMany(GuestBill::class);
+    }
+
+    public function schedule()
+    {
+        return $this->belongsTo(\Modules\Schedule\Models\Schedule::class, 'schedule_reference_id');
     }
 }

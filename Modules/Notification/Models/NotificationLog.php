@@ -22,10 +22,12 @@ class NotificationLog extends Model
         'message_body',
         'status',
         'error_response',
+        'is_read',
     ];
 
     protected $casts = [
-        'status' => NotificationStatus::class,
-        'type' => NotificationType::class,
+        'status'  => NotificationStatus::class,
+        'type'    => NotificationType::class,
+        'is_read' => 'boolean',
     ];
 }

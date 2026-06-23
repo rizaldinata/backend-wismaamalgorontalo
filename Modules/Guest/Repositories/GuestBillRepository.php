@@ -10,7 +10,7 @@ class GuestBillRepository implements GuestBillRepositoryInterface
 {
     public function findByGuestId(int $guestId): ?GuestBill
     {
-        return GuestBill::where('guest_id', $guestId)->first();
+        return GuestBill::where('guest_id', $guestId)->latest()->first();
     }
 
     public function findById(int $id): ?GuestBill

@@ -1,8 +1,10 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Modules\Finance\Models\FixedExpenseEntry;
 use Modules\Setting\Models\AppSetting;
+use Modules\Setting\Models\FeatureToggle;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
@@ -17,6 +19,14 @@ function aktifkanFiturPengeluaranTetap(array $jenis = ['listrik', 'air', 'wifi']
         ['key' => 'pengeluaran_tetap_jenis_aktif'],
         ['value' => json_encode($jenis)]
     );
+    $parent = FeatureToggle::firstOrCreate(
+        ['key' => 'finance'],
+        ['name' => 'Manajemen Keuangan', 'is_active' => true, 'is_locked' => false],
+    );
+    FeatureToggle::updateOrCreate(
+        ['key' => 'finance_fixed_expense'],
+        ['name' => 'Pengeluaran Tetap Bulanan', 'is_active' => true, 'is_locked' => false, 'parent_id' => $parent->id],
+    );
 }
 
 function nonaktifkanFiturPengeluaranTetap(): void
@@ -29,9 +39,18 @@ function nonaktifkanFiturPengeluaranTetap(): void
         ['key' => 'pengeluaran_tetap_jenis_aktif'],
         ['value' => '[]']
     );
+    $parent = FeatureToggle::firstOrCreate(
+        ['key' => 'finance'],
+        ['name' => 'Manajemen Keuangan', 'is_active' => true, 'is_locked' => false],
+    );
+    FeatureToggle::updateOrCreate(
+        ['key' => 'finance_fixed_expense'],
+        ['name' => 'Pengeluaran Tetap Bulanan', 'is_active' => false, 'is_locked' => false, 'parent_id' => $parent->id],
+    );
 }
 
 beforeEach(function () {
+    Cache::flush();
     $this->withoutMiddleware();
     nonaktifkanFiturPengeluaranTetap();
 });

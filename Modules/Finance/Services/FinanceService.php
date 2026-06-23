@@ -82,6 +82,7 @@ class FinanceService
                     roomNumber: $invoice->room_number ?? '',
                     startDate: $invoice->period_start?->toDateString() ?? '',
                     endDate: $invoice->period_end?->toDateString() ?? '',
+                    invoiceType: $invoice->type?->value ?? 'sewa',
                 ));
 
                 event(new PaymentSettled($payment));
@@ -95,6 +96,7 @@ class FinanceService
                     tenantPhone: $rejectedInvoice->tenant_phone ?? '',
                     amount: (float) $rejectedInvoice->amount,
                     paymentStatus: PaymentStatus::REJECTED->value,
+                    invoiceType: $rejectedInvoice->type?->value ?? 'sewa',
                 ));
             }
 
@@ -138,6 +140,7 @@ class FinanceService
                     tenantPhone: $refundedInvoice->tenant_phone ?? '',
                     amount: (float) $refundedInvoice->amount,
                     paymentStatus: PaymentStatus::REFUNDED->value,
+                    invoiceType: $refundedInvoice->type?->value ?? 'sewa',
                 ));
 
                 return $payment;
@@ -179,7 +182,8 @@ class FinanceService
             $invoice->load('schedule.room');
             $room = $invoice->schedule?->room;
 
-            // Dibutuhkan oleh AktifkanJadwalSetelahPembayaranDiterima di Schedule module
+            $invoiceType = $invoice->type?->value ?? 'sewa';
+
             event(new PembayaranDiterima(
                 paymentId: $payment->id,
                 invoiceId: $invoice->id,
@@ -187,6 +191,10 @@ class FinanceService
                 amount: (float) $invoice->amount,
                 tenantName: $invoice->tenant_name ?? '',
                 tenantPhone: $invoice->tenant_phone ?? '',
+                invoiceType: $invoiceType,
+                periodStart: $invoice->period_start?->toDateString(),
+                periodEnd: $invoice->period_end?->toDateString(),
+                roomNumber: $invoice->room_number,
             ));
 
             event(new PembayaranDiverifikasi(
@@ -201,6 +209,7 @@ class FinanceService
                 roomNumber: $invoice->room_number ?? '',
                 startDate: $invoice->period_start?->toDateString() ?? '',
                 endDate: $invoice->period_end?->toDateString() ?? '',
+                invoiceType: $invoiceType,
             ));
 
             event(new PaymentSettled($payment));
@@ -215,6 +224,7 @@ class FinanceService
                 tenantPhone: $invoice->tenant_phone ?? '',
                 amount: (float) $invoice->amount,
                 paymentStatus: PaymentStatus::FAILED->value,
+                invoiceType: $invoice->type?->value ?? 'sewa',
             ));
         }
     }

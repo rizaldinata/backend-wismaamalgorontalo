@@ -17,21 +17,29 @@ class GuestRepository implements GuestRepositoryInterface
             ->get();
     }
 
+    public function getByScheduleId(int $scheduleId): Collection
+    {
+        return Guest::where('schedule_reference_id', $scheduleId)
+            ->with('bill')
+            ->orderByDesc('check_in_at')
+            ->get();
+    }
+
     public function getAllPaginated(array $filters = []): LengthAwarePaginator
     {
         $perPage = (int) ($filters['per_page'] ?? 10);
         $search = $filters['search'] ?? null;
 
-        $query = Guest::with(['lease.resident.user', 'lease.room'])
+        $query = Guest::with(['schedule.tenant', 'schedule.room', 'bill'])
             ->orderByDesc('check_in_at');
 
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                    ->orWhereHas('lease.resident.user', function ($u) use ($search) {
+                    ->orWhereHas('schedule.tenant', function ($u) use ($search) {
                         $u->where('name', 'like', "%{$search}%");
                     })
-                    ->orWhereHas('lease.room', function ($r) use ($search) {
+                    ->orWhereHas('schedule.room', function ($r) use ($search) {
                         $r->where('number', 'like', "%{$search}%");
                     });
             });
@@ -48,6 +56,12 @@ class GuestRepository implements GuestRepositoryInterface
     public function create(array $data): Guest
     {
         return Guest::create($data);
+    }
+
+    public function update(Guest $guest, array $data): Guest
+    {
+        $guest->update($data);
+        return $guest;
     }
 
     public function delete(Guest $guest): void

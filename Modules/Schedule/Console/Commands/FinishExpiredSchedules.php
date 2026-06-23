@@ -2,8 +2,8 @@
 
 namespace Modules\Schedule\Console\Commands;
 
+use App\Contracts\PaymentStatusCheckerInterface;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Schedule\Enums\ScheduleStatus;
 use Modules\Schedule\Enums\ScheduleType;
@@ -16,8 +16,10 @@ class FinishExpiredSchedules extends Command
 
     protected $description = 'Selesaikan jadwal sewa ACTIVE yang masa sewanya sudah berakhir dan tidak ada invoice perpanjangan aktif';
 
-    public function __construct(private readonly ScheduleService $scheduleService)
-    {
+    public function __construct(
+        private readonly ScheduleService $scheduleService,
+        private readonly PaymentStatusCheckerInterface $paymentStatusChecker,
+    ) {
         parent::__construct();
     }
 
@@ -32,13 +34,10 @@ class FinishExpiredSchedules extends Command
         $skipped  = 0;
 
         foreach ($expiredSchedules as $schedule) {
-            // Skip jika ada invoice perpanjangan yang masih dalam window pembayaran 15 menit.
-            // period_start > end_date adalah penanda invoice perpanjangan (bukan invoice sewa reguler).
-            $hasPendingExtension = DB::table('invoices')
-                ->where('schedule_id', $schedule->id)
-                ->where('period_start', '>', $schedule->end_date)
-                ->where('payment_expires_at', '>', now())
-                ->exists();
+            $hasPendingExtension = $this->paymentStatusChecker->hasPendingExtensionInvoice(
+                $schedule->id,
+                $schedule->end_date->toDateString(),
+            );
 
             if ($hasPendingExtension) {
                 $skipped++;

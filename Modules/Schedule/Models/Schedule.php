@@ -31,4 +31,14 @@ class Schedule extends Model
     {
         return $this->belongsTo(Room::class);
     }
+
+    public function tenant()
+    {
+        return $this->belongsTo(\Modules\Auth\Models\User::class, 'tenant_user_id');
+    }
+
+    public function invoices()
+    {
+        return $this->hasMany(\Modules\Finance\Models\Invoice::class, 'schedule_id');
+    }
 }

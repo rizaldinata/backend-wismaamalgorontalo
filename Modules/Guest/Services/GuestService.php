@@ -6,19 +6,25 @@ use Illuminate\Database\Eloquent\Collection;
 use Modules\Guest\Models\Guest;
 use Modules\Guest\Models\GuestActiveContext;
 use Modules\Guest\Repositories\Contracts\GuestRepositoryInterface;
+use Modules\Notification\Services\NotificationService;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+    use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class GuestService
 {
     public function __construct(
         private readonly GuestRepositoryInterface $guestRepository,
         private readonly GuestBillingService $billingService,
+        private readonly NotificationService $notificationService,
     ) {}
 
     public function getMyGuests(int $userId): Collection
     {
         $context = $this->resolveActiveContext($userId);
+
+        if ($context->schedule_id) {
+            return $this->guestRepository->getByScheduleId($context->schedule_id);
+        }
 
         return $this->guestRepository->getByLeaseId($context->lease_id);
     }
@@ -50,6 +56,8 @@ class GuestService
         ]);
 
         $this->billingService->createBillIfNeeded($guest, $billing['billable_days'], (float) $billing['charge_amount']);
+
+        $this->logGuestRegistered($guest);
 
         return $guest;
     }
@@ -88,6 +96,8 @@ class GuestService
 
         $this->billingService->createBillIfNeeded($guest, $billing['billable_days'], (float) $billing['charge_amount']);
 
+        $this->logGuestRegistered($guest);
+
         return $guest;
     }
 
@@ -105,6 +115,39 @@ class GuestService
         $this->guestRepository->delete($guest);
     }
 
+    public function checkoutGuest(int $guestId): Guest
+    {
+        $guest = $this->guestRepository->findById($guestId);
+
+        if (!$guest) {
+            throw new NotFoundHttpException('Data tamu tidak ditemukan.');
+        }
+
+        if ($guest->stay_completed_notified_at) {
+            throw new HttpException(422, 'Tamu sudah ditandai keluar sebelumnya.');
+        }
+
+        return $this->markGuestStayEnded($guest, now(), true);
+    }
+
+    public function checkoutMyGuest(int $userId, int $guestId): Guest
+    {
+        $guest = $this->guestRepository->findById($guestId);
+
+        // Verifikasi kepemilikan via user_id (data baru) atau via relasi lease (data lama, sebelum Fase 4)
+        $ownerId = $guest->user_id ?? $guest->lease?->resident?->user_id;
+
+        if (! $guest || $ownerId !== $userId) {
+            throw new NotFoundHttpException('Data tamu tidak ditemukan atau bukan milik Anda.');
+        }
+
+        if ($guest->stay_completed_notified_at) {
+            throw new HttpException(422, 'Tamu sudah ditandai keluar sebelumnya.');
+        }
+
+        return $this->markGuestStayEnded($guest, now(), true);
+    }
+
     private function resolveActiveContext(int $userId): GuestActiveContext
     {
         $context = GuestActiveContext::where('user_id', $userId)
@@ -116,5 +159,79 @@ class GuestService
         }
 
         return $context;
+    }
+
+    public function markGuestStayEnded(Guest $guest, $endDate, bool $isEarly = false): Guest
+    {
+        $this->guestRepository->update($guest, [
+            'check_out_at' => $endDate,
+            'stay_completed_notified_at' => now(),
+        ]);
+        
+        $status = $isEarly ? 'keluar lebih awal' : 'selesai menginap';
+        $message = "Tamu {$guest->name} telah {$status} pada {$endDate}.";
+        $this->notificationService->logSystemNotification(\Modules\Notification\Enums\NotificationType::GUEST_STAY_ENDED, $message);
+
+        return $guest;
+    }
+
+    private function logGuestRegistered(Guest $guest): void
+    {
+        $message = "Tamu baru terdaftar: {$guest->name} (Resident: {$guest->tenant_name}).";
+        $this->notificationService->logSystemNotification(\Modules\Notification\Enums\NotificationType::GUEST_REGISTERED, $message);
+    }
+
+    public function extendGuestStay(int $guestId, string $newCheckOutAt): Guest
+    {
+        $guest = $this->guestRepository->findById($guestId);
+        if (!$guest) throw new NotFoundHttpException('Tamu tidak ditemukan.');
+        
+        $context = GuestActiveContext::where('schedule_id', $guest->schedule_reference_id)
+            ->where('is_active', true)->first();
+            
+        if (!$context) throw new HttpException(422, 'Sewa penghuni sudah tidak aktif, tidak dapat diperpanjang.');
+
+        $billing = $this->billingService->calculateBilling(
+            (float) $context->room_price,
+            $guest->check_in_at->toIso8601String(),
+            $newCheckOutAt
+        );
+
+        $oldTotal = $guest->charge_amount;
+
+        $this->guestRepository->update($guest, [
+            'check_out_at' => $newCheckOutAt,
+            'total_days' => $billing['total_days'],
+            'billable_days' => $billing['billable_days'],
+            'charge_amount' => $billing['charge_amount'],
+        ]);
+
+        $newTotal = $billing['charge_amount'];
+        $diffAmount = $newTotal - $oldTotal;
+
+        if ($newTotal > 0) {
+            $bill = $guest->bill; // this gets the latest bill
+            if ($bill) {
+                if (in_array($bill->status, [\Modules\Guest\Enums\GuestBillStatus::PAID, \Modules\Guest\Enums\GuestBillStatus::VERIFIED])) {
+                    if ($diffAmount > 0) {
+                        // Create a new bill for the difference
+                        $this->billingService->createBillIfNeeded($guest, 0, $diffAmount);
+                    }
+                } else {
+                    // Update the existing unpaid/pending bill
+                    $bill->update([
+                        'amount' => $bill->amount + $diffAmount,
+                        'admin_notes' => 'Diperbarui karena perpanjangan menginap. ' . $bill->admin_notes
+                    ]);
+                }
+            } else {
+                $this->billingService->createBillIfNeeded($guest, $billing['billable_days'], (float) $newTotal);
+            }
+        }
+
+        $message = "Masa menginap tamu {$guest->name} (Penghuni: {$context->tenant_name}) telah diperpanjang hingga {$newCheckOutAt}.";
+        $this->notificationService->logSystemNotification(\Modules\Notification\Enums\NotificationType::GUEST_STAY_EXTENDED, $message);
+
+        return $guest;
     }
 }

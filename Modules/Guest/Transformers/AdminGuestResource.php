@@ -4,6 +4,7 @@ namespace Modules\Guest\Transformers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Modules\Guest\Transformers\GuestBillResource;
 
 class AdminGuestResource extends JsonResource
 {
@@ -16,8 +17,12 @@ class AdminGuestResource extends JsonResource
             'check_out_at' => $this->check_out_at?->toDateTimeString(),
             'relationship' => $this->relationship?->value,
             'relationship_label' => $this->relationship?->label(),
-            'penghuni' => $this->lease?->resident?->user?->name ?? '-',
-            'kamar' => $this->lease?->room?->number ?? '-',
+            'penghuni' => $this->schedule?->tenant?->name ?? '-',
+            'kamar' => $this->schedule?->room?->number ?? '-',
+            'total_days' => $this->total_days,
+            'billable_days' => $this->billable_days,
+            'charge_amount' => (float) $this->charge_amount,
+            'bill' => $this->bill ? new GuestBillResource($this->bill) : null,
             'created_at' => $this->created_at?->toDateTimeString(),
         ];
     }

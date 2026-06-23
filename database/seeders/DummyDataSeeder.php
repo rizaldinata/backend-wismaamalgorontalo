@@ -438,6 +438,9 @@ class DummyDataSeeder extends Seeder
         $this->command->info('Admin: admin@wismaamal.com / password');
         $this->command->info('Staff: staff@wismaamal.com / password');
         $this->command->info('Members: ahmad@example.com (and others) / password');
+
+        \Illuminate\Support\Facades\Artisan::call('app:fix-guest-context');
+        \Illuminate\Support\Facades\Artisan::call('app:fix-finance-tenants');
     }
 
     private function generatePlaceholder($path, $text1, $text2, $width, $height)

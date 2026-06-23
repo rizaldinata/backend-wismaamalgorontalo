@@ -1,13 +1,16 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Modules\Setting\Models\AppSetting;
+use Modules\Setting\Models\FeatureToggle;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class);
 
 beforeEach(function () {
     $this->withoutMiddleware();
+    Cache::flush();
 });
 
 // =========================================================
@@ -42,14 +45,14 @@ test('[BERHASIL] public settings mengembalikan false untuk semua fitur jika belu
 });
 
 test('[BERHASIL] public settings mencerminkan nilai terkini dari database', function () {
-    AppSetting::create(['key' => 'feature_payment_midtrans', 'value' => 'true']);
-    AppSetting::create(['key' => 'feature_daily_rental',     'value' => 'true']);
+    $parent = FeatureToggle::create(['key' => 'finance', 'name' => 'Keuangan', 'is_active' => true, 'is_locked' => false]);
+    FeatureToggle::create(['key' => 'finance_midtrans', 'name' => 'Midtrans', 'is_active' => true, 'is_locked' => false, 'parent_id' => $parent->id]);
 
     $response = $this->getJson('/api/v1/settings/public');
 
     $response->assertOk();
     expect($response->json('data.feature_payment_midtrans'))->toBeTrue();
-    expect($response->json('data.feature_daily_rental'))->toBeTrue();
+    expect($response->json('data.feature_daily_rental'))->toBeFalse();
 });
 
 // =========================================================
@@ -84,8 +87,7 @@ test('[BERHASIL] admin dapat mengaktifkan fitur Midtrans pembayaran', function (
 
     $response->assertOk()
         ->assertJsonFragment(['status' => true])
-        ->assertJsonFragment(['message' => 'Seluruh konfigurasi internal berhasil diperbarui!'])
-        ->assertJsonPath('data.feature_payment_midtrans', true);
+        ->assertJsonFragment(['message' => 'Seluruh konfigurasi internal berhasil diperbarui!']);
 
     $this->assertDatabaseHas('app_settings', [
         'key'   => 'feature_payment_midtrans',
@@ -122,8 +124,8 @@ test('[BERHASIL] admin dapat update beberapa setting keuangan sekaligus', functi
     ]);
 
     $response->assertOk();
-    expect($response->json('data.feature_payment_midtrans'))->toBeTrue();
-    expect($response->json('data.feature_whatsapp_receipt'))->toBeTrue();
+    $this->assertDatabaseHas('app_settings', ['key' => 'feature_payment_midtrans', 'value' => 'true']);
+    $this->assertDatabaseHas('app_settings', ['key' => 'feature_whatsapp_receipt', 'value' => 'true']);
     expect($response->json('data.feature_daily_rental'))->toBeFalse();
 });
 

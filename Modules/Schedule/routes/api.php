@@ -2,6 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Schedule\Http\Controllers\ScheduleController;
+use Modules\Schedule\Http\Controllers\AdminResidentController;
+
+// Rute lainnya yang membutuhkan otentikasi
+Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
+    Route::get('/admin/residents', [AdminResidentController::class, 'index']);
+});
 
 Route::middleware(['auth:sanctum'])->prefix('v1/room-schedules')->group(function () {
     Route::get('/', [ScheduleController::class, 'index']);

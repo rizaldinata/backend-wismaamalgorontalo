@@ -2,8 +2,8 @@
 
 namespace Modules\Schedule\Console\Commands;
 
+use App\Contracts\PaymentStatusCheckerInterface;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Schedule\Enums\ScheduleStatus;
 use Modules\Schedule\Enums\ScheduleType;
@@ -16,8 +16,10 @@ class ExpirePendingSchedules extends Command
 
     protected $description = 'Batalkan jadwal sewa PENDING yang sudah melebihi batas waktu pembayaran (15 menit) dan belum ada pembayaran aktif';
 
-    public function __construct(private readonly ScheduleService $scheduleService)
-    {
+    public function __construct(
+        private readonly ScheduleService $scheduleService,
+        private readonly PaymentStatusCheckerInterface $paymentStatusChecker,
+    ) {
         parent::__construct();
     }
 
@@ -34,13 +36,7 @@ class ExpirePendingSchedules extends Command
         $skipped = 0;
 
         foreach ($expiredSchedules as $schedule) {
-            // Jangan batalkan jika ada pembayaran yang sedang diproses atau sudah lunas.
-            // Query langsung ke tabel Finance tanpa import kelas Finance (menghindari pelanggaran deptrac).
-            $hasActivePayment = DB::table('payments')
-                ->join('invoices', 'invoices.id', '=', 'payments.invoice_id')
-                ->where('invoices.schedule_id', $schedule->id)
-                ->whereIn('payments.status', ['pending', 'verified', 'paid'])
-                ->exists();
+            $hasActivePayment = $this->paymentStatusChecker->hasActivePaymentForSchedule($schedule->id);
 
             if ($hasActivePayment) {
                 $skipped++;

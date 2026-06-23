@@ -96,4 +96,14 @@ class NotificationRepository implements NotificationRepositoryInterface
             ->orderBy('users.name')
             ->get();
     }
+
+    public function markAllAsRead(): int
+    {
+        return NotificationLog::where('is_read', false)->update(['is_read' => true]);
+    }
+
+    public function countUnread(): int
+    {
+        return NotificationLog::where('is_read', false)->count();
+    }
 }

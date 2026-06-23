@@ -88,15 +88,13 @@ test('[BERHASIL] admin dapat mengaktifkan metode pembayaran pilihan', function (
     expect($saved)->toContain('qris')->toContain('gopay')->toContain('mandiri_va');
 });
 
-test('[BERHASIL] admin dapat menonaktifkan semua metode dengan array kosong', function () {
+test('[GAGAL] ditolak jika enabled_methods dikirim sebagai array kosong', function () {
     $response = $this->putJson('/api/v1/settings/payment-methods', [
         'enabled_methods' => [],
     ]);
 
-    $response->assertOk();
-    $data = $response->json('data');
-    $allDisabled = collect($data)->every(fn ($m) => $m['enabled'] === false);
-    expect($allDisabled)->toBeTrue();
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors(['enabled_methods']);
 });
 
 test('[BERHASIL] update menimpa konfigurasi sebelumnya', function () {

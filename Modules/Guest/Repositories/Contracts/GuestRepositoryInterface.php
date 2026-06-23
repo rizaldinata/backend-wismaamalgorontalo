@@ -10,11 +10,15 @@ interface GuestRepositoryInterface
 {
     public function getByLeaseId(int $leaseId): Collection;
 
+    public function getByScheduleId(int $scheduleId): Collection;
+
     public function getAllPaginated(array $filters = []): LengthAwarePaginator;
 
     public function findById(int $id): ?Guest;
 
     public function create(array $data): Guest;
+
+    public function update(Guest $guest, array $data): Guest;
 
     public function delete(Guest $guest): void;
 }
