@@ -14,7 +14,7 @@ class PayGuestBillRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'payment_method' => ['required', 'in:manual,midtrans'],
+            'payment_method' => ['required', 'in:manual,midtrans,cash'],
             'payment_proof' => [
                 'required_if:payment_method,manual',
                 'nullable',

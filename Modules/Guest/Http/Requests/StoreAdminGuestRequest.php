@@ -13,10 +13,11 @@ class StoreAdminGuestRequest extends FormRequest
 
         return [
             'schedule_id' => 'required|integer|exists:room_schedules,id,status,active,type,sewa',
-            'name' => 'required|string|max:255',
+            'guests' => 'required|array|min:1|max:3',
+            'guests.*.name' => 'required|string|max:255',
+            'guests.*.relationship' => "required|string|in:{$relationships}",
             'check_in_at' => 'required|date',
             'check_out_at' => 'required|date|after:check_in_at',
-            'relationship' => "required|string|in:{$relationships}",
         ];
     }
 

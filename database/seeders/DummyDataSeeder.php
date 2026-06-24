@@ -8,6 +8,10 @@ use Modules\Auth\Models\User;
 use Modules\Room\Models\Room;
 use Modules\Room\Models\RoomImage;
 use Modules\Schedule\Models\Schedule;
+use Modules\Guest\Models\Guest;
+use Modules\Guest\Enums\GuestRelationship;
+use Modules\Guest\Models\GuestBill;
+use Modules\Guest\Enums\GuestBillStatus;
 
 class DummyDataSeeder extends Seeder
 {
@@ -328,7 +332,7 @@ class DummyDataSeeder extends Seeder
 
         // Create Schedules (type: sewa)
         // Active schedules
-        Schedule::create([
+        $schedule1 = Schedule::create([
             'room_id' => $rooms[0]->id,
             'type' => 'sewa',
             'status' => 'active',
@@ -343,7 +347,7 @@ class DummyDataSeeder extends Seeder
             'activated_at' => now()->subMonths(3),
         ]);
 
-        Schedule::create([
+        $schedule2 = Schedule::create([
             'room_id' => $rooms[5]->id,
             'type' => 'sewa',
             'status' => 'active',
@@ -358,7 +362,7 @@ class DummyDataSeeder extends Seeder
             'activated_at' => now()->subMonths(6),
         ]);
 
-        Schedule::create([
+        $schedule3 = Schedule::create([
             'room_id' => $rooms[2]->id,
             'type' => 'sewa',
             'status' => 'active',
@@ -373,7 +377,7 @@ class DummyDataSeeder extends Seeder
             'activated_at' => now()->subMonths(2),
         ]);
 
-        Schedule::create([
+        $schedule4 = Schedule::create([
             'room_id' => $rooms[7]->id,
             'type' => 'sewa',
             'status' => 'active',
@@ -389,7 +393,7 @@ class DummyDataSeeder extends Seeder
         ]);
 
         // Pending schedules
-        Schedule::create([
+        $schedule5 = Schedule::create([
             'room_id' => $rooms[6]->id,
             'type' => 'sewa',
             'status' => 'pending',
@@ -403,7 +407,7 @@ class DummyDataSeeder extends Seeder
             'created_by' => 1,
         ]);
 
-        Schedule::create([
+        $schedule6 = Schedule::create([
             'room_id' => $rooms[10]->id,
             'type' => 'sewa',
             'status' => 'pending',
@@ -418,7 +422,7 @@ class DummyDataSeeder extends Seeder
         ]);
 
         // Finished schedule
-        Schedule::create([
+        $schedule7 = Schedule::create([
             'room_id' => $rooms[1]->id,
             'type' => 'sewa',
             'status' => 'finished',
@@ -433,6 +437,99 @@ class DummyDataSeeder extends Seeder
             'activated_at' => now()->subYear(),
             'finished_at' => now()->subMonths(2),
         ]);
+
+        // Create Dummy Guests
+        $guestsData = [
+            [
+                'schedule' => $schedule1,
+                'name' => 'Bapak Hidayat',
+                'relationship' => GuestRelationship::PARENT,
+                'check_in_at' => now()->subDays(10)->setTime(14, 0),
+                'check_out_at' => now()->subDays(8)->setTime(12, 0),
+                'total_days' => 2,
+                'billable_days' => 0,
+                'charge_amount' => 0,
+            ],
+            [
+                'schedule' => $schedule1,
+                'name' => 'Adik Hidayat',
+                'relationship' => GuestRelationship::SIBLING,
+                'check_in_at' => now()->subDays(5)->setTime(15, 0),
+                'check_out_at' => now()->subDays(2)->setTime(10, 0),
+                'total_days' => 3,
+                'billable_days' => 2,
+                'charge_amount' => 100000,
+                'bill_status' => GuestBillStatus::PAID,
+                'paid_at' => now()->subDays(4),
+                'payment_method' => 'Bank Transfer',
+            ],
+            [
+                'schedule' => $schedule2,
+                'name' => 'Siti Aminah',
+                'relationship' => GuestRelationship::FRIEND,
+                'check_in_at' => now()->subDays(20)->setTime(18, 0),
+                'check_out_at' => now()->subDays(17)->setTime(11, 0),
+                'total_days' => 3,
+                'billable_days' => 1,
+                'charge_amount' => 50000,
+                'bill_status' => GuestBillStatus::VERIFIED,
+                'paid_at' => now()->subDays(19),
+                'payment_method' => 'Cash',
+            ],
+            [
+                'schedule' => $schedule3,
+                'name' => 'Budi Santoso Sr',
+                'relationship' => GuestRelationship::PARENT,
+                'check_in_at' => now()->subDays(1)->setTime(10, 0),
+                'check_out_at' => now()->addDays(2)->setTime(12, 0),
+                'total_days' => 3,
+                'billable_days' => 3,
+                'charge_amount' => 150000,
+                'bill_status' => GuestBillStatus::UNPAID,
+                'paid_at' => null,
+                'payment_method' => null,
+            ],
+            [
+                'schedule' => $schedule7,
+                'name' => 'Rekan Kerja Guest',
+                'relationship' => GuestRelationship::COLLEAGUE,
+                'check_in_at' => now()->subMonths(3)->setTime(14, 0),
+                'check_out_at' => now()->subMonths(3)->addDays(2)->setTime(12, 0),
+                'total_days' => 2,
+                'billable_days' => 0,
+                'charge_amount' => 0,
+            ],
+        ];
+
+        foreach ($guestsData as $gData) {
+            $sched = $gData['schedule'];
+            $tenantUser = User::find($sched->tenant_user_id);
+            $guest = Guest::create([
+                'user_id' => $sched->tenant_user_id,
+                'schedule_reference_id' => $sched->id,
+                'tenant_name' => $sched->tenant_name,
+                'tenant_email' => $tenantUser ? $tenantUser->email : 'tenant@example.com',
+                'tenant_phone' => $sched->tenant_phone,
+                'name' => $gData['name'],
+                'check_in_at' => $gData['check_in_at'],
+                'check_out_at' => $gData['check_out_at'],
+                'relationship' => $gData['relationship'],
+                'total_days' => $gData['total_days'],
+                'billable_days' => $gData['billable_days'],
+                'charge_amount' => $gData['charge_amount'],
+            ]);
+
+            if ($gData['charge_amount'] > 0) {
+                GuestBill::create([
+                    'guest_id' => $guest->id,
+                    'bill_number' => 'GB-' . strtoupper(uniqid()),
+                    'amount' => $gData['charge_amount'],
+                    'status' => $gData['bill_status'] ?? GuestBillStatus::UNPAID,
+                    'payment_method' => $gData['payment_method'] ?? null,
+                    'paid_at' => $gData['paid_at'] ?? null,
+                ]);
+            }
+        }
 
         $this->command->info('Dummy data seeder completed successfully!');
         $this->command->info('Admin: admin@wismaamal.com / password');

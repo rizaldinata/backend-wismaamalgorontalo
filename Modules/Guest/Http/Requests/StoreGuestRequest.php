@@ -12,10 +12,11 @@ class StoreGuestRequest extends FormRequest
         $relationships = implode(',', array_column(GuestRelationship::cases(), 'value'));
 
         return [
-            'name' => 'required|string|max:255',
+            'guests' => 'required|array|min:1|max:3',
+            'guests.*.name' => 'required|string|max:255',
+            'guests.*.relationship' => "required|string|in:{$relationships}",
             'check_in_at' => 'required|date',
             'check_out_at' => 'required|date|after:check_in_at',
-            'relationship' => "required|string|in:{$relationships}",
         ];
     }
 
