@@ -10,12 +10,14 @@ use Modules\Finance\Repositories\Contracts\FixedExpenseEntryRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\FineRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
+use Modules\Finance\Repositories\Contracts\RefundRequestRepositoryInterface;
 use Modules\Finance\Repositories\ExpenseRepository;
 use Modules\Finance\Repositories\FixedExpenseEntryRepository;
 use Modules\Finance\Repositories\FineRepository;
 use Modules\Finance\Services\PaymentStatusChecker;
 use Modules\Finance\Repositories\InvoiceRepository;
 use Modules\Finance\Repositories\PaymentRepository;
+use Modules\Finance\Repositories\RefundRequestRepository;
 use Modules\Finance\Console\Commands\ExpireManualPaymentInvoices;
 use Modules\Finance\Console\Commands\GenerateFixedExpenses;
 use Nwidart\Modules\Traits\PathNamespace;
@@ -74,6 +76,11 @@ class FinanceServiceProvider extends ServiceProvider
         $this->app->bind(
             FineRepositoryInterface::class,
             FineRepository::class,
+        );
+
+        $this->app->bind(
+            RefundRequestRepositoryInterface::class,
+            RefundRequestRepository::class,
         );
 
         $this->app->bind(
