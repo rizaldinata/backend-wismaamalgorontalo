@@ -249,11 +249,13 @@ test('[BERHASIL] penghuni tidak melihat pembayaran milik penghuni lain', functio
     expect($response->json('data'))->toHaveCount(2);
 });
 
-test('[GAGAL] mengembalikan 404 jika penghuni tidak memiliki invoice sama sekali', function () {
+test('[BERHASIL] mengembalikan list kosong jika penghuni tidak memiliki invoice sama sekali', function () {
     $response = $this->actingAs($this->penghuni)
         ->getJson('/api/finance/me/payments');
 
-    $response->assertNotFound();
+    $response->assertOk()
+        ->assertJsonFragment(['success' => true])
+        ->assertJsonPath('data', []);
 });
 
 // =========================================================

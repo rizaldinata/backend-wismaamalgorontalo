@@ -153,7 +153,10 @@ class ResidentFinanceController extends Controller
             ->toArray();
 
         if (empty($scheduleIds)) {
-            return $this->apiError('Data penghuni tidak ditemukan.', 404);
+            return PaymentResource::collection(new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15))->additional([
+                'success' => true,
+                'message' => 'Riwayat pembayaran Anda berhasil diambil',
+            ]);
         }
 
         $perPage = (int) $request->query('per_page', 15);

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Modules\Setting\Services\SettingService;
 
 class SettingController extends Controller
@@ -31,9 +32,7 @@ class SettingController extends Controller
      */
     public function updateBulk(Request $request): JsonResponse
     {
-        $fiturPengeluaranTetapAktif = (bool) $request->input('settings.feature_pengeluaran_tetap', false);
-
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'settings' => 'required|array',
             'settings.wisma_name' => 'nullable|string|max:100',
             'settings.wisma_address' => 'nullable|string',
@@ -53,21 +52,22 @@ class SettingController extends Controller
             'settings.landing_facilities' => 'nullable|string',
             'settings.landing_highlighted_rooms' => 'nullable|array',
             'settings.feature_pengeluaran_tetap' => 'nullable|boolean',
-            'settings.pengeluaran_tetap_jenis_aktif' => [
-                'nullable',
-                'array',
-            ],
+            'settings.pengeluaran_tetap_jenis_aktif' => ['nullable', 'array'],
             'settings.pengeluaran_tetap_jenis_aktif.*' => 'in:listrik,air,wifi',
         ]);
 
-        if ($fiturPengeluaranTetapAktif) {
-            $jenis = $validated['settings']['pengeluaran_tetap_jenis_aktif'] ?? [];
-            if (empty($jenis)) {
-                // Auto-disable feature if no types selected to avoid errors on unrelated updates
-                $validated['settings']['feature_pengeluaran_tetap'] = false;
-                $request->merge(['settings' => array_merge($request->input('settings', []), ['feature_pengeluaran_tetap' => false])]);
+        $validator->after(function ($v) use ($request) {
+            $fiturAktif = (bool) $request->input('settings.feature_pengeluaran_tetap', false);
+            $jenis = $request->input('settings.pengeluaran_tetap_jenis_aktif', []);
+            if ($fiturAktif && empty($jenis)) {
+                $v->errors()->add(
+                    'settings.pengeluaran_tetap_jenis_aktif',
+                    'Minimal satu jenis pengeluaran tetap harus dipilih jika fitur diaktifkan.'
+                );
             }
-        }
+        });
+
+        $validated = $validator->validate();
 
         $settingsToSave = $validated['settings'];
 

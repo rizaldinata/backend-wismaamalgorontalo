@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Modules\Guest\Models\Guest;
 use Modules\Guest\Models\GuestActiveContext;
 use Modules\Guest\Repositories\Contracts\GuestRepositoryInterface;
+use Modules\Notification\Enums\NotificationType;
 use Modules\Notification\Services\NotificationService;
 use Symfony\Component\HttpKernel\Exception\HttpException;
     use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -15,8 +16,14 @@ class GuestService
     public function __construct(
         private readonly GuestRepositoryInterface $guestRepository,
         private readonly GuestBillingService $billingService,
-        private readonly NotificationService $notificationService,
     ) {}
+
+    private function logNotification(NotificationType $type, string $message): void
+    {
+        if (app()->bound(NotificationService::class)) {
+            app(NotificationService::class)->logSystemNotification($type, $message);
+        }
+    }
 
     public function getMyGuests(int $userId): Collection
     {
@@ -97,7 +104,7 @@ class GuestService
 
         $namesStr = implode(', ', $guestNames);
         $message = "Tamu terdaftar: {$namesStr} (Penghuni: {$context->tenant_name}).";
-        $this->notificationService->logSystemNotification(\Modules\Notification\Enums\NotificationType::GUEST_REGISTERED, $message);
+        $this->logNotification(NotificationType::GUEST_REGISTERED, $message);
 
         return $createdGuests;
     }
@@ -171,7 +178,7 @@ class GuestService
         
         $status = $isEarly ? 'keluar lebih awal' : 'selesai menginap';
         $message = "Tamu {$guest->name} telah {$status} pada {$endDate}.";
-        $this->notificationService->logSystemNotification(\Modules\Notification\Enums\NotificationType::GUEST_STAY_ENDED, $message);
+        $this->logNotification(NotificationType::GUEST_STAY_ENDED, $message);
 
         return $guest;
     }
@@ -227,7 +234,7 @@ class GuestService
         }
 
         $message = "Masa menginap tamu {$guest->name} (Penghuni: {$context->tenant_name}) telah diperpanjang hingga {$newCheckOutAt}.";
-        $this->notificationService->logSystemNotification(\Modules\Notification\Enums\NotificationType::GUEST_STAY_EXTENDED, $message);
+        $this->logNotification(NotificationType::GUEST_STAY_EXTENDED, $message);
 
         return $guest;
     }

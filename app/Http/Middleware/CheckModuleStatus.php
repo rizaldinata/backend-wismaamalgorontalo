@@ -28,8 +28,6 @@ class CheckModuleStatus
             'api/finance/expenses' => 'finance_expense',
             'api/finance/fixed-expenses' => 'finance_fixed_expense',
             'api/finance/me/leases' => 'finance_lease',
-            'api/finance/dashboard' => 'finance_dashboard',
-            
             // Granular Auth
             'api/v1/auth/register' => 'auth_registration',
 
