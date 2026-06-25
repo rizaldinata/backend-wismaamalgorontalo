@@ -3,7 +3,15 @@
 set -e
 
 echo "Running migrations..."
-php artisan migrate --force
+for i in {1..15}; do
+    if php artisan migrate --force; then
+        echo "Migrations completed successfully."
+        break
+    else
+        echo "Database not ready yet, waiting 2 seconds..."
+        sleep 2
+    fi
+done
 
 echo "Starting PHP-FPM..."
 exec php-fpm
