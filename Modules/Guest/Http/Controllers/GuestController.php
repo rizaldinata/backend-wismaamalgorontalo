@@ -48,9 +48,9 @@ class GuestController extends Controller
     public function store(StoreGuestRequest $request)
     {
         try {
-            $guest = $this->guestService->addGuest(Auth::id(), $request->validated());
+            $guests = $this->guestService->addGuest(Auth::id(), $request->validated());
 
-            return $this->apiSuccess(new GuestResource($guest), 'Data tamu berhasil ditambahkan.', 201);
+            return $this->apiSuccess(GuestResource::collection($guests), 'Data tamu berhasil ditambahkan.', 201);
         } catch (HttpException $e) {
             return $this->apiError($e->getMessage(), $e->getStatusCode());
         } catch (Exception $e) {

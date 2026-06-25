@@ -5,6 +5,8 @@ namespace Modules\Finance\Services;
 use App\Events\Finance\PembayaranDibatalkan;
 use App\Events\Finance\PembayaranDiterima;
 use App\Events\Finance\PembayaranDiverifikasi;
+use App\Services\ImageService;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Midtrans\Config;
@@ -14,10 +16,17 @@ use Modules\Finance\Enums\InvoiceStatus;
 use Modules\Finance\Enums\PaymentStatus;
 use Modules\Finance\Events\PaymentSettled;
 use Modules\Finance\Models\Payment;
+use Modules\Finance\Models\RefundRequest;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
+use Modules\Finance\Repositories\Contracts\RefundRequestRepositoryInterface;
+use Modules\Finance\Services\ExpenseService;
 use Modules\Finance\Strategies\ManualPaymentStrategy;
 use Modules\Finance\Strategies\MidtransPaymentStrategy;
+use Modules\Schedule\Enums\SchedulePaymentScheme;
+use Modules\Schedule\Enums\ScheduleStatus;
+use Modules\Schedule\Repositories\Contracts\ScheduleRepositoryInterface;
+use Modules\Schedule\Services\ScheduleService;
 use App\Contracts\ConfigProviderInterface;
 
 class FinanceService
@@ -25,6 +34,11 @@ class FinanceService
     public function __construct(
         private readonly InvoiceRepositoryInterface $invoiceRepository,
         private readonly PaymentRepositoryInterface $paymentRepository,
+        private readonly RefundRequestRepositoryInterface $refundRequestRepository,
+        private readonly ScheduleRepositoryInterface $scheduleRepository,
+        private readonly ExpenseService $expenseService,
+        private readonly ScheduleService $scheduleService,
+        private readonly ImageService $imageService,
         private readonly ConfigProviderInterface $settingService,
         private readonly ManualPaymentStrategy $manualStrategy,
         private readonly MidtransPaymentStrategy $midtransStrategy,
@@ -227,5 +241,147 @@ class FinanceService
                 invoiceType: $invoice->type?->value ?? 'sewa',
             ));
         }
+    }
+
+    public function ajukanPembatalanDp(int $scheduleId, int $userId, array $bankData): RefundRequest
+    {
+        $schedule = $this->scheduleRepository->findById($scheduleId);
+
+        if ($schedule->tenant_user_id !== $userId) {
+            throw new \DomainException('Anda tidak memiliki akses ke jadwal ini.');
+        }
+
+        $allowedStatuses = [ScheduleStatus::DP_TERBAYAR, ScheduleStatus::TERKONFIRMASI];
+        if (! in_array($schedule->status, $allowedStatuses)) {
+            throw new \DomainException('Pembatalan hanya bisa dilakukan untuk jadwal dengan status DP Terbayar atau Terkonfirmasi.');
+        }
+
+        if ($schedule->payment_scheme !== SchedulePaymentScheme::DP) {
+            throw new \DomainException('Pembatalan dengan pengembalian dana hanya berlaku untuk skema pembayaran DP.');
+        }
+
+        if ($this->refundRequestRepository->hasPendingBySchedule($scheduleId)) {
+            throw new \DomainException('Sudah ada permintaan pembatalan yang sedang menunggu diproses oleh admin.');
+        }
+
+        // Cari invoice DP yang sudah dibayar
+        $invoice = $schedule->invoices()
+            ->where('status', InvoiceStatus::PAID->value)
+            ->orderBy('created_at')
+            ->first();
+
+        if (! $invoice) {
+            throw new \DomainException('Tidak ditemukan pembayaran yang sudah lunas untuk jadwal ini.');
+        }
+
+        $payment = $invoice->payments()
+            ->where('status', PaymentStatus::PAID->value)
+            ->latest()
+            ->first();
+
+        if (! $payment) {
+            throw new \DomainException('Tidak ditemukan data pembayaran untuk tagihan ini.');
+        }
+
+        $isEligible = \Carbon\Carbon::now()->lt(
+            \Carbon\Carbon::parse($schedule->start_date)->subDays(3)
+        );
+
+        return $this->refundRequestRepository->create([
+            'schedule_id'          => $scheduleId,
+            'payment_id'           => $payment->id,
+            'bank_name'            => $bankData['bank_name'],
+            'account_number'       => $bankData['account_number'],
+            'account_holder_name'  => $bankData['account_holder_name'],
+            'refund_amount'        => $invoice->amount,
+            'is_refund_eligible'   => $isEligible,
+            'status'               => 'pending',
+        ]);
+    }
+
+    public function approveRefundRequest(int $id, ?UploadedFile $proof, float $adminFee, string $notes = ''): RefundRequest
+    {
+        return DB::transaction(function () use ($id, $proof, $adminFee, $notes) {
+            $refundRequest = $this->refundRequestRepository->findOrFail($id);
+
+            if ($refundRequest->status !== 'pending') {
+                throw new \DomainException('Permintaan refund ini sudah diproses.');
+            }
+
+            $updateData = [
+                'status'       => 'processed',
+                'admin_notes'  => $notes,
+                'processed_at' => now(),
+            ];
+
+            if ($refundRequest->is_refund_eligible) {
+                if (! $proof) {
+                    throw new \DomainException('Bukti transfer wajib diunggah untuk refund yang berhak.');
+                }
+
+                $proofPath = $this->imageService->uploadAndCompress($proof, 'refund-proofs');
+                $updateData['proof_path'] = $proofPath;
+                $updateData['admin_fee']  = $adminFee;
+
+                $payment = $refundRequest->payment;
+                $invoice = $payment->invoice;
+
+                $this->paymentRepository->update($payment, [
+                    'status'       => PaymentStatus::REFUNDED->value,
+                    'admin_notes'  => 'Refund manual diproses: '.$notes,
+                ]);
+
+                $this->invoiceRepository->updateStatus($invoice, InvoiceStatus::UNPAID->value);
+
+                $this->expenseService->recordExpense([
+                    'title'        => 'Pengembalian Dana - '.$invoice->invoice_number,
+                    'description'  => 'Refund DP untuk '.$invoice->tenant_name.($notes ? ': '.$notes : ''),
+                    'amount'       => (float) $refundRequest->refund_amount,
+                    'expense_date' => now(),
+                    'reference_id' => $refundRequest->id,
+                    'reference_type' => RefundRequest::class,
+                ]);
+
+                if ($adminFee > 0) {
+                    $this->expenseService->recordExpense([
+                        'title'        => 'Biaya Admin Transfer Refund - '.$invoice->invoice_number,
+                        'description'  => 'Biaya transfer pengembalian dana untuk '.$invoice->tenant_name,
+                        'amount'       => $adminFee,
+                        'expense_date' => now(),
+                        'reference_id' => $refundRequest->id,
+                        'reference_type' => RefundRequest::class.'_fee',
+                    ]);
+                }
+
+                event(new PembayaranDibatalkan(
+                    paymentId:     $payment->id,
+                    invoiceId:     $invoice->id,
+                    scheduleId:    $invoice->schedule_id ?? 0,
+                    tenantName:    $invoice->tenant_name ?? '',
+                    tenantPhone:   $invoice->tenant_phone ?? '',
+                    amount:        (float) $refundRequest->refund_amount,
+                    paymentStatus: PaymentStatus::REFUNDED->value,
+                    invoiceType:   $invoice->type?->value ?? 'sewa',
+                ));
+            }
+
+            $this->scheduleService->batalkanJadwal($refundRequest->schedule_id);
+
+            return $this->refundRequestRepository->update($refundRequest, $updateData);
+        });
+    }
+
+    public function rejectRefundRequest(int $id, string $notes): RefundRequest
+    {
+        $refundRequest = $this->refundRequestRepository->findOrFail($id);
+
+        if ($refundRequest->status !== 'pending') {
+            throw new \DomainException('Permintaan refund ini sudah diproses.');
+        }
+
+        return $this->refundRequestRepository->update($refundRequest, [
+            'status'      => 'rejected',
+            'admin_notes' => $notes,
+        ]);
     }
 }

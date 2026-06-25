@@ -65,6 +65,8 @@ class GuestBillController extends Controller
 
             if ($method === 'manual') {
                 $bill = $this->billingService->payManual($guestId, $userId, $request->file('payment_proof'));
+            } else if ($method === 'cash') {
+                $bill = $this->billingService->payCash($guestId, $userId);
             } else {
                 $bill = $this->billingService->payMidtrans($guestId, $userId);
             }

@@ -17,11 +17,13 @@ use Modules\Finance\Http\Requests\PerpanjangSewaRequest;
 use Modules\Finance\Repositories\Contracts\FineRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
+use Modules\Finance\Repositories\Contracts\RefundRequestRepositoryInterface;
 use Modules\Finance\Services\FinanceService;
 use Modules\Finance\Services\FineService;
 use Modules\Finance\Transformers\FineResource;
 use Modules\Finance\Transformers\InvoiceResource;
 use Modules\Finance\Transformers\PaymentResource;
+use Modules\Finance\Transformers\RefundRequestResource;
 
 class ResidentFinanceController extends Controller
 {
@@ -33,6 +35,7 @@ class ResidentFinanceController extends Controller
         private readonly FinanceService $financeService,
         private readonly FineRepositoryInterface $fineRepository,
         private readonly FineService $fineService,
+        private readonly RefundRequestRepositoryInterface $refundRequestRepository,
     ) {}
 
     /**
@@ -396,6 +399,57 @@ class ResidentFinanceController extends Controller
             new PaymentResource($payment),
             'Pembayaran denda berhasil diproses.',
             201
+        );
+    }
+
+    public function ajukanPembatalanDp(Request $request, int $scheduleId): JsonResponse
+    {
+        $request->validate([
+            'bank_name'           => 'required|string|max:100',
+            'account_number'      => 'required|string|max:50',
+            'account_holder_name' => 'required|string|max:150',
+        ]);
+
+        $refundRequest = $this->financeService->ajukanPembatalanDp(
+            scheduleId: $scheduleId,
+            userId: Auth::id(),
+            bankData: $request->only(['bank_name', 'account_number', 'account_holder_name']),
+        );
+
+        return $this->apiSuccess(
+            new RefundRequestResource($refundRequest),
+            'Permintaan pembatalan DP berhasil diajukan. Menunggu persetujuan admin.',
+            201
+        );
+    }
+
+    public function myRefundRequests(Request $request): JsonResponse
+    {
+        $userId = Auth::id();
+
+        $scheduleIds = DB::table('room_schedules')
+            ->where('tenant_user_id', $userId)
+            ->pluck('id')
+            ->toArray();
+
+        if (empty($scheduleIds)) {
+            return $this->apiSuccess(
+                ['data' => [], 'meta' => ['total' => 0]],
+                'Belum ada permintaan pembatalan.'
+            );
+        }
+
+        $perPage = (int) $request->query('per_page', 15);
+        $filters = array_merge(
+            $request->only(['status']),
+            ['schedule_ids' => $scheduleIds]
+        );
+
+        $refundRequests = $this->refundRequestRepository->getPaginated($perPage, $filters);
+
+        return $this->apiSuccess(
+            RefundRequestResource::collection($refundRequests)->response()->getData(true),
+            'Daftar permintaan pembatalan Anda'
         );
     }
 }

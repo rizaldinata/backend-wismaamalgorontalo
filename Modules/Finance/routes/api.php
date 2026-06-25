@@ -8,6 +8,7 @@ use Modules\Finance\Http\Controllers\FixedExpenseController;
 use Modules\Finance\Http\Controllers\InvoiceController;
 use Modules\Finance\Http\Controllers\PaymentController;
 use Modules\Finance\Http\Controllers\PaymentMethodController;
+use Modules\Finance\Http\Controllers\RefundRequestController;
 use Modules\Finance\Http\Controllers\ResidentFinanceController;
 use Modules\Finance\Http\Middleware\VerifyMidtransSignature;
 
@@ -68,6 +69,13 @@ Route::prefix('finance/')->middleware(['auth:sanctum'])->group(function () {
         Route::post('/{id}/cancel', [FineController::class, 'cancel'])->middleware('permission:finance-fine-waive');
     });
 
+    // Admin: kelola permintaan refund manual
+    Route::prefix('refund-requests')->middleware('permission:finance-payment-refund')->group(function () {
+        Route::get('/', [RefundRequestController::class, 'index']);
+        Route::post('/{id}/proses', [RefundRequestController::class, 'proses']);
+        Route::post('/{id}/tolak', [RefundRequestController::class, 'tolak']);
+    });
+
     // Resident/Member Routes
     Route::prefix('me')->group(function () {
         Route::get('/summary', [ResidentFinanceController::class, 'summary'])->middleware('permission:finance-me-summary-view');
@@ -78,5 +86,7 @@ Route::prefix('finance/')->middleware(['auth:sanctum'])->group(function () {
         Route::post('/leases/{scheduleId}/perpanjang/initiate', [ResidentFinanceController::class, 'initiatePerpanjangManual'])->middleware('permission:finance-me-invoice-view');
         Route::get('/fines', [ResidentFinanceController::class, 'myFines'])->middleware('permission:finance-me-fine-view');
         Route::post('/fines/bayar', [ResidentFinanceController::class, 'bayarDenda'])->middleware('permission:finance-me-fine-view');
+        Route::post('/schedules/{scheduleId}/ajukan-pembatalan-dp', [ResidentFinanceController::class, 'ajukanPembatalanDp'])->middleware('permission:finance-me-payment-view');
+        Route::get('/refund-requests', [ResidentFinanceController::class, 'myRefundRequests'])->middleware('permission:finance-me-payment-view');
     });
 });

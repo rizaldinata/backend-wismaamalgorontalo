@@ -90,6 +90,30 @@ class GuestBillingService
     }
 
     /**
+     * Resident pays via cash.
+     */
+    public function payCash(int $guestId, int $userId): GuestBill
+    {
+        $guest = $this->resolveOwnedGuest($guestId, $userId);
+
+        $bill = $this->billRepository->findByGuestId($guestId);
+
+        if (! $bill) {
+            throw new NotFoundHttpException('Tagihan tidak ditemukan untuk tamu ini.');
+        }
+
+        if (! in_array($bill->status, [GuestBillStatus::UNPAID, GuestBillStatus::REJECTED])) {
+            throw new HttpException(422, 'Tagihan tidak dapat dibayar karena statusnya bukan "Belum Dibayar" atau "Ditolak".');
+        }
+
+        return $this->billRepository->update($bill, [
+            'payment_method' => 'cash',
+            'status' => GuestBillStatus::PENDING->value,
+            'admin_notes' => 'Menunggu pembayaran tunai ke pengelola. ' . $bill->admin_notes
+        ]);
+    }
+
+    /**
      * Resident pays via Midtrans — generates a Snap token.
      */
     public function payMidtrans(int $guestId, int $userId): GuestBill

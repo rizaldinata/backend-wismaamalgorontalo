@@ -43,10 +43,10 @@ class AdminGuestController extends Controller
             $scheduleId = (int) $data['schedule_id'];
             unset($data['schedule_id']);
 
-            $guest = $this->guestService->addGuestBySchedule($scheduleId, $data);
-            $guest->loadMissing(['schedule.tenant', 'schedule.room']);
+            $guests = $this->guestService->addGuestBySchedule($scheduleId, $data);
+            $guests->loadMissing(['schedule.tenant', 'schedule.room']);
 
-            return $this->apiSuccess(new AdminGuestResource($guest), 'Data tamu berhasil ditambahkan.', 201);
+            return $this->apiSuccess(AdminGuestResource::collection($guests), 'Data tamu berhasil ditambahkan.', 201);
         } catch (NotFoundHttpException $e) {
             return $this->apiError($e->getMessage(), 404);
         } catch (HttpException $e) {
