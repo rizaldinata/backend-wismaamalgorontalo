@@ -20,6 +20,13 @@ class RoleRepository implements RoleRepositoryInterface
             })->get();
     }
 
+    public function getExceptNames(array $names)
+    {
+        return Role::with('permissions:id,name,target,description')
+            ->whereNotIn('name', $names)
+            ->get();
+    }
+
     public function findById(int $id)
     {
         return Role::with('permissions:id,name,target,description')->findOrFail($id);

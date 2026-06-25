@@ -8,6 +8,8 @@ interface RoleRepositoryInterface
 
     public function getAllExceptPermission(string $permissionName);
 
+    public function getExceptNames(array $names);
+
     public function findById(int $id);
 
     public function create(array $data);

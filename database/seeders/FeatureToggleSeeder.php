@@ -64,7 +64,7 @@ class FeatureToggleSeeder extends Seeder
         // 2. MAINTENANCE & INVENTORY (Togglable)
         // Group them under a virtual parent or physical module. We'll use 'FacilityManagement' as parent.
         $facilityModule = FeatureToggle::create([
-            'name' => 'Fasilitas & Pemeliharaan',
+            'name' => 'Inventaris & Pemeliharaan',
             'key' => 'facility_management', // virtual parent or we map it to Maintenance + Inventory in backend
             'description' => 'Manajemen aset kos, jadwal pembersihan, dan pelaporan kerusakan.',
             'icon' => 'home_repair_service',

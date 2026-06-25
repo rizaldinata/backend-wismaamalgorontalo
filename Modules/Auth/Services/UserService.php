@@ -70,7 +70,7 @@ class UserService
             throw new HttpException(422, "Role '{$roleName}' tidak ditemukan dalam sistem (Guard: api).");
         }
 
-        if ($role->hasPermissionTo('pay_lease_bill', 'api')) {
+        if (in_array(strtolower($roleName), ['resident', 'member'])) {
             throw new HttpException(422, "Role '{$roleName}' tidak diizinkan untuk ditetapkan melalui panel admin.");
         }
     }

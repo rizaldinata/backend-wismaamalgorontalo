@@ -14,7 +14,7 @@ class RoleService
     public function getAllRoles(bool $forUserManagament = false)
     {
         if ($forUserManagament) {
-            return $this->roleRepository->getAllExceptPermission('pay_lease_bill');
+            return $this->roleRepository->getExceptNames(['resident', 'member']);
         }
 
         return $this->roleRepository->getAll();

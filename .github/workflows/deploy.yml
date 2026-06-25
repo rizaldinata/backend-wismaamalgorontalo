@@ -92,7 +92,7 @@ jobs:
             
             # Pull latest images and restart containers
             docker compose pull backend-app backend-web
-            docker compose up -d backend-app backend-web
+            docker compose up -d backend-app backend-web phpmyadmin
             
             echo "Waiting for database connection..."
             sleep 15
