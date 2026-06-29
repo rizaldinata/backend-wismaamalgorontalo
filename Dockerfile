@@ -30,9 +30,12 @@ WORKDIR /var/www
 # Copy existing application directory contents
 COPY . /var/www
 
-# Set permissions for storage and cache
+# Set permissions for storage, cache, and modules_statuses.json
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
-    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache \
+    && touch /var/www/modules_statuses.json \
+    && chown www-data:www-data /var/www/modules_statuses.json \
+    && chmod 664 /var/www/modules_statuses.json
 
 # Install dependencies
 RUN composer config --global policy.advisories.block false && \

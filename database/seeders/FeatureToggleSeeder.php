@@ -61,24 +61,32 @@ class FeatureToggleSeeder extends Seeder
             ]);
         }
 
-        // 2. MAINTENANCE & INVENTORY (Togglable)
-        // Group them under a virtual parent or physical module. We'll use 'FacilityManagement' as parent.
-        $facilityModule = FeatureToggle::create([
-            'name' => 'Inventaris & Pemeliharaan',
-            'key' => 'facility_management', // virtual parent or we map it to Maintenance + Inventory in backend
-            'description' => 'Manajemen aset kos, jadwal pembersihan, dan pelaporan kerusakan.',
+        // 2. INVENTORY (Togglable)
+        $inventoryModule = FeatureToggle::create([
+            'name' => 'Manajemen Inventaris',
+            'key' => 'inventory', // Maps to Inventory module
+            'description' => 'Pendataan barang/aset di kos dan di dalam kamar.',
+            'icon' => 'inventory_2',
+            'is_active' => true,
+            'is_locked' => false,
+        ]);
+
+        // 3. MAINTENANCE (Togglable)
+        $maintenanceModule = FeatureToggle::create([
+            'name' => 'Manajemen Pemeliharaan',
+            'key' => 'maintenance', // Maps to Maintenance module
+            'description' => 'Manajemen jadwal pembersihan dan pelaporan kerusakan.',
             'icon' => 'home_repair_service',
             'is_active' => true,
             'is_locked' => false,
         ]);
 
-        $facilityFeatures = [
-            ['name' => 'Manajemen Inventaris', 'key' => 'inventory', 'description' => 'Pendataan barang/aset di kos dan di dalam kamar.', 'icon' => 'inventory_2'],
+        $maintenanceFeatures = [
             ['name' => 'Jadwal Maintenance', 'key' => 'maintenance_schedule', 'description' => 'Pembuatan jadwal rutin untuk membersihkan kamar atau fasilitas.', 'icon' => 'cleaning_services'],
             ['name' => 'Laporan Kerusakan', 'key' => 'damage_report', 'description' => 'Mengizinkan penghuni melaporkan kerusakan langsung dari aplikasi.', 'icon' => 'report_problem'],
         ];
 
-        foreach ($facilityFeatures as $feat) {
+        foreach ($maintenanceFeatures as $feat) {
             FeatureToggle::create([
                 'name' => $feat['name'],
                 'key' => $feat['key'],
@@ -86,7 +94,7 @@ class FeatureToggleSeeder extends Seeder
                 'icon' => $feat['icon'],
                 'is_active' => true,
                 'is_locked' => false,
-                'parent_id' => $facilityModule->id,
+                'parent_id' => $maintenanceModule->id,
             ]);
         }
 

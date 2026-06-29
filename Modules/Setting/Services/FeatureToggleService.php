@@ -59,9 +59,6 @@ class FeatureToggleService
             foreach ($toggle->children as $child) {
                 Cache::forget(self::CACHE_KEY_PREFIX . $child->key);
             }
-            
-            // Sync laravel-modules json file
-            $this->syncModulesStatusesJson();
         }
 
         return true;
@@ -73,28 +70,39 @@ class FeatureToggleService
     public function getHierarchicalToggles(): array
     {
         $modules = FeatureToggle::with('children')->whereNull('parent_id')->orderBy('sort_order')->get();
-        return $modules->toArray();
-    }
-
-    /**
-     * Sync the module status to laravel-modules file.
-     */
-    private function syncModulesStatusesJson(): void
-    {
+        $togglesArray = $modules->toArray();
+        
         $path = base_path(self::MODULES_STATUSES_PATH);
-        if (!File::exists($path)) {
-            return;
+        $statuses = [];
+        if (File::exists($path)) {
+            $statuses = json_decode(File::get($path), true) ?? [];
         }
 
-        $statuses = json_decode(File::get($path), true) ?? [];
-        $modules = FeatureToggle::whereNull('parent_id')->get();
+        $mapLicensed = function(array &$item, bool $parentLicensed) use (&$mapLicensed, $statuses) {
+            if ($item['parent_id'] === null) {
+                // Modul utama: ambil dari JSON berdasarkan key ucfirst
+                $moduleName = ucfirst($item['key']);
+                if (isset($statuses[$moduleName])) {
+                    $item['is_licensed'] = (bool) $statuses[$moduleName];
+                } else {
+                    $item['is_licensed'] = true; // default true jika tidak ada di JSON (misal core module)
+                }
+            } else {
+                // Sub-fitur mewarisi lisensi parent
+                $item['is_licensed'] = $parentLicensed; 
+            }
 
-        foreach ($modules as $module) {
-            // Mapping from DB key (e.g. 'finance') to Module Name format (e.g. 'Finance')
-            $moduleName = ucfirst($module->key);
-            $statuses[$moduleName] = $module->is_active;
+            if (!empty($item['children'])) {
+                foreach ($item['children'] as &$child) {
+                    $mapLicensed($child, $item['is_licensed']);
+                }
+            }
+        };
+
+        foreach ($togglesArray as &$moduleItem) {
+            $mapLicensed($moduleItem, true);
         }
 
-        File::put($path, json_encode($statuses, JSON_PRETTY_PRINT));
+        return $togglesArray;
     }
 }

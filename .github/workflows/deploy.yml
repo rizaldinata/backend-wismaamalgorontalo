@@ -87,6 +87,23 @@ jobs:
             echo "MIDTRANS_ENABLED_PAYMENTS=qris,gopay,shopeepay,bca_va,bni_va,bri_va,echannel,permata_va,other_va,indomaret,alfamart,credit_card,akulaku,kredivo" >> .env
             echo "FONNTE_TOKEN=${{ secrets.FONNTE_TOKEN }}" >> .env
             
+            # Create default modules_statuses.json if it doesn't exist
+            if [ ! -f modules_statuses.json ]; then
+              echo '{
+                "Finance": true,
+                "Guest": true,
+                "Maintenance": true,
+                "Notification": true,
+                "Room": true,
+                "Setting": true,
+                "Auth": true,
+                "Inventory": true,
+                "Schedule": true,
+                "Facility_management": true,
+                "Dashboard": true
+              }' > modules_statuses.json
+            fi
+            
             # Login to GHCR (Server needs to be authenticated to pull)
             echo "${{ secrets.PAT_FOR_DISPATCH }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             
