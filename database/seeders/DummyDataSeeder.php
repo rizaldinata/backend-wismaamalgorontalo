@@ -392,35 +392,6 @@ class DummyDataSeeder extends Seeder
             'activated_at' => now()->subMonth(),
         ]);
 
-        // Pending schedules
-        $schedule5 = Schedule::create([
-            'room_id' => $rooms[6]->id,
-            'type' => 'sewa',
-            'status' => 'pending',
-            'start_date' => now()->addDays(7)->toDateString(),
-            'end_date' => now()->addDays(7)->addYear()->toDateString(),
-            'tenant_user_id' => $users[5]->id,
-            'tenant_name' => $users[5]->name,
-            'tenant_phone' => $residentsData[5]['phone_number'],
-            'tenant_id_number' => $residentsData[5]['id_card_number'],
-            'agreed_price' => 750000,
-            'created_by' => 1,
-        ]);
-
-        $schedule6 = Schedule::create([
-            'room_id' => $rooms[10]->id,
-            'type' => 'sewa',
-            'status' => 'pending',
-            'start_date' => now()->addDays(5)->toDateString(),
-            'end_date' => now()->addDays(5)->addYear()->toDateString(),
-            'tenant_user_id' => $users[6]->id,
-            'tenant_name' => $users[6]->name,
-            'tenant_phone' => $residentsData[6]['phone_number'],
-            'tenant_id_number' => $residentsData[6]['id_card_number'],
-            'agreed_price' => 1200000,
-            'created_by' => 1,
-        ]);
-
         // Finished schedule
         $schedule7 = Schedule::create([
             'room_id' => $rooms[1]->id,

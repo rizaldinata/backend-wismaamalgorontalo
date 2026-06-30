@@ -2,6 +2,11 @@
 
 set -e
 
+# Jika ada argument (misal: php artisan queue:work), jalankan langsung tanpa migrasi
+if [ $# -gt 0 ]; then
+    exec "$@"
+fi
+
 echo "Running migrations..."
 for i in {1..15}; do
     if php artisan migrate --force; then

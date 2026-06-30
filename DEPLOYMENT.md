@@ -87,7 +87,9 @@ php artisan schedule:list
 | Command | Jadwal | Ditambahkan | Fungsi |
 |---|---|---|---|
 | `schedule:expire-pending` | Setiap menit | 2026-06-14 | Batalkan jadwal sewa PENDING yang melebihi 15 menit tanpa ada pembayaran. Membebaskan kamar yang dibooking tapi tidak dilanjutkan bayar. |
+| `finance:expire-manual-invoices` | Setiap menit | 2026-06-30 | Batalkan invoice perpanjangan sewa manual yang sudah melewati `payment_expires_at` dan belum ada pembayaran aktif (pending/verified). |
 | `notification:lease-reminders` | Setiap hari jam 08:00 | — | Kirim pengingat WhatsApp ke penghuni yang kontrak sewanya hampir habis. |
+| `finance:generate-fixed-expenses` | Tiap tgl 1 jam 00:05 | — | Generate tagihan pengeluaran tetap (utilitas dll.) secara otomatis setiap awal bulan. |
 
 ---
 

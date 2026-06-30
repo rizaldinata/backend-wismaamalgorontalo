@@ -48,3 +48,4 @@ RUN chmod +x /usr/local/bin/start-container
 EXPOSE 9000
 
 ENTRYPOINT ["start-container"]
+CMD []
