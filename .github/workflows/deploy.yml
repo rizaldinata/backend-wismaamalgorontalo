@@ -99,7 +99,6 @@ jobs:
                 "Auth": true,
                 "Inventory": true,
                 "Schedule": true,
-                "Facility_management": true,
                 "Dashboard": true
               }' > modules_statuses.json
             fi
