@@ -57,6 +57,11 @@ class DamageReportService
         return $this->requestRepository->getAll();
     }
 
+    public function getPaginatedReports(int $perPage = 10)
+    {
+        return $this->requestRepository->getPaginated($perPage);
+    }
+
     public function getReportById(int $id)
     {
         return $this->requestRepository->findById($id);

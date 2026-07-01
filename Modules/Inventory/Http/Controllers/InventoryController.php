@@ -28,9 +28,11 @@ class InventoryController extends Controller
      */
     public function index()
     {
-        $inventories = $this->inventoryRepository->getAll();
+        $perPage = request()->get('per_page', 10);
+        $inventories = $this->inventoryRepository->getPaginated($perPage);
+        $resource = InventoryResource::collection($inventories)->response()->getData(true);
 
-        return $this->apiSuccess(InventoryResource::collection($inventories), 'Data inventory berhasil diambil');
+        return $this->apiSuccess($resource['data'], 'Data inventory berhasil diambil', 200, $resource['meta']);
     }
 
     /**

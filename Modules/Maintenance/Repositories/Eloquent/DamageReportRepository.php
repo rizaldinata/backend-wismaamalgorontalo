@@ -43,6 +43,13 @@ class DamageReportRepository implements DamageReportRepositoryInterface
             ->get();
     }
 
+    public function getPaginated(int $perPage = 10)
+    {
+        return MaintenanceRequest::with(['room', 'images', 'updates.user', 'updates.images'])
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+    }
+
     public function findById(int $id): ?MaintenanceRequest
     {
         return MaintenanceRequest::with(['room', 'images', 'updates.user', 'updates.images'])

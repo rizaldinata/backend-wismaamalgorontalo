@@ -3,6 +3,7 @@
 namespace Modules\Maintenance\Repositories\Eloquent;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Modules\Maintenance\Models\MaintenanceSchedule;
 use Modules\Maintenance\Models\MaintenanceScheduleUpdate;
 use Modules\Maintenance\Repositories\Contracts\ScheduleRepositoryInterface;
@@ -12,6 +13,11 @@ class ScheduleRepository implements ScheduleRepositoryInterface
     public function getAll(): Collection
     {
         return MaintenanceSchedule::latest('start_time')->get();
+    }
+
+    public function getPaginated(int $perPage = 10): LengthAwarePaginator
+    {
+        return MaintenanceSchedule::latest('start_time')->paginate($perPage);
     }
 
     public function findById(int $id): ?MaintenanceSchedule

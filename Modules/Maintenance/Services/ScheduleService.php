@@ -17,6 +17,11 @@ class ScheduleService
         return $this->scheduleRepository->getAll();
     }
 
+    public function getPaginated(int $perPage = 10): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        return $this->scheduleRepository->getPaginated($perPage);
+    }
+
     public function findById(int $id): MaintenanceSchedule
     {
         $schedule = $this->scheduleRepository->findById($id);

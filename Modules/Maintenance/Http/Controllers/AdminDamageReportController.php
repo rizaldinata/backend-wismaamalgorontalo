@@ -20,9 +20,11 @@ class AdminDamageReportController extends Controller
 
     public function index()
     {
-        $reports = $this->maintenanceService->getAllReports();
+        $perPage = request()->get('per_page', 10);
+        $reports = $this->maintenanceService->getPaginatedReports($perPage);
+        $resource = MaintenanceRequestResource::collection($reports)->response()->getData(true);
 
-        return $this->apiSuccess(MaintenanceRequestResource::collection($reports), 'Berhasil mengambil daftar keluhan.');
+        return $this->apiSuccess($resource['data'], 'Berhasil mengambil daftar keluhan.', 200, $resource['meta']);
     }
 
     public function show($id)

@@ -3,12 +3,15 @@
 namespace Modules\Maintenance\Repositories\Contracts;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Modules\Maintenance\Models\MaintenanceSchedule;
 use Modules\Maintenance\Models\MaintenanceScheduleUpdate;
 
 interface ScheduleRepositoryInterface
 {
     public function getAll(): Collection;
+
+    public function getPaginated(int $perPage = 10): LengthAwarePaginator;
 
     public function findById(int $id): ?MaintenanceSchedule;
 

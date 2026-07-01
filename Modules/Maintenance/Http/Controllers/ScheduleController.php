@@ -28,9 +28,11 @@ class ScheduleController extends Controller
      */
     public function index()
     {
-        $schedules = $this->scheduleService->getAll();
+        $perPage = request()->get('per_page', 10);
+        $schedules = $this->scheduleService->getPaginated($perPage);
+        $resource = ScheduleResource::collection($schedules)->response()->getData(true);
 
-        return $this->apiSuccess(ScheduleResource::collection($schedules), 'Daftar jadwal berhasil diambil.');
+        return $this->apiSuccess($resource['data'], 'Daftar jadwal berhasil diambil.', 200, $resource['meta']);
     }
 
     /**

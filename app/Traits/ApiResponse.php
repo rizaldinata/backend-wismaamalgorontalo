@@ -6,13 +6,19 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 trait ApiResponse
 {
-    protected function apiSuccess($data = null, string $message = 'Success', int $code = 200): JsonResponse
+    protected function apiSuccess($data = null, string $message = 'Success', int $code = 200, $meta = null): JsonResponse
     {
-        return response()->json([
+        $response = [
             'status' => true,
             'message' => $message,
             'data' => $data,
-        ], $code);
+        ];
+
+        if ($meta) {
+            $response['meta'] = $meta;
+        }
+
+        return response()->json($response, $code);
     }
 
     protected function apiError(string $message, int $code = 400, $errors = null): JsonResponse

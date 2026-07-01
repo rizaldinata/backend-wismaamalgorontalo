@@ -13,6 +13,11 @@ class InventoryRepository implements InventoryRepositoryInterface
         return Inventory::latest()->get();
     }
 
+    public function getPaginated(int $perPage = 10)
+    {
+        return Inventory::latest()->paginate($perPage);
+    }
+
     public function findById(int $id): ?Inventory
     {
         return Inventory::findOrFail($id);
