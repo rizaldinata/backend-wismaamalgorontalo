@@ -43,7 +43,7 @@ services:
       - mysql
     volumes:
       - wismaamal_storage:/var/www/storage
-      - ./modules_statuses.json:/var/www/html/modules_statuses.json
+      - ./modules_statuses.json:/var/www/modules_statuses.json
     networks:
       - wismaamal_network
 
