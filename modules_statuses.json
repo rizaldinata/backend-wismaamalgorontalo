@@ -1,15 +1,12 @@
 {
     "Room": true,
-    "Resident": true,
     "Finance": true,
     "Maintenance": true,
     "Auth": true,
     "Inventory": true,
     "Setting": true,
-    "Rental": true,
     "Notification": true,
     "Guest": true,
     "Schedule": true,
-    "Facility_management": true,
     "Dashboard": true
 }
