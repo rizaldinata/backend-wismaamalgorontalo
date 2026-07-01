@@ -17,6 +17,7 @@ class MaintenanceRequest extends Model
         'reporter_name',
         'reporter_phone',
         'room_id',
+        'location',
         'title',
         'description',
         'status',

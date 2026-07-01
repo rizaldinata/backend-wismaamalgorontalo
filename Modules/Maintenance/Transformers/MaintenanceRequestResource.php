@@ -19,6 +19,7 @@ class MaintenanceRequestResource extends JsonResource
                 'id' => $this->room->id,
                 'number' => $this->room->number,
             ] : null,
+            'location' => $this->location,
             'title' => $this->title,
             'description' => $this->description,
             'status' => $this->status ? $this->status->value : null,
