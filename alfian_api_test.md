@@ -9,12 +9,12 @@ Dokumen ini merangkum skenario dan hasil pengujian otomatis (*Automated Testing*
 Skenario pengujian ini memastikan bahwa endpoint API untuk pengiriman, pembacaan, dan pembaharuan laporan kerusakan berfungsi sesuai dengan batasan *permission* (hak akses) masing-masing *role*.
 
 ### 1.1. Pengujian *Controller / Endpoint API* (`DamageReportControllerTest`)
-| No | Skenario Pengujian (Test Case) | Ekspektasi Hasil (Expected Result) | Status |
-|----|--------------------------------|------------------------------------|--------|
-| 1 | `[BERHASIL] resident dapat mengirim laporan kerusakan baru` | API mengembalikan status `201 Created` dan data laporan baru tersimpan di *database*. | ✅ PASS |
-| 2 | `[BERHASIL] resident dapat melihat daftar laporan miliknya` | API mengembalikan data list laporan yang direquest khusus oleh *resident* yang sedang _login_. | ✅ PASS |
-| 3 | `[BERHASIL] admin dapat mengupdate status laporan` | Laporan berhasil diperbarui statusnya dan mencatat *log* pembaruan (misal: dari "pending" ke "in_progress"). | ✅ PASS |
-| 4 | `[GAGAL] request ditolak jika resident tidak memiliki permission` | Sistem menolak akses dari pengguna (contoh: resident mencoba *update* status milik admin) dengan respons `403 Forbidden`. | ✅ PASS |
+| No | Endpoint yang Diuji | Skenario Pengujian (Test Case) | Ekspektasi Hasil (Expected Result) | Status |
+|----|---------------------|--------------------------------|------------------------------------|--------|
+| 1 | `POST /api/v1/damage-reports` | `[BERHASIL] resident dapat mengirim laporan kerusakan baru` | API mengembalikan status `201 Created` dan data laporan baru tersimpan di *database*. | ✅ PASS |
+| 2 | `GET /api/v1/damage-reports/my-reports` | `[BERHASIL] resident dapat melihat daftar laporan miliknya` | API mengembalikan data list laporan yang direquest khusus oleh *resident* yang sedang _login_. | ✅ PASS |
+| 3 | `POST /api/v1/damage-reports/admin/{id}/updates` | `[BERHASIL] admin dapat mengupdate status laporan` | Laporan berhasil diperbarui statusnya dan mencatat *log* pembaruan (misal: dari "pending" ke "in_progress"). | ✅ PASS |
+| 4 | `POST /api/v1/damage-reports` | `[GAGAL] request ditolak jika resident tidak memiliki permission` | Sistem menolak akses dari pengguna (contoh: resident mencoba *update* status milik admin) dengan respons `403 Forbidden`. | ✅ PASS |
 
 ### 1.2. Pengujian *Service Logic* (`DamageReportServiceTest`)
 | No | Skenario Pengujian (Test Case) | Ekspektasi Hasil (Expected Result) | Status |
@@ -29,14 +29,14 @@ Skenario pengujian ini memastikan bahwa endpoint API untuk pengiriman, pembacaan
 Skenario pengujian ini menguji endpoint operasional *Super-Admin/Admin* untuk melakukan penjadwalan pemeliharaan rutin pada aset atau fasilitas.
 
 ### 2.1. Pengujian *Controller / Endpoint API* (`ScheduleControllerTest`)
-| No | Skenario Pengujian (Test Case) | Ekspektasi Hasil (Expected Result) | Status |
-|----|--------------------------------|------------------------------------|--------|
-| 1 | `[BERHASIL] admin dapat membuat jadwal pemeliharaan` | API mengembalikan `201 Created` dan jadwal baru terbentuk di *database*. | ✅ PASS |
-| 2 | `[BERHASIL] admin dapat menambahkan update pada jadwal` | *Admin* dapat menyisipkan progres/catatan ke sebuah jadwal pemeliharaan yang ada. | ✅ PASS |
-| 3 | `[GAGAL] request membuat jadwal ditolak jika tidak memiliki permission` | Upaya tanpa *permission* memadai (misal dari *Resident* atau akun biasa) ditolak dengan respons HTTP `403 Forbidden`. | ✅ PASS |
-| 4 | `[BERHASIL] admin dapat melihat daftar jadwal pemeliharaan` | Sistem memvalidasi bahwa daftar pengembalian API memuat koleksi *schedule* dengan format *pagination* yang benar. | ✅ PASS |
-| 5 | `[BERHASIL] admin dapat mengubah jadwal pemeliharaan` | Perubahan data (tanggal, deskripsi) berhasil di-*commit* ke tabel jadwal pemeliharaan. | ✅ PASS |
-| 6 | `[BERHASIL] admin dapat menghapus jadwal pemeliharaan` | Jadwal beserta catatan progres (*updates*) terkait terhapus atau tertandai *soft-delete*. | ✅ PASS |
+| No | Endpoint yang Diuji | Skenario Pengujian (Test Case) | Ekspektasi Hasil (Expected Result) | Status |
+|----|---------------------|--------------------------------|------------------------------------|--------|
+| 1 | `POST /api/v1/schedules` | `[BERHASIL] admin dapat membuat jadwal pemeliharaan` | API mengembalikan `201 Created` dan jadwal baru terbentuk di *database*. | ✅ PASS |
+| 2 | `POST /api/v1/schedules/{id}/updates` | `[BERHASIL] admin dapat menambahkan update pada jadwal` | *Admin* dapat menyisipkan progres/catatan ke sebuah jadwal pemeliharaan yang ada. | ✅ PASS |
+| 3 | `POST /api/v1/schedules` | `[GAGAL] request membuat jadwal ditolak jika tidak memiliki permission` | Upaya tanpa *permission* memadai (misal dari *Resident* atau akun biasa) ditolak dengan respons HTTP `403 Forbidden`. | ✅ PASS |
+| 4 | `GET /api/v1/schedules` | `[BERHASIL] admin dapat melihat daftar jadwal pemeliharaan` | Sistem memvalidasi bahwa daftar pengembalian API memuat koleksi *schedule* dengan format *pagination* yang benar. | ✅ PASS |
+| 5 | `PUT /api/v1/schedules/{id}` | `[BERHASIL] admin dapat mengubah jadwal pemeliharaan` | Perubahan data (tanggal, deskripsi) berhasil di-*commit* ke tabel jadwal pemeliharaan. | ✅ PASS |
+| 6 | `DELETE /api/v1/schedules/{id}` | `[BERHASIL] admin dapat menghapus jadwal pemeliharaan` | Jadwal beserta catatan progres (*updates*) terkait terhapus atau tertandai *soft-delete*. | ✅ PASS |
 
 ### 2.2. Pengujian *Service Logic* (`ScheduleServiceTest`)
 | No | Skenario Pengujian (Test Case) | Ekspektasi Hasil (Expected Result) | Status |
@@ -51,13 +51,13 @@ Skenario pengujian ini menguji endpoint operasional *Super-Admin/Admin* untuk me
 Skenario pengujian modul ini memeriksa kapabilitas CRUD inventaris dan memastikan bahwa fitur Inventaris tetap terisolasi/bekerja (*loose coupling*) meskipun modul Keuangan (Finance) tidak aktif.
 
 ### 3.1. Pengujian *Controller / Endpoint API* (`InventoryControllerTest`)
-| No | Skenario Pengujian (Test Case) | Ekspektasi Hasil (Expected Result) | Status |
-|----|--------------------------------|------------------------------------|--------|
-| 1 | `[BERHASIL] admin dapat melihat daftar inventaris` | Mengembalikan seluruh *list* koleksi inventaris kamar & fasilitas. | ✅ PASS |
-| 2 | `[BERHASIL] admin dapat menambah inventaris baru` | *Payload* barang ter-*submit* sempurna dan tersimpan ke dalam *database*. | ✅ PASS |
-| 3 | `[BERHASIL] admin dapat mengubah data inventaris` | Mengizinkan perbaikan kondisi (bagus, rusak, dll) atau pembaruan nama aset. | ✅ PASS |
-| 4 | `[BERHASIL] admin dapat menghapus data inventaris` | Data berhasil di-*delete* (berserta rujukan *cascade* jika ada). | ✅ PASS |
-| 5 | `[GAGAL] request ditolak jika tidak ada permission view-inventory` | Akses langsung di-blokir pada level autentikasi/otorisasi *middleware* (403). | ✅ PASS |
+| No | Endpoint yang Diuji | Skenario Pengujian (Test Case) | Ekspektasi Hasil (Expected Result) | Status |
+|----|---------------------|--------------------------------|------------------------------------|--------|
+| 1 | `GET /api/inventory` | `[BERHASIL] admin dapat melihat daftar inventaris` | Mengembalikan seluruh *list* koleksi inventaris kamar & fasilitas. | ✅ PASS |
+| 2 | `POST /api/inventory` | `[BERHASIL] admin dapat menambah inventaris baru` | *Payload* barang ter-*submit* sempurna dan tersimpan ke dalam *database*. | ✅ PASS |
+| 3 | `PUT /api/inventory/{id}` | `[BERHASIL] admin dapat mengubah data inventaris` | Mengizinkan perbaikan kondisi (bagus, rusak, dll) atau pembaruan nama aset. | ✅ PASS |
+| 4 | `DELETE /api/inventory/{id}` | `[BERHASIL] admin dapat menghapus data inventaris` | Data berhasil di-*delete* (berserta rujukan *cascade* jika ada). | ✅ PASS |
+| 5 | `GET /api/inventory` | `[GAGAL] request ditolak jika tidak ada permission view-inventory` | Akses langsung di-blokir pada level autentikasi/otorisasi *middleware* (403). | ✅ PASS |
 
 ### 3.2. Pengujian *Service Logic & Isolasi* (`InventoryServiceTest` & `BuatChecklistInventarisSetelahSewaSelesaiTest`)
 | No | Skenario Pengujian (Test Case) | Ekspektasi Hasil (Expected Result) | Status |
