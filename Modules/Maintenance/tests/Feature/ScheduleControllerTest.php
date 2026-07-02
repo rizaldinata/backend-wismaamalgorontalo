@@ -95,3 +95,69 @@ test('[GAGAL] request membuat jadwal ditolak jika tidak memiliki permission', fu
 
     $response->assertStatus(403);
 });
+
+test('[BERHASIL] admin dapat melihat daftar jadwal pemeliharaan', function () {
+    $admin = User::factory()->create();
+    $admin->givePermissionTo('view-maintenance');
+    
+    MaintenanceSchedule::create([
+        'type' => ScheduleType::PERAWATAN->value,
+        'subtype' => 'perbaikan',
+        'technician_name' => 'John Doe',
+        'location' => 'Kamar 102',
+        'start_time' => now()->format('Y-m-d H:i:s'),
+        'status' => ScheduleStatus::IN_PROGRESS->value,
+        'created_by' => $admin->id
+    ]);
+
+    $response = $this->actingAs($admin)->getJson('/api/v1/schedules');
+
+    $response->assertStatus(200)
+             ->assertJsonFragment(['location' => 'Kamar 102']);
+});
+
+test('[BERHASIL] admin dapat mengubah jadwal pemeliharaan', function () {
+    $admin = User::factory()->create();
+    $admin->givePermissionTo('schedule-maintenance');
+    
+    $schedule = MaintenanceSchedule::create([
+        'type' => ScheduleType::PERAWATAN->value,
+        'subtype' => 'perbaikan',
+        'technician_name' => 'Old Tech',
+        'location' => 'Kamar 103',
+        'start_time' => now()->format('Y-m-d H:i:s'),
+        'status' => ScheduleStatus::IN_PROGRESS->value,
+        'created_by' => $admin->id
+    ]);
+
+    $response = $this->actingAs($admin)->putJson("/api/v1/schedules/{$schedule->id}", [
+        'technician_name' => 'New Tech',
+        'location' => 'Kamar 103A',
+        'type' => ScheduleType::PERAWATAN->value,
+    ]);
+
+    $response->assertStatus(200)
+             ->assertJsonFragment(['technician_name' => 'New Tech']);
+});
+
+test('[BERHASIL] admin dapat menghapus jadwal pemeliharaan', function () {
+    $admin = User::factory()->create();
+    $admin->givePermissionTo('schedule-maintenance');
+    
+    $schedule = MaintenanceSchedule::create([
+        'type' => ScheduleType::PERAWATAN->value,
+        'subtype' => 'perbaikan',
+        'technician_name' => 'Tech',
+        'location' => 'Kamar 104',
+        'start_time' => now()->format('Y-m-d H:i:s'),
+        'status' => ScheduleStatus::IN_PROGRESS->value,
+        'created_by' => $admin->id
+    ]);
+
+    $response = $this->actingAs($admin)->deleteJson("/api/v1/schedules/{$schedule->id}");
+
+    $response->assertStatus(200);
+    $this->assertDatabaseMissing('maintenance_schedules', [
+        'id' => $schedule->id,
+    ]);
+});

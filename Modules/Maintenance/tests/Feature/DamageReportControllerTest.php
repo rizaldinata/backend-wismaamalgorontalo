@@ -16,6 +16,7 @@ beforeEach(function () {
     Cache::flush();
     Permission::firstOrCreate(['name' => 'create-damage-report', 'guard_name' => 'api']);
     Permission::firstOrCreate(['name' => 'view-damage-report', 'guard_name' => 'api']);
+    Permission::firstOrCreate(['name' => 'view-my-damage-report', 'guard_name' => 'api']);
 
     $facilityParent = FeatureToggle::firstOrCreate(
         ['key' => 'facility_management'],
@@ -37,17 +38,44 @@ test('[BERHASIL] resident dapat mengirim laporan kerusakan baru', function () {
         'title' => 'Lampu Mati',
         'room_id' => $room->id,
         'description' => 'Lampu kamar mandi mati',
+        'location' => 'Kamar Mandi',
         'reporter_phone' => '08123456789'
     ]);
 
     $response->assertStatus(201)
-             ->assertJsonPath('data.description', 'Lampu kamar mandi mati');
+             ->assertJsonPath('data.description', 'Lampu kamar mandi mati')
+             ->assertJsonPath('data.location', 'Kamar Mandi');
 
     $this->assertDatabaseHas('maintenance_requests', [
         'room_id' => $room->id,
         'description' => 'Lampu kamar mandi mati',
+        'location' => 'Kamar Mandi',
         'reporter_user_id' => $resident->id
     ]);
+});
+
+test('[BERHASIL] resident dapat melihat daftar laporan miliknya', function () {
+    $resident = User::factory()->create();
+    $resident->givePermissionTo('view-my-damage-report');
+    
+    $room = Room::factory()->create();
+    
+    MaintenanceRequest::create([
+        'title' => 'Lampu Mati',
+        'room_id' => $room->id,
+        'reporter_user_id' => $resident->id,
+        'reporter_name' => 'Test Resident',
+        'description' => 'Lampu rusak',
+        'location' => 'Kamar Mandi',
+        'status' => MaintenanceStatus::PENDING->value,
+        'reported_at' => now()
+    ]);
+
+    $response = $this->actingAs($resident)->getJson('/api/v1/damage-reports/my-reports');
+
+    $response->assertStatus(200)
+             ->assertJsonFragment(['title' => 'Lampu Mati'])
+             ->assertJsonFragment(['location' => 'Kamar Mandi']);
 });
 
 test('[BERHASIL] admin dapat mengupdate status laporan', function () {
