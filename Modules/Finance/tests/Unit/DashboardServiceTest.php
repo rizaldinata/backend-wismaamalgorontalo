@@ -96,14 +96,14 @@ test('[BERHASIL] kpiSummary menghitung pending_verification_count dari payment p
 test('[BERHASIL] kpiSummary dapat difilter per bulan dan tahun tertentu', function () {
     // Invoice paid di bulan Januari 2026
     Invoice::factory()->create([
-        'status'     => InvoiceStatus::PAID,
-        'amount'     => 750000,
+        'status' => InvoiceStatus::PAID,
+        'amount' => 750000,
         'updated_at' => Carbon::create(2026, 1, 15),
     ]);
     // Invoice paid di bulan sekarang — tidak termasuk di filter Januari 2026
     Invoice::factory()->create([
-        'status'     => InvoiceStatus::PAID,
-        'amount'     => 999999,
+        'status' => InvoiceStatus::PAID,
+        'amount' => 999999,
         'updated_at' => now(),
     ]);
 
@@ -152,8 +152,8 @@ test('[BERHASIL] revenueChart setiap dataset memiliki 6 titik data', function ()
 test('[BERHASIL] revenueChart memuat nilai pendapatan invoice paid pada bulan yang benar', function () {
     // Buat invoice paid bulan ini
     Invoice::factory()->create([
-        'status'     => InvoiceStatus::PAID,
-        'amount'     => 1200000,
+        'status' => InvoiceStatus::PAID,
+        'amount' => 1200000,
         'updated_at' => now(),
     ]);
 
@@ -184,7 +184,7 @@ test('[BERHASIL] dueInvoices hanya mengembalikan invoice yang jatuh tempo dalam 
 
 test('[BERHASIL] dueInvoices maksimal mengembalikan 5 invoice', function () {
     Invoice::factory()->count(8)->create([
-        'status'   => InvoiceStatus::UNPAID,
+        'status' => InvoiceStatus::UNPAID,
         'due_date' => now()->addDays(2),
     ]);
 

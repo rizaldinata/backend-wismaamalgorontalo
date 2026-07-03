@@ -30,7 +30,7 @@ class GuestRepository implements GuestRepositoryInterface
         $perPage = (int) ($filters['per_page'] ?? 10);
         $search = $filters['search'] ?? null;
 
-        $query = Guest::with(['schedule.tenant', 'schedule.room', 'bill'])
+        $query = Guest::with(['bill'])
             ->orderByDesc('check_in_at');
 
         if ($search) {
@@ -61,6 +61,7 @@ class GuestRepository implements GuestRepositoryInterface
     public function update(Guest $guest, array $data): Guest
     {
         $guest->update($data);
+
         return $guest;
     }
 

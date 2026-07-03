@@ -2,7 +2,6 @@
 
 use App\Contracts\ConfigProviderInterface;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\Finance\Models\FixedExpenseEntry;
 use Modules\Finance\Repositories\Contracts\FixedExpenseEntryRepositoryInterface;
 use Modules\Finance\Services\ExpenseService;
 use Modules\Finance\Services\FixedExpenseService;
@@ -12,7 +11,7 @@ uses(TestCase::class, RefreshDatabase::class);
 
 function buatServiceDenganFitur(bool $aktif, array $jenisAktif = ['listrik', 'air', 'wifi']): FixedExpenseService
 {
-    $mockRepo    = \Mockery::mock(FixedExpenseEntryRepositoryInterface::class);
+    $mockRepo = \Mockery::mock(FixedExpenseEntryRepositoryInterface::class);
     $mockExpense = \Mockery::mock(ExpenseService::class);
     $mockSetting = \Mockery::mock(ConfigProviderInterface::class);
 
@@ -39,7 +38,7 @@ test('[BERHASIL] generateBulanIni memanggil repository dengan jenis aktif dan pe
     $bulan = (int) now()->format('n');
     $tahun = (int) now()->format('Y');
 
-    $mockRepo    = \Mockery::mock(FixedExpenseEntryRepositoryInterface::class);
+    $mockRepo = \Mockery::mock(FixedExpenseEntryRepositoryInterface::class);
     $mockExpense = \Mockery::mock(ExpenseService::class);
     $mockSetting = \Mockery::mock(ConfigProviderInterface::class);
 

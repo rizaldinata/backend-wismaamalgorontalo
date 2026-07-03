@@ -151,12 +151,13 @@ Copy `.env.example` to `.env` and set:
 
 ## Architectural Rules
 
-1. **No direct cross-module calls** — business modules must communicate only via Laravel Events, never by injecting another module's Service or Repository.
-2. **Additive DB changes** — add columns/tables first, migrate data, then drop old ones. Never destructive-first.
-3. **API shapes are stable** — response structure consumed by Flutter clients must not change without coordinating a frontend update.
-4. **Run tests after every change** — `php artisan test`.
-5. **Run deptrac after structural changes** — `./vendor/bin/deptrac analyse` to verify no layer violations were introduced.
-6. **One branch per feature/phase** — never mix unrelated changes in the same branch.
+1. **No direct cross-module calls for WRITE operations** — business modules must communicate only via Laravel Events, never by injecting another module's Service or Repository for creation, update, or deletion.
+2. **Direct Service Access for GET operations** — read-only (GET) aggregation across modules (e.g., Dashboard, Guest endpoints needing Finance data) may directly call static methods on other modules' Services (e.g., `ScheduleService::getActiveSewaCount()`). These calls MUST be wrapped in `ModuleGate::isActive('ModuleName')` to ensure toggle-safety without causing 500 errors when a module is disabled.
+3. **Additive DB changes** — add columns/tables first, migrate data, then drop old ones. Never destructive-first.
+4. **API shapes are stable** — response structure consumed by Flutter clients must not change without coordinating a frontend update.
+5. **Run tests after every change** — `php artisan test`.
+6. **Run deptrac after structural changes** — `./vendor/bin/deptrac analyse` to verify no layer violations were introduced.
+7. **One branch per feature/phase** — never mix unrelated changes in the same branch.
 
 ## Testing Rules
 

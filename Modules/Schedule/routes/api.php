@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Schedule\Http\Controllers\ScheduleController;
 use Modules\Schedule\Http\Controllers\AdminResidentController;
+use Modules\Schedule\Http\Controllers\ScheduleController;
 
 // Rute lainnya yang membutuhkan otentikasi
 Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {

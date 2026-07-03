@@ -2,12 +2,12 @@
 
 namespace Modules\Notification\Listeners;
 
+use App\Contracts\ConfigProviderInterface;
 use App\Events\Finance\PembayaranDibatalkan;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Modules\Notification\Enums\NotificationType;
 use Modules\Notification\Services\NotificationService;
-use App\Contracts\ConfigProviderInterface;
 
 class KirimNotifikasiPembayaranDibatalkan implements ShouldQueue
 {
@@ -29,17 +29,17 @@ class KirimNotifikasiPembayaranDibatalkan implements ShouldQueue
         }
 
         $amount = $event->amount !== null
-            ? 'Rp' . number_format($event->amount, 0, ',', '.')
+            ? 'Rp'.number_format($event->amount, 0, ',', '.')
             : '';
 
         $amountLine = $amount ? "sebesar *{$amount}* " : '';
 
         $message = "*PEMBAYARAN TIDAK BERHASIL*\n"
-            . "Wisma Amal Gorontalo\n\n"
-            . "Yth. Bpk/Ibu {$event->tenantName},\n\n"
-            . "Pembayaran {$amountLine}Anda tidak dapat diproses atau telah dibatalkan.\n\n"
-            . "Mohon hubungi admin atau lakukan pembayaran ulang melalui aplikasi.\n\n"
-            . "Hormat kami,\n*Manajemen Wisma Amal Gorontalo*";
+            ."Wisma Amal Gorontalo\n\n"
+            ."Yth. Bpk/Ibu {$event->tenantName},\n\n"
+            ."Pembayaran {$amountLine}Anda tidak dapat diproses atau telah dibatalkan.\n\n"
+            ."Mohon hubungi admin atau lakukan pembayaran ulang melalui aplikasi.\n\n"
+            ."Hormat kami,\n*Manajemen Wisma Amal Gorontalo*";
 
         $this->notificationService->sendNotification(
             NotificationType::PEMBAYARAN_DIBATALKAN,

@@ -15,8 +15,8 @@ test('[BERHASIL] createManualExpense selalu menyimpan reference_type sebagai nul
     $service = app(ExpenseService::class);
 
     $expense = $service->createManualExpense([
-        'title'        => 'Beli Sabun',
-        'amount'       => 25000,
+        'title' => 'Beli Sabun',
+        'amount' => 25000,
         'expense_date' => now()->toDateString(),
     ]);
 
@@ -28,7 +28,7 @@ test('[BERHASIL] createManualExpense mengisi expense_date dengan hari ini jika t
     $service = app(ExpenseService::class);
 
     $expense = $service->createManualExpense([
-        'title'  => 'Beli Galon Air',
+        'title' => 'Beli Galon Air',
         'amount' => 20000,
     ]);
 
@@ -41,14 +41,14 @@ test('[BERHASIL] createManualExpense mengisi expense_date dengan hari ini jika t
 
 test('[BERHASIL] updateManualExpense berhasil mengubah data pengeluaran manual', function () {
     $expense = Expense::factory()->create([
-        'title'          => 'Beli Kopi',
-        'amount'         => 15000,
+        'title' => 'Beli Kopi',
+        'amount' => 15000,
         'reference_type' => null,
     ]);
     $service = app(ExpenseService::class);
 
     $updated = $service->updateManualExpense($expense, [
-        'title'  => 'Beli Kopi & Teh',
+        'title' => 'Beli Kopi & Teh',
         'amount' => 30000,
     ]);
 
@@ -59,7 +59,7 @@ test('[BERHASIL] updateManualExpense berhasil mengubah data pengeluaran manual',
 test('[GAGAL] updateManualExpense menolak update pengeluaran yang terintegrasi dengan inventory', function () {
     $expense = Expense::factory()->create([
         'reference_type' => 'Modules\\Inventory\\Models\\Inventory',
-        'reference_id'   => 5,
+        'reference_id' => 5,
     ]);
     $service = app(ExpenseService::class);
 
@@ -73,14 +73,14 @@ test('[GAGAL] updateManualExpense menolak update pengeluaran yang terintegrasi d
 
 test('[BERHASIL] syncExpenseByReference memperbarui pengeluaran yang sudah ada jika amount valid', function () {
     $expense = Expense::factory()->create([
-        'reference_id'   => 10,
+        'reference_id' => 10,
         'reference_type' => 'Modules\\Inventory\\Models\\Inventory',
-        'amount'         => 100000,
+        'amount' => 100000,
     ]);
     $service = app(ExpenseService::class);
 
     $service->syncExpenseByReference(10, 'Modules\\Inventory\\Models\\Inventory', [
-        'title'  => 'Kursi Diperbarui',
+        'title' => 'Kursi Diperbarui',
         'amount' => 200000,
     ]);
 
@@ -89,14 +89,14 @@ test('[BERHASIL] syncExpenseByReference memperbarui pengeluaran yang sudah ada j
 
 test('[BERHASIL] syncExpenseByReference menghapus pengeluaran jika amount diperbarui menjadi nol', function () {
     $expense = Expense::factory()->create([
-        'reference_id'   => 11,
+        'reference_id' => 11,
         'reference_type' => 'Modules\\Inventory\\Models\\Inventory',
-        'amount'         => 150000,
+        'amount' => 150000,
     ]);
     $service = app(ExpenseService::class);
 
     $service->syncExpenseByReference(11, 'Modules\\Inventory\\Models\\Inventory', [
-        'title'  => 'Barang Gratis',
+        'title' => 'Barang Gratis',
         'amount' => 0,
     ]);
 
@@ -107,14 +107,14 @@ test('[BERHASIL] syncExpenseByReference membuat pengeluaran baru jika belum ada 
     $service = app(ExpenseService::class);
 
     $service->syncExpenseByReference(99, 'Modules\\Inventory\\Models\\Inventory', [
-        'title'  => 'Lemari Baru',
+        'title' => 'Lemari Baru',
         'amount' => 500000,
     ]);
 
     $this->assertDatabaseHas('expenses', [
-        'reference_id'   => 99,
+        'reference_id' => 99,
         'reference_type' => 'Modules\\Inventory\\Models\\Inventory',
-        'amount'         => 500000,
+        'amount' => 500000,
     ]);
 });
 
@@ -122,7 +122,7 @@ test('[BERHASIL] syncExpenseByReference mengabaikan jika belum ada dan amount no
     $service = app(ExpenseService::class);
 
     $result = $service->syncExpenseByReference(88, 'Modules\\Inventory\\Models\\Inventory', [
-        'title'  => 'Barang Gratis',
+        'title' => 'Barang Gratis',
         'amount' => 0,
     ]);
 
@@ -136,7 +136,7 @@ test('[BERHASIL] syncExpenseByReference mengabaikan jika belum ada dan amount no
 
 test('[BERHASIL] removeExpenseByReference menghapus pengeluaran berdasarkan referensi', function () {
     $expense = Expense::factory()->create([
-        'reference_id'   => 20,
+        'reference_id' => 20,
         'reference_type' => 'Modules\\Inventory\\Models\\Inventory',
     ]);
     $service = app(ExpenseService::class);

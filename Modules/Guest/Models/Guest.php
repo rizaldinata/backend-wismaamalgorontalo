@@ -44,8 +44,5 @@ class Guest extends Model
         return $this->hasMany(GuestBill::class);
     }
 
-    public function schedule()
-    {
-        return $this->belongsTo(\Modules\Schedule\Models\Schedule::class, 'schedule_reference_id');
-    }
+    // Removed cross-module eloquent relationship (schedule)
 }

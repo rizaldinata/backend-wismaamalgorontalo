@@ -29,12 +29,12 @@ class FeatureToggleController extends Controller
         ]);
 
         $success = $this->featureToggleService->updateStatus(
-            $key, 
-            $request->is_active, 
+            $key,
+            $request->is_active,
             $request->user() ? $request->user()->id : null
         );
 
-        if (!$success) {
+        if (! $success) {
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal mengubah status fitur. Fitur tidak ditemukan atau terkunci.',

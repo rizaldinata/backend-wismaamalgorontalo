@@ -36,7 +36,7 @@ test('[BERHASIL] response berisi 11 metode sesuai katalog', function () {
 
 test('[BERHASIL] metode yang disimpan di DB ditampilkan sebagai enabled true', function () {
     AppSetting::create([
-        'key'   => 'midtrans_enabled_payment_methods',
+        'key' => 'midtrans_enabled_payment_methods',
         'value' => '["qris","gopay","bca_va"]',
     ]);
 
@@ -44,10 +44,10 @@ test('[BERHASIL] metode yang disimpan di DB ditampilkan sebagai enabled true', f
 
     $response->assertOk();
 
-    $data    = collect($response->json('data'));
-    $qris    = $data->firstWhere('code', 'qris');
-    $gopay   = $data->firstWhere('code', 'gopay');
-    $bcaVa   = $data->firstWhere('code', 'bca_va');
+    $data = collect($response->json('data'));
+    $qris = $data->firstWhere('code', 'qris');
+    $gopay = $data->firstWhere('code', 'gopay');
+    $bcaVa = $data->firstWhere('code', 'bca_va');
     $shopeePay = $data->firstWhere('code', 'shopeepay');
 
     expect($qris['enabled'])->toBeTrue();
@@ -99,7 +99,7 @@ test('[GAGAL] ditolak jika enabled_methods dikirim sebagai array kosong', functi
 
 test('[BERHASIL] update menimpa konfigurasi sebelumnya', function () {
     AppSetting::create([
-        'key'   => 'midtrans_enabled_payment_methods',
+        'key' => 'midtrans_enabled_payment_methods',
         'value' => '["qris","gopay"]',
     ]);
 

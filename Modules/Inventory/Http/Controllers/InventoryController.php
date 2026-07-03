@@ -24,6 +24,7 @@ class InventoryController extends Controller
      * Daftar Inventaris
      *
      * Melihat semua daftar barang inventaris (Hanya Admin).
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function index()
@@ -39,6 +40,7 @@ class InventoryController extends Controller
      * Tambah Inventaris
      *
      * Mendaftarkan barang inventaris baru. (Hanya Admin).
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreInventoryRequest $request)
@@ -56,6 +58,7 @@ class InventoryController extends Controller
      * Detail Inventaris
      *
      * Melihat detail spesifik suatu barang inventaris. (Hanya Admin).
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(int $id)
@@ -73,6 +76,7 @@ class InventoryController extends Controller
      * Update Inventaris
      *
      * Mengubah data barang inventaris. (Hanya Admin).
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateInventoryRequest $request, int $id)
@@ -95,6 +99,7 @@ class InventoryController extends Controller
      * Hapus Inventaris
      *
      * Menghapus barang inventaris. (Hanya Admin).
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(int $id)

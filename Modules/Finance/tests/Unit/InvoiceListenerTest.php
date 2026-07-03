@@ -11,6 +11,7 @@ use Tests\TestCase;
 class InvoiceListenerTest extends TestCase
 {
     private InvoiceRepositoryInterface $invoiceRepository;
+
     private BuatInvoiceSetelahJadwalDibuat $listener;
 
     protected function setUp(): void
@@ -28,16 +29,16 @@ class InvoiceListenerTest extends TestCase
             : $default;
 
         return new JadwalDibuat(
-            scheduleId:   $get('scheduleId',   1),
-            roomId:       $get('roomId',        10),
-            roomNumber:   $get('roomNumber',    'A-01'),
-            tipeJadwal:   $get('tipeJadwal',   'sewa'),
-            startDate:    $get('startDate',    '2026-06-01'),
-            endDate:      $get('endDate',      '2026-07-01'),
-            tenantName:   $get('tenantName',   'Budi Santoso'),
-            tenantPhone:  $get('tenantPhone',  '081234567890'),
-            agreedPrice:  $get('agreedPrice',  500000.0),
-            source:       $get('source',       'schedule'),
+            scheduleId: $get('scheduleId', 1),
+            roomId: $get('roomId', 10),
+            roomNumber: $get('roomNumber', 'A-01'),
+            tipeJadwal: $get('tipeJadwal', 'sewa'),
+            startDate: $get('startDate', '2026-06-01'),
+            endDate: $get('endDate', '2026-07-01'),
+            tenantName: $get('tenantName', 'Budi Santoso'),
+            tenantPhone: $get('tenantPhone', '081234567890'),
+            agreedPrice: $get('agreedPrice', 500000.0),
+            source: $get('source', 'schedule'),
             tenantUserId: $get('tenantUserId', 5),
         );
     }
@@ -116,9 +117,9 @@ class InvoiceListenerTest extends TestCase
     public function test_data_snapshot_penghuni_tersimpan_di_invoice(): void
     {
         $event = $this->buatEventSewa([
-            'tenantName'   => 'Andi Wijaya',
-            'tenantPhone'  => '082200001111',
-            'roomNumber'   => 'B-05',
+            'tenantName' => 'Andi Wijaya',
+            'tenantPhone' => '082200001111',
+            'roomNumber' => 'B-05',
             'tenantUserId' => 9,
         ]);
 
@@ -126,9 +127,9 @@ class InvoiceListenerTest extends TestCase
             ->expects($this->once())
             ->method('create')
             ->with($this->callback(function ($data) {
-                return $data['tenant_name']    === 'Andi Wijaya'
-                    && $data['tenant_phone']   === '082200001111'
-                    && $data['room_number']    === 'B-05'
+                return $data['tenant_name'] === 'Andi Wijaya'
+                    && $data['tenant_phone'] === '082200001111'
+                    && $data['room_number'] === 'B-05'
                     && $data['tenant_user_id'] === 9;
             }));
 

@@ -20,10 +20,10 @@ class RoomImagePlaceholderSeeder extends Seeder
         $rooms = \Modules\Room\Models\Room::with('images')->get();
 
         // Get all dummy images
-        $dummyImagesPath = __DIR__ . '/dummy_images';
+        $dummyImagesPath = __DIR__.'/dummy_images';
         $dummyImages = [];
         if (is_dir($dummyImagesPath)) {
-            $dummyImages = glob($dummyImagesPath . '/*.*');
+            $dummyImages = glob($dummyImagesPath.'/*.*');
         }
 
         foreach ($rooms as $room) {

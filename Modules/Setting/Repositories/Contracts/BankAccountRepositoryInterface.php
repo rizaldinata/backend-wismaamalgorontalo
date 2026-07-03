@@ -2,8 +2,8 @@
 
 namespace Modules\Setting\Repositories\Contracts;
 
-use Modules\Setting\Models\BankAccount;
 use Illuminate\Database\Eloquent\Collection;
+use Modules\Setting\Models\BankAccount;
 
 interface BankAccountRepositoryInterface
 {

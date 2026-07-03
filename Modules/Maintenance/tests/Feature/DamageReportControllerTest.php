@@ -31,7 +31,7 @@ beforeEach(function () {
 test('[BERHASIL] resident dapat mengirim laporan kerusakan baru', function () {
     $resident = User::factory()->create();
     $resident->givePermissionTo('create-damage-report');
-    
+
     $room = Room::factory()->create();
 
     $response = $this->actingAs($resident)->postJson('/api/v1/damage-reports', [
@@ -39,27 +39,27 @@ test('[BERHASIL] resident dapat mengirim laporan kerusakan baru', function () {
         'room_id' => $room->id,
         'description' => 'Lampu kamar mandi mati',
         'location' => 'Kamar Mandi',
-        'reporter_phone' => '08123456789'
+        'reporter_phone' => '08123456789',
     ]);
 
     $response->assertStatus(201)
-             ->assertJsonPath('data.description', 'Lampu kamar mandi mati')
-             ->assertJsonPath('data.location', 'Kamar Mandi');
+        ->assertJsonPath('data.description', 'Lampu kamar mandi mati')
+        ->assertJsonPath('data.location', 'Kamar Mandi');
 
     $this->assertDatabaseHas('maintenance_requests', [
         'room_id' => $room->id,
         'description' => 'Lampu kamar mandi mati',
         'location' => 'Kamar Mandi',
-        'reporter_user_id' => $resident->id
+        'reporter_user_id' => $resident->id,
     ]);
 });
 
 test('[BERHASIL] resident dapat melihat daftar laporan miliknya', function () {
     $resident = User::factory()->create();
     $resident->givePermissionTo('view-my-damage-report');
-    
+
     $room = Room::factory()->create();
-    
+
     MaintenanceRequest::create([
         'title' => 'Lampu Mati',
         'room_id' => $room->id,
@@ -68,22 +68,22 @@ test('[BERHASIL] resident dapat melihat daftar laporan miliknya', function () {
         'description' => 'Lampu rusak',
         'location' => 'Kamar Mandi',
         'status' => MaintenanceStatus::PENDING->value,
-        'reported_at' => now()
+        'reported_at' => now(),
     ]);
 
     $response = $this->actingAs($resident)->getJson('/api/v1/damage-reports/my-reports');
 
     $response->assertStatus(200)
-             ->assertJsonFragment(['title' => 'Lampu Mati'])
-             ->assertJsonFragment(['location' => 'Kamar Mandi']);
+        ->assertJsonFragment(['title' => 'Lampu Mati'])
+        ->assertJsonFragment(['location' => 'Kamar Mandi']);
 });
 
 test('[BERHASIL] admin dapat mengupdate status laporan', function () {
     $admin = User::factory()->create();
     $admin->givePermissionTo('view-damage-report');
-    
+
     $room = Room::factory()->create();
-    
+
     $report = MaintenanceRequest::create([
         'title' => 'Lampu Mati',
         'room_id' => $room->id,
@@ -91,31 +91,31 @@ test('[BERHASIL] admin dapat mengupdate status laporan', function () {
         'reporter_name' => 'Test User',
         'description' => 'Lampu rusak',
         'status' => MaintenanceStatus::PENDING->value,
-        'reported_at' => now()
+        'reported_at' => now(),
     ]);
 
     $response = $this->actingAs($admin)->postJson("/api/v1/damage-reports/admin/{$report->id}/updates", [
         'description' => 'Lampu sudah diganti',
-        'status' => MaintenanceStatus::COMPLETED->value
+        'status' => MaintenanceStatus::COMPLETED->value,
     ]);
 
     $response->assertStatus(201);
-    
+
     $this->assertDatabaseHas('maintenance_requests', [
         'id' => $report->id,
-        'status' => MaintenanceStatus::COMPLETED->value
+        'status' => MaintenanceStatus::COMPLETED->value,
     ]);
-    
+
     $this->assertDatabaseHas('maintenance_request_updates', [
         'maintenance_request_id' => $report->id,
-        'description' => 'Lampu sudah diganti'
+        'description' => 'Lampu sudah diganti',
     ]);
 });
 
 test('[GAGAL] request ditolak jika resident tidak memiliki permission', function () {
     $resident = User::factory()->create();
     // No permission given
-    
+
     $room = Room::factory()->create();
 
     $response = $this->actingAs($resident)->postJson('/api/v1/damage-reports', [

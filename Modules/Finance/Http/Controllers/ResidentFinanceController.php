@@ -42,6 +42,7 @@ class ResidentFinanceController extends Controller
      * Ringkasan Keuangan Penghuni
      *
      * Menampilkan ringkasan tagihan belum bayar (unpaid) dan informasi sewa aktif pengguna saat ini.
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function summary()
@@ -71,17 +72,17 @@ class ResidentFinanceController extends Controller
             ->get();
 
         $activeLeases = $activeTenants->map(fn ($t) => [
-            'id'          => $t->schedule_id,
+            'id' => $t->schedule_id,
             'room_number' => $t->room_number ?? '-',
-            'end_date'    => $t->end_date,
+            'end_date' => $t->end_date,
             'rental_type' => 'monthly',
         ])->values()->toArray();
 
         return $this->apiSuccess([
             'resident_name' => Auth::user()->name,
             'active_leases' => $activeLeases,
-            'total_unpaid'  => (float) $totalUnpaid,
-            'unpaid_count'  => $billableInvoices->count(),
+            'total_unpaid' => (float) $totalUnpaid,
+            'unpaid_count' => $billableInvoices->count(),
         ], 'Ringkasan keuangan berhasil diambil');
     }
 
@@ -89,6 +90,7 @@ class ResidentFinanceController extends Controller
      * Daftar Tagihan Saya
      *
      * Melihat semua tagihan yang dibebankan kepada penghuni yang sedang login.
+     *
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function invoices(Request $request)
@@ -114,6 +116,7 @@ class ResidentFinanceController extends Controller
      * Detail Tagihan Saya
      *
      * Melihat detail satu tagihan spesifik milik penghuni yang sedang login.
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function showInvoice(int $id)
@@ -135,6 +138,7 @@ class ResidentFinanceController extends Controller
      * Riwayat Pembayaran Saya
      *
      * Melihat daftar transaksi/pembayaran yang pernah dilakukan oleh penghuni yang sedang login.
+     *
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function payments(Request $request)
@@ -175,7 +179,6 @@ class ResidentFinanceController extends Controller
      * Inisiasi Perpanjang Sewa (Manual)
      *
      * Mengajukan perpanjangan masa sewa dan generate tagihan untuk pembayaran manual (transfer bank).
-     * @return JsonResponse
      */
     public function initiatePerpanjangManual(InitiatePerpanjangSewaRequest $request, int $scheduleId): JsonResponse
     {
@@ -190,7 +193,12 @@ class ResidentFinanceController extends Controller
             return $this->apiError('Sewa aktif tidak ditemukan.', 404);
         }
 
-        $schedule = DB::table('room_schedules')->where('id', $scheduleId)->first();
+        if (\App\Support\ModuleGate::isActive('Schedule')) {
+            $scheduleData = \Modules\Schedule\Services\ScheduleService::getByIds([$scheduleId]);
+            $schedule = ! empty($scheduleData) ? (object) $scheduleData[$scheduleId] : null;
+        } else {
+            $schedule = null;
+        }
 
         if (! $schedule || ! $schedule->agreed_price || (float) $schedule->agreed_price <= 0) {
             return $this->apiError('Harga sewa belum diatur. Hubungi admin.', 422);
@@ -209,7 +217,7 @@ class ResidentFinanceController extends Controller
             ->where(function ($q) {
                 // Jika sudah melewati payment_expires_at, tidak dianggap pending
                 $q->whereNull('payment_expires_at')
-                  ->orWhere('payment_expires_at', '>', now());
+                    ->orWhere('payment_expires_at', '>', now());
             })
             ->whereNotExists(function ($query) use ($statusTerminal) {
                 $query->from('payments')
@@ -222,18 +230,18 @@ class ResidentFinanceController extends Controller
             return $this->apiError('Masih ada tagihan perpanjangan yang belum dibayar. Selesaikan pembayaran terlebih dahulu sebelum memperpanjang kembali.', 422);
         }
 
-        $durationMonths   = $request->integer('duration_months');
-        $currentEndDate   = Carbon::parse($schedule->end_date);
-        $newEndDate       = $currentEndDate->copy()->addMonths($durationMonths);
-        $amount           = (float) $schedule->agreed_price * $durationMonths;
-        $suffix           = strtoupper(substr(md5(uniqid()), 0, 6));
-        $invoiceNumber    = 'EXT-' . date('Ymd') . '-' . str_pad($scheduleId, 4, '0', STR_PAD_LEFT) . '-' . $suffix;
+        $durationMonths = $request->integer('duration_months');
+        $currentEndDate = Carbon::parse($schedule->end_date);
+        $newEndDate = $currentEndDate->copy()->addMonths($durationMonths);
+        $amount = (float) $schedule->agreed_price * $durationMonths;
+        $suffix = strtoupper(substr(md5(uniqid()), 0, 6));
+        $invoiceNumber = 'EXT-'.date('Ymd').'-'.str_pad($scheduleId, 4, '0', STR_PAD_LEFT).'-'.$suffix;
         $paymentExpiresAt = now()->addMinutes(15);
 
         $invoice = DB::transaction(function () use (
             $scheduleId, $schedule, $activeTenant, $userId,
             $invoiceNumber, $amount, $currentEndDate, $newEndDate,
-            $paymentExpiresAt, $statusTerminal
+            $paymentExpiresAt
         ) {
             // Batalkan invoice perpanjangan lama yang expired atau semua pembayarannya gagal
             DB::table('invoices')
@@ -243,17 +251,17 @@ class ResidentFinanceController extends Controller
                 ->update(['status' => InvoiceStatus::CANCELLED->value, 'updated_at' => now()]);
 
             return $this->invoiceRepository->create([
-                'schedule_id'        => $scheduleId,
-                'invoice_number'     => $invoiceNumber,
-                'amount'             => $amount,
-                'status'             => InvoiceStatus::UNPAID->value,
-                'due_date'           => now()->toDateString(),
+                'schedule_id' => $scheduleId,
+                'invoice_number' => $invoiceNumber,
+                'amount' => $amount,
+                'status' => InvoiceStatus::UNPAID->value,
+                'due_date' => now()->toDateString(),
                 'payment_expires_at' => $paymentExpiresAt,
-                'tenant_user_id'     => $userId,
-                'tenant_name'        => $activeTenant->tenant_name,
-                'room_number'        => $activeTenant->room_number,
-                'period_start'       => $currentEndDate->copy()->addDay()->toDateString(),
-                'period_end'         => $newEndDate->toDateString(),
+                'tenant_user_id' => $userId,
+                'tenant_name' => $activeTenant->tenant_name,
+                'room_number' => $activeTenant->room_number,
+                'period_start' => $currentEndDate->copy()->addDay()->toDateString(),
+                'period_end' => $newEndDate->toDateString(),
             ]);
         });
 
@@ -268,7 +276,6 @@ class ResidentFinanceController extends Controller
      * Perpanjang Sewa (Otomatis/Midtrans)
      *
      * Mengajukan perpanjangan masa sewa dan langsung memproses pembayaran via payment gateway (Midtrans).
-     * @return JsonResponse
      */
     public function perpanjangSewa(PerpanjangSewaRequest $request, int $scheduleId): JsonResponse
     {
@@ -285,7 +292,12 @@ class ResidentFinanceController extends Controller
         }
 
         // Load jadwal untuk mendapatkan agreed_price dan end_date
-        $schedule = DB::table('room_schedules')->where('id', $scheduleId)->first();
+        if (\App\Support\ModuleGate::isActive('Schedule')) {
+            $scheduleData = \Modules\Schedule\Services\ScheduleService::getByIds([$scheduleId]);
+            $schedule = ! empty($scheduleData) ? (object) $scheduleData[$scheduleId] : null;
+        } else {
+            $schedule = null;
+        }
 
         if (! $schedule || ! $schedule->agreed_price || (float) $schedule->agreed_price <= 0) {
             return $this->apiError('Harga sewa belum diatur. Hubungi admin.', 422);
@@ -317,17 +329,17 @@ class ResidentFinanceController extends Controller
 
         $durationMonths = $request->integer('duration_months');
         $currentEndDate = Carbon::parse($schedule->end_date);
-        $newEndDate     = $currentEndDate->copy()->addMonths($durationMonths);
-        $amount         = (float) $schedule->agreed_price * $durationMonths;
-        $suffix         = strtoupper(substr(md5(uniqid()), 0, 6));
-        $invoiceNumber  = 'EXT-' . date('Ymd') . '-' . str_pad($scheduleId, 4, '0', STR_PAD_LEFT) . '-' . $suffix;
+        $newEndDate = $currentEndDate->copy()->addMonths($durationMonths);
+        $amount = (float) $schedule->agreed_price * $durationMonths;
+        $suffix = strtoupper(substr(md5(uniqid()), 0, 6));
+        $invoiceNumber = 'EXT-'.date('Ymd').'-'.str_pad($scheduleId, 4, '0', STR_PAD_LEFT).'-'.$suffix;
 
         // Bungkus cleanup + pembuatan invoice + pemrosesan pembayaran dalam satu transaction.
         // Jika processPayment gagal (mis. Midtrans API error), invoice juga ikut di-rollback
         // sehingga tidak ada invoice yatim yang memblokir retry berikutnya.
         $payment = DB::transaction(function () use (
             $scheduleId, $schedule, $activeTenant, $userId,
-            $request, $invoiceNumber, $amount, $currentEndDate, $newEndDate, $statusTerminal
+            $request, $invoiceNumber, $amount, $currentEndDate, $newEndDate
         ) {
             // Batalkan invoice perpanjangan lama yang semua pembayarannya sudah gagal
             // agar tidak ada duplikat invoice aktif untuk periode yang sama.
@@ -341,16 +353,16 @@ class ResidentFinanceController extends Controller
             // end_date pada room_schedules TIDAK diubah di sini — akan diupdate oleh listener
             // setelah pembayaran berhasil dikonfirmasi.
             $invoice = $this->invoiceRepository->create([
-                'schedule_id'    => $scheduleId,
+                'schedule_id' => $scheduleId,
                 'invoice_number' => $invoiceNumber,
-                'amount'         => $amount,
-                'status'         => InvoiceStatus::UNPAID->value,
-                'due_date'       => now()->toDateString(),
+                'amount' => $amount,
+                'status' => InvoiceStatus::UNPAID->value,
+                'due_date' => now()->toDateString(),
                 'tenant_user_id' => $userId,
-                'tenant_name'    => $activeTenant->tenant_name,
-                'room_number'    => $activeTenant->room_number,
-                'period_start'   => $currentEndDate->copy()->addDay()->toDateString(),
-                'period_end'     => $newEndDate->toDateString(),
+                'tenant_name' => $activeTenant->tenant_name,
+                'room_number' => $activeTenant->room_number,
+                'period_start' => $currentEndDate->copy()->addDay()->toDateString(),
+                'period_end' => $newEndDate->toDateString(),
             ]);
 
             // processPayment punya nested transaction sendiri; jika ia throw,
@@ -383,17 +395,17 @@ class ResidentFinanceController extends Controller
     public function bayarDenda(BayarDendaRequest $request): JsonResponse
     {
         $userId = Auth::id();
-        $data   = $request->validated();
+        $data = $request->validated();
 
         $paymentData = [
-            'payment_method'         => $data['payment_method'],
+            'payment_method' => $data['payment_method'],
             'preferred_payment_type' => $data['preferred_payment_type'] ?? null,
         ];
 
         if ($request->hasFile('payment_proof')) {
             $file = $request->file('payment_proof');
             $paymentData['payment_proof_bytes'] = $file->get();
-            $paymentData['payment_proof_name']  = $file->getClientOriginalName();
+            $paymentData['payment_proof_name'] = $file->getClientOriginalName();
         }
 
         $payment = $this->fineService->bayarDenda($userId, $data['fine_ids'], $paymentData);
@@ -408,8 +420,8 @@ class ResidentFinanceController extends Controller
     public function ajukanPembatalanDp(Request $request, int $scheduleId): JsonResponse
     {
         $request->validate([
-            'bank_name'           => 'required|string|max:100',
-            'account_number'      => 'required|string|max:50',
+            'bank_name' => 'required|string|max:100',
+            'account_number' => 'required|string|max:50',
             'account_holder_name' => 'required|string|max:150',
         ]);
 
@@ -420,7 +432,7 @@ class ResidentFinanceController extends Controller
         );
 
         return $this->apiSuccess(
-            new RefundRequestResource($refundRequest),
+            RefundRequestResource::makeWithSchedule($refundRequest),
             'Permintaan pembatalan DP berhasil diajukan. Menunggu persetujuan admin.',
             201
         );
@@ -430,10 +442,10 @@ class ResidentFinanceController extends Controller
     {
         $userId = Auth::id();
 
-        $scheduleIds = DB::table('room_schedules')
-            ->where('tenant_user_id', $userId)
-            ->pluck('id')
-            ->toArray();
+        $scheduleIds = [];
+        if (\App\Support\ModuleGate::isActive('Schedule')) {
+            $scheduleIds = \Modules\Schedule\Services\ScheduleService::getIdsByTenant($userId);
+        }
 
         if (empty($scheduleIds)) {
             return $this->apiSuccess(
@@ -451,7 +463,7 @@ class ResidentFinanceController extends Controller
         $refundRequests = $this->refundRequestRepository->getPaginated($perPage, $filters);
 
         return $this->apiSuccess(
-            RefundRequestResource::collection($refundRequests)->response()->getData(true),
+            RefundRequestResource::collectionWithSchedule($refundRequests)->response()->getData(true),
             'Daftar permintaan pembatalan Anda'
         );
     }

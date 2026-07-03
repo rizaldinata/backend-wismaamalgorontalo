@@ -19,7 +19,6 @@ class UserProfileController extends Controller
      * Lihat Profil User
      *
      * Mengambil detail profil dari user yang sedang login.
-     * @return JsonResponse
      */
     public function show(Request $request): JsonResponse
     {
@@ -36,29 +35,28 @@ class UserProfileController extends Controller
      * Simpan/Update Profil User
      *
      * Menyimpan profil lengkap (termasuk KTP) dari user yang sedang login.
-     * @return JsonResponse
      */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'id_card_number'          => 'required|string|max:20',
-            'phone_number'            => 'required|string|max:20',
-            'gender'                  => 'required|in:male,female',
-            'job'                     => 'nullable|string|max:100',
-            'address_ktp'             => 'required|string|max:500',
-            'emergency_contact_name'  => 'nullable|string|max:100',
+            'id_card_number' => 'required|string|max:20',
+            'phone_number' => 'required|string|max:20',
+            'gender' => 'required|in:male,female',
+            'job' => 'nullable|string|max:100',
+            'address_ktp' => 'required|string|max:500',
+            'emergency_contact_name' => 'nullable|string|max:100',
             'emergency_contact_phone' => 'nullable|string|max:20',
-            'ktp_photo'               => 'nullable|image|max:2048',
+            'ktp_photo' => 'nullable|image|max:2048',
         ]);
 
         $data = [
-            'user_id'                 => $request->user()->id,
-            'id_card_number'          => $validated['id_card_number'],
-            'phone_number'            => $validated['phone_number'],
-            'gender'                  => $validated['gender'],
-            'job'                     => $validated['job'] ?? null,
-            'address_ktp'             => $validated['address_ktp'],
-            'emergency_contact_name'  => $validated['emergency_contact_name'] ?? null,
+            'user_id' => $request->user()->id,
+            'id_card_number' => $validated['id_card_number'],
+            'phone_number' => $validated['phone_number'],
+            'gender' => $validated['gender'],
+            'job' => $validated['job'] ?? null,
+            'address_ktp' => $validated['address_ktp'],
+            'emergency_contact_name' => $validated['emergency_contact_name'] ?? null,
             'emergency_contact_phone' => $validated['emergency_contact_phone'] ?? null,
         ];
 
@@ -82,16 +80,16 @@ class UserProfileController extends Controller
     private function transform(UserProfile $profile): array
     {
         return [
-            'id'                      => (string) $profile->id,
-            'user_id'                 => (string) $profile->user_id,
-            'id_card_number'          => $profile->id_card_number,
-            'phone_number'            => $profile->phone_number,
-            'gender'                  => $profile->gender,
-            'job'                     => $profile->job,
-            'address_ktp'             => $profile->address_ktp,
-            'emergency_contact_name'  => $profile->emergency_contact_name,
+            'id' => (string) $profile->id,
+            'user_id' => (string) $profile->user_id,
+            'id_card_number' => $profile->id_card_number,
+            'phone_number' => $profile->phone_number,
+            'gender' => $profile->gender,
+            'job' => $profile->job,
+            'address_ktp' => $profile->address_ktp,
+            'emergency_contact_name' => $profile->emergency_contact_name,
             'emergency_contact_phone' => $profile->emergency_contact_phone,
-            'ktp_photo_url'           => $profile->ktp_photo_url,
+            'ktp_photo_url' => $profile->ktp_photo_url,
         ];
     }
 }

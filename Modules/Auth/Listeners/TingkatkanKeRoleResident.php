@@ -18,6 +18,7 @@ class TingkatkanKeRoleResident
 
         if (! $user) {
             Log::warning('TingkatkanKeRoleResident: user tidak ditemukan', ['user_id' => $event->userId]);
+
             return;
         }
 

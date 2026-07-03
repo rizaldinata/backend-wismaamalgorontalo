@@ -63,10 +63,10 @@ class FixedExpenseEntryRepository implements FixedExpenseEntryRepositoryInterfac
 
             if (! $exists) {
                 FixedExpenseEntry::create([
-                    'jenis'     => $jenis,
-                    'bulan'     => $bulan,
-                    'tahun'     => $tahun,
-                    'amount'    => 0,
+                    'jenis' => $jenis,
+                    'bulan' => $bulan,
+                    'tahun' => $tahun,
+                    'amount' => 0,
                     'is_filled' => false,
                 ]);
                 $created++;

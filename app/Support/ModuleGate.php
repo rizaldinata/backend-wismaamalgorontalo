@@ -9,8 +9,7 @@ class ModuleGate
     /**
      * Mengecek apakah sebuah modul terinstall dan sedang aktif.
      *
-     * @param string $moduleName Nama modul (misal: 'Schedule', 'Finance')
-     * @return bool
+     * @param  string  $moduleName  Nama modul (misal: 'Schedule', 'Finance')
      */
     public static function isActive(string $moduleName): bool
     {

@@ -22,8 +22,8 @@ class InitiatePerpanjangSewaRequest extends FormRequest
     {
         return [
             'duration_months.required' => 'Durasi perpanjangan wajib diisi',
-            'duration_months.min'      => 'Durasi minimal 1 bulan',
-            'duration_months.max'      => 'Durasi maksimal 12 bulan',
+            'duration_months.min' => 'Durasi minimal 1 bulan',
+            'duration_months.max' => 'Durasi maksimal 12 bulan',
         ];
     }
 }

@@ -24,31 +24,31 @@ function buatGuestDenganKonteks(User $user, string $billStatus = 'unpaid'): arra
     $scheduleId = 10;
 
     GuestActiveContext::create([
-        'user_id'     => $user->id,
+        'user_id' => $user->id,
         'schedule_id' => $scheduleId,
-        'room_id'     => 1,
-        'room_price'  => 500000,
+        'room_id' => 1,
+        'room_price' => 500000,
         'tenant_name' => $user->name,
-        'is_active'   => true,
+        'is_active' => true,
     ]);
 
     $guest = Guest::create([
-        'user_id'              => $user->id,
+        'user_id' => $user->id,
         'schedule_reference_id' => $scheduleId,
-        'name'                 => 'Tamu Uji',
-        'check_in_at'          => now()->subDays(5),
-        'check_out_at'         => now(),
-        'relationship'         => GuestRelationship::FRIEND,
-        'total_days'           => 5,
-        'billable_days'        => 3,
-        'charge_amount'        => 75000,
+        'name' => 'Tamu Uji',
+        'check_in_at' => now()->subDays(5),
+        'check_out_at' => now(),
+        'relationship' => GuestRelationship::FRIEND,
+        'total_days' => 5,
+        'billable_days' => 3,
+        'charge_amount' => 75000,
     ]);
 
     $bill = GuestBill::create([
-        'guest_id'    => $guest->id,
+        'guest_id' => $guest->id,
         'bill_number' => 'GB-TEST-001',
-        'amount'      => 75000,
-        'status'      => $billStatus,
+        'amount' => 75000,
+        'status' => $billStatus,
     ]);
 
     return compact('guest', 'bill');
@@ -58,21 +58,21 @@ function buatGuestDenganKonteks(User $user, string $billStatus = 'unpaid'): arra
 function buatGuestMilikUser(User $user, string $billStatus = 'unpaid'): array
 {
     $guest = Guest::create([
-        'user_id'      => $user->id,
-        'name'         => 'Tamu Bayar',
-        'check_in_at'  => now()->subDays(4),
+        'user_id' => $user->id,
+        'name' => 'Tamu Bayar',
+        'check_in_at' => now()->subDays(4),
         'check_out_at' => now(),
         'relationship' => GuestRelationship::SIBLING,
-        'total_days'   => 4,
+        'total_days' => 4,
         'billable_days' => 2,
         'charge_amount' => 50000,
     ]);
 
     $bill = GuestBill::create([
-        'guest_id'    => $guest->id,
+        'guest_id' => $guest->id,
         'bill_number' => 'GB-PAY-001',
-        'amount'      => 50000,
-        'status'      => $billStatus,
+        'amount' => 50000,
+        'status' => $billStatus,
     ]);
 
     return compact('guest', 'bill');
@@ -97,11 +97,11 @@ test('[BERHASIL] penghuni dapat melihat tagihan tamu yang dimilikinya', function
 
 test('[GAGAL] mengembalikan 403 jika penghuni tidak memiliki konteks sewa aktif', function () {
     $guest = Guest::create([
-        'name'         => 'Tamu Asing',
-        'check_in_at'  => now()->subDay(),
+        'name' => 'Tamu Asing',
+        'check_in_at' => now()->subDay(),
         'check_out_at' => now(),
         'relationship' => GuestRelationship::OTHER,
-        'total_days'   => 1,
+        'total_days' => 1,
         'billable_days' => 0,
         'charge_amount' => 0,
     ]);
@@ -116,23 +116,23 @@ test('[GAGAL] mengembalikan 404 jika tagihan tidak ditemukan untuk tamu', functi
     // Konteks aktif ada, tamu ada, tapi tidak ada GuestBill
     $scheduleId = 20;
     GuestActiveContext::create([
-        'user_id'     => $this->penghuni->id,
+        'user_id' => $this->penghuni->id,
         'schedule_id' => $scheduleId,
-        'room_id'     => 2,
-        'room_price'  => 300000,
+        'room_id' => 2,
+        'room_price' => 300000,
         'tenant_name' => 'Penghuni Uji',
-        'is_active'   => true,
+        'is_active' => true,
     ]);
     $guest = Guest::create([
-        'user_id'              => $this->penghuni->id,
+        'user_id' => $this->penghuni->id,
         'schedule_reference_id' => $scheduleId,
-        'name'                 => 'Tamu Tanpa Tagihan',
-        'check_in_at'          => now()->subDay(),
-        'check_out_at'         => now(),
-        'relationship'         => GuestRelationship::RELATIVE,
-        'total_days'           => 1,
-        'billable_days'        => 0,
-        'charge_amount'        => 0,
+        'name' => 'Tamu Tanpa Tagihan',
+        'check_in_at' => now()->subDay(),
+        'check_out_at' => now(),
+        'relationship' => GuestRelationship::RELATIVE,
+        'total_days' => 1,
+        'billable_days' => 0,
+        'charge_amount' => 0,
     ]);
 
     $response = $this->actingAs($this->penghuni)
@@ -152,7 +152,7 @@ test('[BERHASIL] penghuni dapat membayar tagihan tamu dengan bukti transfer manu
     $response = $this->actingAs($this->penghuni)
         ->postJson("/api/guests/{$guest->id}/bill/pay", [
             'payment_method' => 'manual',
-            'payment_proof'  => UploadedFile::fake()->image('bukti.jpg'),
+            'payment_proof' => UploadedFile::fake()->image('bukti.jpg'),
         ]);
 
     $response->assertOk()
@@ -168,7 +168,7 @@ test('[GAGAL] mengembalikan 422 jika tagihan sudah diverifikasi dan tidak bisa d
     $response = $this->actingAs($this->penghuni)
         ->postJson("/api/guests/{$guest->id}/bill/pay", [
             'payment_method' => 'manual',
-            'payment_proof'  => UploadedFile::fake()->image('bukti.jpg'),
+            'payment_proof' => UploadedFile::fake()->image('bukti.jpg'),
         ]);
 
     $response->assertStatus(422);
@@ -207,7 +207,7 @@ test('[BERHASIL] webhook settlement mengubah status tagihan tamu menjadi PAID', 
     $bill->update(['transaction_id' => 'GB-TRX-999']);
 
     $this->postJson('/api/guests/bills/midtrans/notification', [
-        'order_id'           => 'GB-TRX-999',
+        'order_id' => 'GB-TRX-999',
         'transaction_status' => 'settlement',
     ])->assertOk();
 
@@ -220,7 +220,7 @@ test('[BERHASIL] webhook expire mengubah status tagihan tamu menjadi FAILED', fu
     $bill->update(['transaction_id' => 'GB-TRX-888']);
 
     $this->postJson('/api/guests/bills/midtrans/notification', [
-        'order_id'           => 'GB-TRX-888',
+        'order_id' => 'GB-TRX-888',
         'transaction_status' => 'expire',
     ])->assertOk();
 
@@ -229,7 +229,7 @@ test('[BERHASIL] webhook expire mengubah status tagihan tamu menjadi FAILED', fu
 
 test('[BERHASIL] webhook dengan transaction_id tidak dikenal diabaikan tanpa error', function () {
     $this->postJson('/api/guests/bills/midtrans/notification', [
-        'order_id'           => 'GB-TRX-TIDAK-ADA',
+        'order_id' => 'GB-TRX-TIDAK-ADA',
         'transaction_status' => 'settlement',
     ])->assertOk();
 });

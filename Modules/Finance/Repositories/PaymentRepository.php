@@ -68,7 +68,7 @@ class PaymentRepository implements PaymentRepositoryInterface
     public function getMidtransSummary(): array
     {
         $currentMonth = now()->month;
-        $currentYear  = now()->year;
+        $currentYear = now()->year;
 
         $settled = Payment::with('invoice')
             ->where('payment_method', 'midtrans')
@@ -85,17 +85,17 @@ class PaymentRepository implements PaymentRepositoryInterface
         $netAmount = fn ($p) => ($p->invoice?->amount ?? 0) - ($p->fee_bearer === 'merchant' ? $p->midtrans_fee : 0);
 
         return [
-            'total_transaksi'         => Payment::where('payment_method', 'midtrans')->count(),
+            'total_transaksi' => Payment::where('payment_method', 'midtrans')->count(),
             'total_settlement_bersih' => (float) $settled->sum($netAmount),
-            'total_settlement_gross'  => (float) $settled->sum(fn ($p) => $p->invoice?->amount ?? 0),
-            'total_biaya_midtrans'    => (float) $settled->sum(fn ($p) => $p->fee_bearer === 'merchant' ? $p->midtrans_fee : 0),
-            'jumlah_settlement'       => $settled->count(),
-            'jumlah_pending'          => Payment::where('payment_method', 'midtrans')
-                                            ->where('status', PaymentStatus::PENDING->value)
-                                            ->count(),
-            'settlement_bulan_ini'    => (float) $settledBulanIni->sum($netAmount),
-            'bulan'                   => $currentMonth,
-            'tahun'                   => $currentYear,
+            'total_settlement_gross' => (float) $settled->sum(fn ($p) => $p->invoice?->amount ?? 0),
+            'total_biaya_midtrans' => (float) $settled->sum(fn ($p) => $p->fee_bearer === 'merchant' ? $p->midtrans_fee : 0),
+            'jumlah_settlement' => $settled->count(),
+            'jumlah_pending' => Payment::where('payment_method', 'midtrans')
+                ->where('status', PaymentStatus::PENDING->value)
+                ->count(),
+            'settlement_bulan_ini' => (float) $settledBulanIni->sum($netAmount),
+            'bulan' => $currentMonth,
+            'tahun' => $currentYear,
         ];
     }
 }

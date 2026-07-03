@@ -2,11 +2,11 @@
 
 namespace Modules\Notification\Listeners;
 
+use App\Contracts\ConfigProviderInterface;
 use App\Events\Finance\PembayaranDiverifikasi;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Modules\Notification\Services\NotificationService;
-use App\Contracts\ConfigProviderInterface;
 
 class SendWhatsAppReceipt implements ShouldQueue
 {

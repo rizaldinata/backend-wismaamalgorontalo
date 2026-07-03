@@ -36,7 +36,7 @@ test('[BERHASIL] konfigurasi dimuat dari DB jika sudah ada', function () {
     $config = SettingService::defaultMidtransFeeConfig();
     $config['bearer'] = 'customer';
     AppSetting::create([
-        'key'   => 'midtrans_fee_config',
+        'key' => 'midtrans_fee_config',
         'value' => json_encode($config),
     ]);
 
@@ -76,7 +76,7 @@ test('[BERHASIL] perubahan tarif fee tersimpan ke DB', function () {
     $this->putJson('/api/v1/settings/midtrans-fees', $payload)->assertOk();
 
     $setting = AppSetting::where('key', 'midtrans_fee_config')->first();
-    $saved   = json_decode($setting->value, true);
+    $saved = json_decode($setting->value, true);
 
     expect((float) $saved['fees']['qris']['rate'])->toBe(1.0);
 });
@@ -91,7 +91,7 @@ test('[GAGAL] bearer wajib diisi', function () {
 });
 
 test('[GAGAL] bearer hanya boleh merchant atau customer', function () {
-    $payload          = SettingService::defaultMidtransFeeConfig();
+    $payload = SettingService::defaultMidtransFeeConfig();
     $payload['bearer'] = 'admin';
 
     $this->putJson('/api/v1/settings/midtrans-fees', $payload)

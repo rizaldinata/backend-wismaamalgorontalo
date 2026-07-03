@@ -30,7 +30,7 @@ beforeEach(function () {
 test('[BERHASIL] admin dapat membuat jadwal pemeliharaan', function () {
     $admin = User::factory()->create();
     $admin->givePermissionTo('schedule-maintenance');
-    
+
     $response = $this->actingAs($admin)->postJson('/api/v1/schedules', [
         'type' => ScheduleType::PERAWATAN->value,
         'subtype' => 'perbaikan',
@@ -38,23 +38,23 @@ test('[BERHASIL] admin dapat membuat jadwal pemeliharaan', function () {
         'location' => 'Kamar 101',
         'start_time' => now()->addDays(2)->format('Y-m-d H:i:s'),
         'status' => ScheduleStatus::IN_PROGRESS->value,
-        'notes' => 'Pembersihan AC bulanan'
+        'notes' => 'Pembersihan AC bulanan',
     ]);
 
     $response->assertStatus(201)
-             ->assertJsonPath('data.type', ScheduleType::PERAWATAN->value);
+        ->assertJsonPath('data.type', ScheduleType::PERAWATAN->value);
 
     $this->assertDatabaseHas('maintenance_schedules', [
         'location' => 'Kamar 101',
         'type' => ScheduleType::PERAWATAN->value,
-        'subtype' => 'perbaikan'
+        'subtype' => 'perbaikan',
     ]);
 });
 
 test('[BERHASIL] admin dapat menambahkan update pada jadwal', function () {
     $admin = User::factory()->create();
     $admin->givePermissionTo('schedule-maintenance');
-    
+
     $schedule = MaintenanceSchedule::create([
         'type' => ScheduleType::PERAWATAN->value,
         'subtype' => 'perbaikan',
@@ -62,30 +62,30 @@ test('[BERHASIL] admin dapat menambahkan update pada jadwal', function () {
         'location' => 'Kamar 101',
         'start_time' => now()->format('Y-m-d H:i:s'),
         'status' => ScheduleStatus::IN_PROGRESS->value,
-        'created_by' => $admin->id
+        'created_by' => $admin->id,
     ]);
 
     $response = $this->actingAs($admin)->postJson("/api/v1/schedules/{$schedule->id}/updates", [
         'notes' => 'Teknisi sudah datang',
-        'status' => ScheduleStatus::DONE->value
+        'status' => ScheduleStatus::DONE->value,
     ]);
 
     $response->assertStatus(201);
-    
+
     $this->assertDatabaseHas('maintenance_schedules', [
         'id' => $schedule->id,
-        'status' => ScheduleStatus::DONE->value
+        'status' => ScheduleStatus::DONE->value,
     ]);
-    
+
     $this->assertDatabaseHas('maintenance_schedule_updates', [
         'maintenance_schedule_id' => $schedule->id,
-        'notes' => 'Teknisi sudah datang'
+        'notes' => 'Teknisi sudah datang',
     ]);
 });
 
 test('[GAGAL] request membuat jadwal ditolak jika tidak memiliki permission', function () {
     $user = User::factory()->create();
-    
+
     $response = $this->actingAs($user)->postJson('/api/v1/schedules', [
         'type' => ScheduleType::PEMBERSIHAN->value,
         'technician_name' => 'John Doe',
@@ -99,7 +99,7 @@ test('[GAGAL] request membuat jadwal ditolak jika tidak memiliki permission', fu
 test('[BERHASIL] admin dapat melihat daftar jadwal pemeliharaan', function () {
     $admin = User::factory()->create();
     $admin->givePermissionTo('view-maintenance');
-    
+
     MaintenanceSchedule::create([
         'type' => ScheduleType::PERAWATAN->value,
         'subtype' => 'perbaikan',
@@ -107,19 +107,19 @@ test('[BERHASIL] admin dapat melihat daftar jadwal pemeliharaan', function () {
         'location' => 'Kamar 102',
         'start_time' => now()->format('Y-m-d H:i:s'),
         'status' => ScheduleStatus::IN_PROGRESS->value,
-        'created_by' => $admin->id
+        'created_by' => $admin->id,
     ]);
 
     $response = $this->actingAs($admin)->getJson('/api/v1/schedules');
 
     $response->assertStatus(200)
-             ->assertJsonFragment(['location' => 'Kamar 102']);
+        ->assertJsonFragment(['location' => 'Kamar 102']);
 });
 
 test('[BERHASIL] admin dapat mengubah jadwal pemeliharaan', function () {
     $admin = User::factory()->create();
     $admin->givePermissionTo('schedule-maintenance');
-    
+
     $schedule = MaintenanceSchedule::create([
         'type' => ScheduleType::PERAWATAN->value,
         'subtype' => 'perbaikan',
@@ -127,7 +127,7 @@ test('[BERHASIL] admin dapat mengubah jadwal pemeliharaan', function () {
         'location' => 'Kamar 103',
         'start_time' => now()->format('Y-m-d H:i:s'),
         'status' => ScheduleStatus::IN_PROGRESS->value,
-        'created_by' => $admin->id
+        'created_by' => $admin->id,
     ]);
 
     $response = $this->actingAs($admin)->putJson("/api/v1/schedules/{$schedule->id}", [
@@ -137,13 +137,13 @@ test('[BERHASIL] admin dapat mengubah jadwal pemeliharaan', function () {
     ]);
 
     $response->assertStatus(200)
-             ->assertJsonFragment(['technician_name' => 'New Tech']);
+        ->assertJsonFragment(['technician_name' => 'New Tech']);
 });
 
 test('[BERHASIL] admin dapat menghapus jadwal pemeliharaan', function () {
     $admin = User::factory()->create();
     $admin->givePermissionTo('schedule-maintenance');
-    
+
     $schedule = MaintenanceSchedule::create([
         'type' => ScheduleType::PERAWATAN->value,
         'subtype' => 'perbaikan',
@@ -151,7 +151,7 @@ test('[BERHASIL] admin dapat menghapus jadwal pemeliharaan', function () {
         'location' => 'Kamar 104',
         'start_time' => now()->format('Y-m-d H:i:s'),
         'status' => ScheduleStatus::IN_PROGRESS->value,
-        'created_by' => $admin->id
+        'created_by' => $admin->id,
     ]);
 
     $response = $this->actingAs($admin)->deleteJson("/api/v1/schedules/{$schedule->id}");

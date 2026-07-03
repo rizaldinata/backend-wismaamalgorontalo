@@ -35,9 +35,9 @@ class MidtransFeeCalculator
         }
 
         return match ($feeDef['type']) {
-            'flat'    => (int) ($feeDef['amount'] ?? 0),
+            'flat' => (int) ($feeDef['amount'] ?? 0),
             'percent' => (int) round($amount * ($feeDef['rate'] ?? 0) / 100),
-            default   => 0,
+            default => 0,
         };
     }
 }

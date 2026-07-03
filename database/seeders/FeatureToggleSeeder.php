@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Modules\Setting\Models\FeatureToggle;
 use Illuminate\Support\Facades\DB;
+use Modules\Setting\Models\FeatureToggle;
 
 class FeatureToggleSeeder extends Seeder
 {
@@ -110,13 +110,13 @@ class FeatureToggleSeeder extends Seeder
 
         // Pengeluaran umum: inti, tidak bisa dimatikan
         FeatureToggle::create([
-            'name'        => 'Pencatatan Pengeluaran',
-            'key'         => 'finance_expense',
+            'name' => 'Pencatatan Pengeluaran',
+            'key' => 'finance_expense',
             'description' => 'Pencatatan pengeluaran operasional kos (wajib).',
-            'icon'        => 'receipt_long',
-            'is_active'   => true,
-            'is_locked'   => true,
-            'parent_id'   => $financeModule->id,
+            'icon' => 'receipt_long',
+            'is_active' => true,
+            'is_locked' => true,
+            'parent_id' => $financeModule->id,
         ]);
 
         $financeFeatures = [
@@ -126,10 +126,10 @@ class FeatureToggleSeeder extends Seeder
 
         foreach ($financeFeatures as $feat) {
             FeatureToggle::create([
-                'name'      => $feat['name'],
-                'key'       => $feat['key'],
+                'name' => $feat['name'],
+                'key' => $feat['key'],
                 'description' => $feat['description'],
-                'icon'      => $feat['icon'],
+                'icon' => $feat['icon'],
                 'is_active' => true,
                 'is_locked' => false,
                 'parent_id' => $financeModule->id,

@@ -109,7 +109,7 @@ class GuestBillingService
         return $this->billRepository->update($bill, [
             'payment_method' => 'cash',
             'status' => GuestBillStatus::PENDING->value,
-            'admin_notes' => 'Menunggu pembayaran tunai ke pengelola. ' . $bill->admin_notes
+            'admin_notes' => 'Menunggu pembayaran tunai ke pengelola. '.$bill->admin_notes,
         ]);
     }
 

@@ -15,7 +15,7 @@ class UpdateFixedExpenseRequest extends FormRequest
     {
         return [
             'amount' => ['required', 'numeric', 'min:1'],
-            'notes'  => ['nullable', 'string', 'max:500'],
+            'notes' => ['nullable', 'string', 'max:500'],
         ];
     }
 }

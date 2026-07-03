@@ -24,6 +24,7 @@ class ExpenseController extends Controller
      * Daftar Pengeluaran (Expense)
      *
      * Melihat semua pengeluaran keuangan wisma, baik dari maintenance rutin maupun pengeluaran manual. (Hanya Admin)
+     *
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function index(Request $request)
@@ -46,6 +47,7 @@ class ExpenseController extends Controller
      * Catat Pengeluaran Manual
      *
      * Menambahkan data pengeluaran secara manual (di luar jadwal maintenance/pengeluaran tetap). (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreExpenseRequest $request)
@@ -63,6 +65,7 @@ class ExpenseController extends Controller
      * Detail Pengeluaran
      *
      * Melihat detail dari satu transaksi pengeluaran. (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(int $id)
@@ -76,6 +79,7 @@ class ExpenseController extends Controller
      * Edit Pengeluaran Manual
      *
      * Mengubah nominal atau deskripsi pada pengeluaran manual. (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateExpenseRequest $request, int $id)
@@ -91,6 +95,7 @@ class ExpenseController extends Controller
      * Hapus Pengeluaran Manual
      *
      * Menghapus transaksi pengeluaran manual. (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(int $id)

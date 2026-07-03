@@ -29,7 +29,9 @@ class FixFinanceTenants extends Command
         $count = 0;
 
         foreach ($schedules as $schedule) {
-            if (!$schedule->tenant_user_id) continue;
+            if (! $schedule->tenant_user_id) {
+                continue;
+            }
 
             \Illuminate\Support\Facades\DB::table('finance_active_tenants')->updateOrInsert(
                 ['schedule_id' => $schedule->id],

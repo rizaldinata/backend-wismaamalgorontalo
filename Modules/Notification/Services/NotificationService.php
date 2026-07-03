@@ -2,11 +2,11 @@
 
 namespace Modules\Notification\Services;
 
+use App\Contracts\ConfigProviderInterface;
 use Modules\Notification\Contracts\NotificationRepositoryInterface;
 use Modules\Notification\Contracts\WhatsAppProviderInterface;
 use Modules\Notification\Enums\NotificationStatus;
 use Modules\Notification\Enums\NotificationType;
-use App\Contracts\ConfigProviderInterface;
 
 readonly class NotificationService
 {
@@ -21,7 +21,7 @@ readonly class NotificationService
         $isSent = $this->whatsAppProvider->sendMessage($target, $message);
 
         $status = $isSent ? NotificationStatus::SENT->value : NotificationStatus::FAILED->value;
-        $error  = $isSent ? null : ($this->whatsAppProvider->getLastError() ?? 'Failed to send via provider');
+        $error = $isSent ? null : ($this->whatsAppProvider->getLastError() ?? 'Failed to send via provider');
 
         $this->repository->logNotification($type, $target, $message, $status, $error);
 

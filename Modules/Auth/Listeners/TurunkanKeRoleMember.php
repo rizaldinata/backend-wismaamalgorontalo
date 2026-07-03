@@ -24,6 +24,7 @@ class TurunkanKeRoleMember
 
         if (! $user) {
             Log::warning('TurunkanKeRoleMember: user tidak ditemukan', ['user_id' => $event->userId]);
+
             return;
         }
 

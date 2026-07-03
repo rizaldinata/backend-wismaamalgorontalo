@@ -4,10 +4,9 @@ use App\Events\Finance\PembayaranDiverifikasi;
 use App\Events\Jadwal\DPDibayar;
 use App\Events\Jadwal\JadwalSewaAktif;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
-use Modules\Finance\Models\Invoice;
 use Modules\Finance\Enums\InvoiceStatus;
+use Modules\Finance\Models\Invoice;
 use Modules\Schedule\Enums\SchedulePaymentScheme;
 use Modules\Schedule\Enums\ScheduleStatus;
 use Modules\Schedule\Enums\ScheduleType;
@@ -22,35 +21,35 @@ uses(TestCase::class, RefreshDatabase::class);
 function buatInvoiceDP(int $scheduleId, string $type = 'dp'): Invoice
 {
     return Invoice::create([
-        'schedule_id'    => $scheduleId,
-        'type'           => $type,
-        'invoice_number' => 'DP-TEST-' . $scheduleId,
-        'amount'         => 500000,
-        'status'         => InvoiceStatus::UNPAID->value,
-        'due_date'       => now()->addDays(10)->toDateString(),
-        'tenant_name'    => 'Budi Santoso',
-        'tenant_phone'   => '08123456789',
-        'room_number'    => 'A-01',
-        'period_start'   => now()->addDays(8)->toDateString(),
-        'period_end'     => now()->addDays(38)->toDateString(),
+        'schedule_id' => $scheduleId,
+        'type' => $type,
+        'invoice_number' => 'DP-TEST-'.$scheduleId,
+        'amount' => 500000,
+        'status' => InvoiceStatus::UNPAID->value,
+        'due_date' => now()->addDays(10)->toDateString(),
+        'tenant_name' => 'Budi Santoso',
+        'tenant_phone' => '08123456789',
+        'room_number' => 'A-01',
+        'period_start' => now()->addDays(8)->toDateString(),
+        'period_end' => now()->addDays(38)->toDateString(),
     ]);
 }
 
 function buatEventVerifikasi(int $invoiceId, int $scheduleId, string $invoiceType = 'sewa'): PembayaranDiverifikasi
 {
     return new PembayaranDiverifikasi(
-        paymentId:     1,
-        invoiceId:     $invoiceId,
-        scheduleId:    $scheduleId,
-        amount:        500000.0,
-        tenantName:    'Budi Santoso',
-        tenantPhone:   '08123456789',
-        invoiceNumber: 'DP-TEST-' . $scheduleId,
-        roomTitle:     'Kamar Standar',
-        roomNumber:    'A-01',
-        startDate:     now()->addDays(8)->toDateString(),
-        endDate:       now()->addDays(38)->toDateString(),
-        invoiceType:   $invoiceType,
+        paymentId: 1,
+        invoiceId: $invoiceId,
+        scheduleId: $scheduleId,
+        amount: 500000.0,
+        tenantName: 'Budi Santoso',
+        tenantPhone: '08123456789',
+        invoiceNumber: 'DP-TEST-'.$scheduleId,
+        roomTitle: 'Kamar Standar',
+        roomNumber: 'A-01',
+        startDate: now()->addDays(8)->toDateString(),
+        endDate: now()->addDays(38)->toDateString(),
+        invoiceType: $invoiceType,
     );
 }
 
@@ -58,19 +57,19 @@ test('[BERHASIL] TandaiDPTerbayarSetelahPembayaranDP mengubah status ke dp_terba
     Event::fake([DPDibayar::class]);
 
     $schedule = Schedule::create([
-        'room_id'        => 1,
-        'type'           => ScheduleType::SEWA->value,
-        'status'         => ScheduleStatus::PENDING->value,
+        'room_id' => 1,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::PENDING->value,
         'payment_scheme' => SchedulePaymentScheme::DP->value,
-        'dp_amount'      => 500000,
-        'start_date'     => now()->addDays(8)->toDateString(),
-        'end_date'       => now()->addDays(38)->toDateString(),
-        'agreed_price'   => 1000000,
-        'tenant_name'    => 'Budi Santoso',
-        'tenant_phone'   => '08123456789',
+        'dp_amount' => 500000,
+        'start_date' => now()->addDays(8)->toDateString(),
+        'end_date' => now()->addDays(38)->toDateString(),
+        'agreed_price' => 1000000,
+        'tenant_name' => 'Budi Santoso',
+        'tenant_phone' => '08123456789',
     ]);
 
-    $invoice  = buatInvoiceDP($schedule->id, 'dp');
+    $invoice = buatInvoiceDP($schedule->id, 'dp');
     $listener = app(TandaiDPTerbayarSetelahPembayaranDP::class);
     $listener->handle(buatEventVerifikasi($invoice->id, $schedule->id, 'dp'));
 
@@ -89,14 +88,14 @@ test('[DIABAIKAN] TandaiDPTerbayarSetelahPembayaranDP tidak melakukan apapun jik
     Event::fake([DPDibayar::class]);
 
     $schedule = Schedule::create([
-        'room_id'    => 2,
-        'type'       => ScheduleType::SEWA->value,
-        'status'     => ScheduleStatus::PENDING->value,
+        'room_id' => 2,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::PENDING->value,
         'start_date' => now()->addDays(8)->toDateString(),
-        'end_date'   => now()->addDays(38)->toDateString(),
+        'end_date' => now()->addDays(38)->toDateString(),
     ]);
 
-    $invoice  = buatInvoiceDP($schedule->id, 'sewa');
+    $invoice = buatInvoiceDP($schedule->id, 'sewa');
     $listener = app(TandaiDPTerbayarSetelahPembayaranDP::class);
     $listener->handle(buatEventVerifikasi($invoice->id, $schedule->id, 'sewa'));
 
@@ -109,29 +108,29 @@ test('[BERHASIL] AktifkanJadwalSetelahPelunasan mengaktifkan langsung jika start
     Event::fake([JadwalSewaAktif::class]);
 
     $schedule = Schedule::create([
-        'room_id'        => 3,
-        'type'           => ScheduleType::SEWA->value,
-        'status'         => ScheduleStatus::DP_TERBAYAR->value,
+        'room_id' => 3,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::DP_TERBAYAR->value,
         'payment_scheme' => SchedulePaymentScheme::DP->value,
-        'dp_amount'      => 500000,
-        'dp_paid_at'     => now()->subHour(),
-        'start_date'     => now()->subDay()->toDateString(), // kemarin → sudah tiba
-        'end_date'       => now()->addDays(30)->toDateString(),
-        'agreed_price'   => 1000000,
-        'tenant_name'    => 'Budi Santoso',
+        'dp_amount' => 500000,
+        'dp_paid_at' => now()->subHour(),
+        'start_date' => now()->subDay()->toDateString(), // kemarin → sudah tiba
+        'end_date' => now()->addDays(30)->toDateString(),
+        'agreed_price' => 1000000,
+        'tenant_name' => 'Budi Santoso',
     ]);
 
     $invoice = Invoice::create([
-        'schedule_id'    => $schedule->id,
-        'type'           => 'pelunasan',
-        'invoice_number' => 'PLN-TEST-' . $schedule->id,
-        'amount'         => 500000,
-        'status'         => InvoiceStatus::UNPAID->value,
-        'due_date'       => now()->toDateString(),
-        'tenant_name'    => 'Budi Santoso',
-        'room_number'    => 'A-01',
-        'period_start'   => now()->subDay()->toDateString(),
-        'period_end'     => now()->addDays(30)->toDateString(),
+        'schedule_id' => $schedule->id,
+        'type' => 'pelunasan',
+        'invoice_number' => 'PLN-TEST-'.$schedule->id,
+        'amount' => 500000,
+        'status' => InvoiceStatus::UNPAID->value,
+        'due_date' => now()->toDateString(),
+        'tenant_name' => 'Budi Santoso',
+        'room_number' => 'A-01',
+        'period_start' => now()->subDay()->toDateString(),
+        'period_end' => now()->addDays(30)->toDateString(),
     ]);
 
     $listener = app(AktifkanJadwalSetelahPelunasan::class);
@@ -146,29 +145,29 @@ test('[BERHASIL] AktifkanJadwalSetelahPelunasan mengkonfirmasi jika start_date b
     Event::fake([JadwalSewaAktif::class]);
 
     $schedule = Schedule::create([
-        'room_id'        => 30,
-        'type'           => ScheduleType::SEWA->value,
-        'status'         => ScheduleStatus::DP_TERBAYAR->value,
+        'room_id' => 30,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::DP_TERBAYAR->value,
         'payment_scheme' => SchedulePaymentScheme::DP->value,
-        'dp_amount'      => 500000,
-        'dp_paid_at'     => now()->subHour(),
-        'start_date'     => now()->addDays(5)->toDateString(), // masa depan
-        'end_date'       => now()->addDays(35)->toDateString(),
-        'agreed_price'   => 1000000,
-        'tenant_name'    => 'Budi Santoso',
+        'dp_amount' => 500000,
+        'dp_paid_at' => now()->subHour(),
+        'start_date' => now()->addDays(5)->toDateString(), // masa depan
+        'end_date' => now()->addDays(35)->toDateString(),
+        'agreed_price' => 1000000,
+        'tenant_name' => 'Budi Santoso',
     ]);
 
     $invoice = Invoice::create([
-        'schedule_id'    => $schedule->id,
-        'type'           => 'pelunasan',
-        'invoice_number' => 'PLN-TEST-FUTURE-' . $schedule->id,
-        'amount'         => 500000,
-        'status'         => InvoiceStatus::UNPAID->value,
-        'due_date'       => now()->addDays(5)->toDateString(),
-        'tenant_name'    => 'Budi Santoso',
-        'room_number'    => 'A-01',
-        'period_start'   => now()->addDays(5)->toDateString(),
-        'period_end'     => now()->addDays(35)->toDateString(),
+        'schedule_id' => $schedule->id,
+        'type' => 'pelunasan',
+        'invoice_number' => 'PLN-TEST-FUTURE-'.$schedule->id,
+        'amount' => 500000,
+        'status' => InvoiceStatus::UNPAID->value,
+        'due_date' => now()->addDays(5)->toDateString(),
+        'tenant_name' => 'Budi Santoso',
+        'room_number' => 'A-01',
+        'period_start' => now()->addDays(5)->toDateString(),
+        'period_end' => now()->addDays(35)->toDateString(),
     ]);
 
     $listener = app(AktifkanJadwalSetelahPelunasan::class);
@@ -183,15 +182,15 @@ test('[DIABAIKAN] AktifkanJadwalSetelahPembayaranDiverifikasi melewati invoice t
     Event::fake([JadwalSewaAktif::class]);
 
     $schedule = Schedule::create([
-        'room_id'        => 4,
-        'type'           => ScheduleType::SEWA->value,
-        'status'         => ScheduleStatus::PENDING->value,
+        'room_id' => 4,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::PENDING->value,
         'payment_scheme' => SchedulePaymentScheme::DP->value,
-        'start_date'     => now()->addDays(8)->toDateString(),
-        'end_date'       => now()->addDays(38)->toDateString(),
+        'start_date' => now()->addDays(8)->toDateString(),
+        'end_date' => now()->addDays(38)->toDateString(),
     ]);
 
-    $invoice  = buatInvoiceDP($schedule->id, 'dp');
+    $invoice = buatInvoiceDP($schedule->id, 'dp');
     $listener = app(AktifkanJadwalSetelahPembayaranDiverifikasi::class);
     $listener->handle(buatEventVerifikasi($invoice->id, $schedule->id, 'dp'));
 

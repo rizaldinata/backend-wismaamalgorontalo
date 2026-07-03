@@ -20,6 +20,8 @@ interface NotificationRepositoryInterface
     public function getSummary(): array;
 
     public function getRecipients(): Collection;
+
     public function markAllAsRead(): int;
+
     public function countUnread(): int;
 }

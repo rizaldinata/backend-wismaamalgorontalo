@@ -2,13 +2,13 @@
 
 namespace Modules\Finance\Http\Controllers;
 
+use App\Contracts\ConfigProviderInterface;
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Transformers\InvoiceResource;
-use App\Contracts\ConfigProviderInterface;
 
 class InvoiceController extends Controller
 {
@@ -23,6 +23,7 @@ class InvoiceController extends Controller
      * Daftar Semua Tagihan
      *
      * Mengambil daftar seluruh tagihan (Invoice) di sistem. (Hanya Admin)
+     *
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function index(Request $request)
@@ -47,6 +48,7 @@ class InvoiceController extends Controller
      * Detail Tagihan
      *
      * Melihat detail lengkap suatu tagihan beserta status pembayarannya. (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(int $id)
@@ -69,6 +71,7 @@ class InvoiceController extends Controller
      * Dapatkan Link Cetak Tagihan
      *
      * Membuat tautan sementara (sementara 2 jam) untuk mencetak/download PDF tagihan. (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function getPrintLink(int $id)
@@ -92,6 +95,7 @@ class InvoiceController extends Controller
      * Cetak PDF Tagihan
      *
      * Endpoint internal/web untuk mencetak invoice. Tidak ditujukan untuk konsumsi API JSON.
+     *
      * @unauthenticated
      */
     public function printPdf(int $id)

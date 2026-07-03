@@ -139,10 +139,10 @@ class InvoiceRepository implements InvoiceRepositoryInterface
                 ->value('net_revenue') ?? 0;
 
             $revenueData[] = [
-                'date_instance'        => clone $date,
-                'total'                => $total,
+                'date_instance' => clone $date,
+                'total' => $total,
                 'monthly_rent_revenue' => $total,
-                'daily_rent_revenue'   => 0.0,
+                'daily_rent_revenue' => 0.0,
             ];
         }
 

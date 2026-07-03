@@ -13,12 +13,12 @@ class FixedExpenseEntryFactory extends Factory
     public function definition(): array
     {
         return [
-            'jenis'       => fake()->randomElement(JenisPengeluaranTetap::cases())->value,
-            'bulan'       => fake()->numberBetween(1, 12),
-            'tahun'       => (int) now()->format('Y'),
-            'amount'      => fake()->randomFloat(2, 50000, 2000000),
-            'is_filled'   => true,
-            'notes'       => fake()->optional()->sentence(),
+            'jenis' => fake()->randomElement(JenisPengeluaranTetap::cases())->value,
+            'bulan' => fake()->numberBetween(1, 12),
+            'tahun' => (int) now()->format('Y'),
+            'amount' => fake()->randomFloat(2, 50000, 2000000),
+            'is_filled' => true,
+            'notes' => fake()->optional()->sentence(),
             'recorded_by' => null,
         ];
     }

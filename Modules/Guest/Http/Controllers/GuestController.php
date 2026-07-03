@@ -24,6 +24,7 @@ class GuestController extends Controller
      * Daftar Tamu Saya
      *
      * Mengambil daftar tamu yang didaftarkan oleh pengguna saat ini.
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function index()
@@ -43,6 +44,7 @@ class GuestController extends Controller
      * Tambah Tamu Baru
      *
      * Mendaftarkan tamu baru untuk pengguna saat ini.
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreGuestRequest $request)
@@ -62,6 +64,7 @@ class GuestController extends Controller
      * Hapus Data Tamu
      *
      * Menghapus data tamu berdasarkan ID milik pengguna saat ini.
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(int $id)
@@ -105,8 +108,10 @@ class GuestController extends Controller
             // Tapi pastikan user memiliki akses ke guest tersebut (resolveOwnedGuest)
             // Namun karena logic extendGuestStay hanya butuh guestId, mari tambahkan verifikasi ownership
             $guest = \Modules\Guest\Models\Guest::find($id);
-            if (!$guest) throw new NotFoundHttpException('Tamu tidak ditemukan.');
-            
+            if (! $guest) {
+                throw new NotFoundHttpException('Tamu tidak ditemukan.');
+            }
+
             $ownerId = $guest->user_id ?? $guest->lease?->resident?->user_id;
             if ($ownerId !== Auth::id()) {
                 throw new HttpException(403, 'Anda tidak memiliki akses ke data tamu ini.');

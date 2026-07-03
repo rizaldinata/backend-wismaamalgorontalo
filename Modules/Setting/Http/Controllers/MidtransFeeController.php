@@ -18,7 +18,7 @@ class MidtransFeeController extends Controller
 
     public function index(): JsonResponse
     {
-        $config  = $this->settingService->getMidtransFeeConfig();
+        $config = $this->settingService->getMidtransFeeConfig();
         $catalog = SettingService::midtransFeeCatalog();
 
         $fees = [];
@@ -28,7 +28,7 @@ class MidtransFeeController extends Controller
 
         return $this->apiSuccess([
             'bearer' => $config['bearer'],
-            'fees'   => $fees,
+            'fees' => $fees,
         ], 'Konfigurasi biaya transaksi Midtrans berhasil dimuat');
     }
 
@@ -36,7 +36,7 @@ class MidtransFeeController extends Controller
     {
         $this->settingService->setMidtransFeeConfig($request->validated());
 
-        $config  = $this->settingService->getMidtransFeeConfig();
+        $config = $this->settingService->getMidtransFeeConfig();
         $catalog = SettingService::midtransFeeCatalog();
 
         $fees = [];
@@ -46,7 +46,7 @@ class MidtransFeeController extends Controller
 
         return $this->apiSuccess([
             'bearer' => $config['bearer'],
-            'fees'   => $fees,
+            'fees' => $fees,
         ], 'Konfigurasi biaya transaksi Midtrans berhasil diperbarui');
     }
 }

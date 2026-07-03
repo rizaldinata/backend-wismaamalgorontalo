@@ -46,7 +46,7 @@ test('gagal memproses pembayaran jika invoice sudah lunas', function () {
 
 test('[GAGAL] processPayment menolak invoice yang sudah melewati batas waktu pembayaran', function () {
     $invoice = Invoice::factory()->create([
-        'status'             => InvoiceStatus::UNPAID,
+        'status' => InvoiceStatus::UNPAID,
         'payment_expires_at' => now()->subMinutes(1),
     ]);
     $service = app(FinanceService::class);

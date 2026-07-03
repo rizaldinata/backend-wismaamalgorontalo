@@ -45,7 +45,7 @@ class AktifkanJadwalSetelahPembayaranDiverifikasi
 
                 Log::info('Jadwal dikonfirmasi (start_date belum tiba) setelah pembayaran diverifikasi.', [
                     'schedule_id' => $event->scheduleId,
-                    'start_date'  => $schedule->start_date->toDateString(),
+                    'start_date' => $schedule->start_date->toDateString(),
                 ]);
             } else {
                 // Start date sudah tiba atau hari ini → aktifkan langsung
@@ -53,7 +53,7 @@ class AktifkanJadwalSetelahPembayaranDiverifikasi
 
                 Log::info('Jadwal diaktifkan setelah pembayaran diverifikasi.', [
                     'schedule_id' => $event->scheduleId,
-                    'payment_id'  => $event->paymentId,
+                    'payment_id' => $event->paymentId,
                 ]);
             }
 
@@ -66,8 +66,8 @@ class AktifkanJadwalSetelahPembayaranDiverifikasi
 
             Log::info('end_date jadwal diperbarui setelah pembayaran perpanjangan diverifikasi admin.', [
                 'schedule_id' => $event->scheduleId,
-                'invoice_id'  => $event->invoiceId,
-                'payment_id'  => $event->paymentId,
+                'invoice_id' => $event->invoiceId,
+                'payment_id' => $event->paymentId,
             ]);
         }
     }

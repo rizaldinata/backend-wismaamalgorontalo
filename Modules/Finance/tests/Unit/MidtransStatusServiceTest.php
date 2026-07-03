@@ -26,7 +26,7 @@ test('[BERHASIL] mengembalikan available true untuk semua metode jika API meresp
     ]);
 
     $service = new MidtransStatusService;
-    $result  = $service->getMethodsStatus(['qris', 'gopay']);
+    $result = $service->getMethodsStatus(['qris', 'gopay']);
 
     expect($result)->toHaveCount(2);
     expect($result[0])->toMatchArray(['code' => 'qris', 'maintenance' => false, 'available' => true]);
@@ -44,7 +44,7 @@ test('[BERHASIL] metode dengan status maintenance ditandai maintenance true dan 
     ]);
 
     $service = new MidtransStatusService;
-    $result  = collect($service->getMethodsStatus(['qris', 'bca_va']));
+    $result = collect($service->getMethodsStatus(['qris', 'bca_va']));
 
     $bca = $result->firstWhere('code', 'bca_va');
     expect($bca['maintenance'])->toBeTrue();
@@ -63,7 +63,7 @@ test('[BERHASIL] fail open dan semua metode tersedia ketika API Midtrans mengemb
     Http::fake(['*' => Http::response(null, 500)]);
 
     $service = new MidtransStatusService;
-    $result  = $service->getMethodsStatus(['qris', 'gopay', 'bca_va']);
+    $result = $service->getMethodsStatus(['qris', 'gopay', 'bca_va']);
 
     foreach ($result as $item) {
         expect($item['maintenance'])->toBeFalse();
@@ -75,7 +75,7 @@ test('[BERHASIL] fail open ketika koneksi ke Midtrans timeout', function () {
     Http::fake(['*' => fn () => throw new \Illuminate\Http\Client\ConnectionException('timeout')]);
 
     $service = new MidtransStatusService;
-    $result  = $service->getMethodsStatus(['qris']);
+    $result = $service->getMethodsStatus(['qris']);
 
     expect($result[0]['available'])->toBeTrue();
     expect($result[0]['maintenance'])->toBeFalse();
@@ -85,7 +85,7 @@ test('[BERHASIL] fail open ketika response tidak memiliki key payment_methods', 
     Http::fake(['*' => Http::response(['status' => 'ok'], 200)]);
 
     $service = new MidtransStatusService;
-    $result  = $service->getMethodsStatus(['gopay']);
+    $result = $service->getMethodsStatus(['gopay']);
 
     expect($result[0]['available'])->toBeTrue();
 });

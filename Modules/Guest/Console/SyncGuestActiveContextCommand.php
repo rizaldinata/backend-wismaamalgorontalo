@@ -3,8 +3,8 @@
 namespace Modules\Guest\Console;
 
 use Illuminate\Console\Command;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 
 class SyncGuestActiveContextCommand extends Command
 {

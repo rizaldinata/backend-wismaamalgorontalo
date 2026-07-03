@@ -21,8 +21,8 @@ class KirimNotifikasiDPDibayarTest extends TestCase
     {
         parent::setUp();
         $this->notificationService = $this->createMock(NotificationService::class);
-        $this->settingService      = $this->createMock(SettingService::class);
-        $this->listener            = new KirimNotifikasiDPDibayar(
+        $this->settingService = $this->createMock(SettingService::class);
+        $this->listener = new KirimNotifikasiDPDibayar(
             $this->notificationService,
             $this->settingService,
         );
@@ -31,17 +31,17 @@ class KirimNotifikasiDPDibayarTest extends TestCase
     private function buatEvent(string $tenantPhone = '08123456789'): DPDibayar
     {
         return new DPDibayar(
-            scheduleId:         1,
-            roomNumber:         '101',
-            tenantName:         'Budi Santoso',
-            tenantPhone:        $tenantPhone,
-            dpAmount:           500000.0,
-            pelunasanAmount:    1000000.0,
-            startDate:          '01 Jan 2025',
-            endDate:            '01 Jun 2025',
+            scheduleId: 1,
+            roomNumber: '101',
+            tenantName: 'Budi Santoso',
+            tenantPhone: $tenantPhone,
+            dpAmount: 500000.0,
+            pelunasanAmount: 1000000.0,
+            startDate: '01 Jan 2025',
+            endDate: '01 Jun 2025',
             roomNumberSnapshot: '101',
-            periodStart:        '2025-01-01',
-            periodEnd:          '2025-06-01',
+            periodStart: '2025-01-01',
+            periodEnd: '2025-06-01',
         );
     }
 

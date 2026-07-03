@@ -31,7 +31,7 @@ class AktifkanJadwalSetelahPembayaranDiterima
         } catch (\Throwable) {
             Log::warning('AktifkanJadwalSetelahPembayaranDiterima: schedule tidak ditemukan.', [
                 'schedule_id' => $event->scheduleId,
-                'payment_id'  => $event->paymentId,
+                'payment_id' => $event->paymentId,
             ]);
 
             return;
@@ -45,7 +45,7 @@ class AktifkanJadwalSetelahPembayaranDiterima
 
                 Log::info('Jadwal dikonfirmasi (start_date belum tiba) setelah pembayaran Midtrans diterima.', [
                     'schedule_id' => $event->scheduleId,
-                    'start_date'  => $schedule->start_date->toDateString(),
+                    'start_date' => $schedule->start_date->toDateString(),
                 ]);
             } else {
                 // Start date sudah tiba atau hari ini → aktifkan langsung
@@ -53,7 +53,7 @@ class AktifkanJadwalSetelahPembayaranDiterima
 
                 Log::info('Jadwal diaktifkan setelah pembayaran Midtrans diterima.', [
                     'schedule_id' => $event->scheduleId,
-                    'payment_id'  => $event->paymentId,
+                    'payment_id' => $event->paymentId,
                 ]);
             }
 
@@ -66,8 +66,8 @@ class AktifkanJadwalSetelahPembayaranDiterima
 
             Log::info('end_date jadwal diperbarui setelah pembayaran perpanjangan Midtrans diterima.', [
                 'schedule_id' => $event->scheduleId,
-                'invoice_id'  => $event->invoiceId,
-                'payment_id'  => $event->paymentId,
+                'invoice_id' => $event->invoiceId,
+                'payment_id' => $event->paymentId,
             ]);
         }
     }

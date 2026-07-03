@@ -22,15 +22,15 @@ class FineService
 
     public function buatDenda(array $data): Fine
     {
-        $user  = User::with('profile')->findOrFail($data['tenant_user_id']);
+        $user = User::with('profile')->findOrFail($data['tenant_user_id']);
         $phone = $user->profile?->phone_number;
 
         $fine = $this->fineRepository->create([
             'tenant_user_id' => $user->id,
-            'schedule_id'    => $data['schedule_id'] ?? null,
-            'amount'         => $data['amount'],
-            'reason'         => $data['reason'],
-            'status'         => FineStatus::UNPAID->value,
+            'schedule_id' => $data['schedule_id'] ?? null,
+            'amount' => $data['amount'],
+            'reason' => $data['reason'],
+            'status' => FineStatus::UNPAID->value,
         ]);
 
         if ($phone) {
@@ -59,7 +59,7 @@ class FineService
         }
 
         return $this->fineRepository->update($fine, [
-            'status'       => FineStatus::WAIVED->value,
+            'status' => FineStatus::WAIVED->value,
             'waive_reason' => $waiveReason,
         ]);
     }
@@ -110,26 +110,26 @@ class FineService
             }
 
             // Ambil nama & nomor HP dari relasi user untuk snapshot invoice
-            $user  = User::with('profile')->findOrFail($userId);
+            $user = User::with('profile')->findOrFail($userId);
             $phone = $user->profile?->phone_number;
 
-            $totalAmount   = $fines->sum('amount');
-            $suffix        = strtoupper(substr(md5(uniqid()), 0, 6));
-            $invoiceNumber = 'FINE-' . date('Ymd') . '-' . str_pad($userId, 4, '0', STR_PAD_LEFT) . '-' . $suffix;
+            $totalAmount = $fines->sum('amount');
+            $suffix = strtoupper(substr(md5(uniqid()), 0, 6));
+            $invoiceNumber = 'FINE-'.date('Ymd').'-'.str_pad($userId, 4, '0', STR_PAD_LEFT).'-'.$suffix;
 
             $invoice = $this->invoiceRepository->create([
-                'type'           => 'fine',
+                'type' => 'fine',
                 'invoice_number' => $invoiceNumber,
-                'amount'         => $totalAmount,
-                'status'         => InvoiceStatus::UNPAID->value,
-                'due_date'       => now()->toDateString(),
+                'amount' => $totalAmount,
+                'status' => InvoiceStatus::UNPAID->value,
+                'due_date' => now()->toDateString(),
                 'tenant_user_id' => $userId,
-                'tenant_name'    => $user->name,
-                'tenant_phone'   => $phone,
+                'tenant_name' => $user->name,
+                'tenant_phone' => $phone,
             ]);
 
             $pivotRows = $fines->map(fn ($fine) => [
-                'fine_id'    => $fine->id,
+                'fine_id' => $fine->id,
                 'invoice_id' => $invoice->id,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -154,9 +154,8 @@ class FineService
         Fine::whereIn('id', $fineIds)
             ->where('status', FineStatus::UNPAID->value)
             ->update([
-                'status'  => FineStatus::PAID->value,
+                'status' => FineStatus::PAID->value,
                 'paid_at' => now(),
             ]);
     }
-
 }

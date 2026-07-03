@@ -31,8 +31,8 @@ class BatalkanJadwalSetelahPembayaranGagal
             $schedule = $this->scheduleRepository->findById($event->scheduleId);
         } catch (\Throwable) {
             Log::warning('BatalkanJadwalSetelahPembayaranGagal: schedule tidak ditemukan.', [
-                'schedule_id'    => $event->scheduleId,
-                'payment_id'     => $event->paymentId,
+                'schedule_id' => $event->scheduleId,
+                'payment_id' => $event->paymentId,
                 'payment_status' => $event->paymentStatus,
             ]);
 
@@ -49,8 +49,8 @@ class BatalkanJadwalSetelahPembayaranGagal
         // Kamar baru boleh jadi AVAILABLE jika tidak ada sewa aktif sama sekali.
         if ($schedule->status === ScheduleStatus::ACTIVE) {
             Log::info('Pembayaran gagal/direfund pada jadwal aktif. Jadwal tetap aktif, kamar tetap terisi.', [
-                'schedule_id'    => $event->scheduleId,
-                'invoice_id'     => $event->invoiceId,
+                'schedule_id' => $event->scheduleId,
+                'invoice_id' => $event->invoiceId,
                 'payment_status' => $event->paymentStatus,
             ]);
 
@@ -61,8 +61,8 @@ class BatalkanJadwalSetelahPembayaranGagal
         if ($schedule->status === ScheduleStatus::DP_TERBAYAR) {
             if ($event->invoiceType === 'pelunasan') {
                 Log::info('Pembayaran pelunasan gagal. Jadwal tetap dp_terbayar.', [
-                    'schedule_id'    => $event->scheduleId,
-                    'invoice_id'     => $event->invoiceId,
+                    'schedule_id' => $event->scheduleId,
+                    'invoice_id' => $event->invoiceId,
                     'payment_status' => $event->paymentStatus,
                 ]);
 
@@ -73,8 +73,8 @@ class BatalkanJadwalSetelahPembayaranGagal
         $this->scheduleService->batalkanJadwal($schedule->id);
 
         Log::info('Jadwal dibatalkan setelah pembayaran gagal/direfund.', [
-            'schedule_id'    => $event->scheduleId,
-            'payment_id'     => $event->paymentId,
+            'schedule_id' => $event->scheduleId,
+            'payment_id' => $event->paymentId,
             'payment_status' => $event->paymentStatus,
         ]);
     }

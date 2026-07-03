@@ -24,6 +24,7 @@ class ScheduleController extends Controller
      * Daftar Jadwal Maintenance
      *
      * Mengambil daftar seluruh jadwal perbaikan fasilitas. (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function index()
@@ -39,6 +40,7 @@ class ScheduleController extends Controller
      * Tambah Jadwal Maintenance
      *
      * Membuat jadwal perbaikan fasilitas baru. (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreScheduleRequest $request)
@@ -52,6 +54,7 @@ class ScheduleController extends Controller
      * Detail Jadwal Maintenance
      *
      * Mengambil detail jadwal perbaikan beserta update progress-nya. (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(int $id)
@@ -65,6 +68,7 @@ class ScheduleController extends Controller
      * Edit Jadwal Maintenance
      *
      * Mengubah data jadwal perbaikan (contoh: status, tanggal, dll). (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateScheduleRequest $request, int $id)
@@ -78,6 +82,7 @@ class ScheduleController extends Controller
      * Hapus Jadwal Maintenance
      *
      * Menghapus secara permanen jadwal perbaikan. (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(int $id)
@@ -91,6 +96,7 @@ class ScheduleController extends Controller
      * Tambah Update Progress
      *
      * Menambahkan log/update terkait progress perbaikan (contoh: "Tukang sudah datang"). (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function storeUpdate(StoreScheduleUpdate $request, int $id)

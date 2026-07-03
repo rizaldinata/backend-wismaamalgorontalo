@@ -18,10 +18,10 @@ beforeEach(function () {
 
 test('[BERHASIL] index mengembalikan paginated logs dengan success true', function () {
     NotificationLog::factory()->count(3)->create([
-        'type'         => 'manual_broadcast',
+        'type' => 'manual_broadcast',
         'target_phone' => '08123456789',
         'message_body' => 'Pesan test',
-        'status'       => 'sent',
+        'status' => 'sent',
     ]);
 
     $response = $this->actingAs($this->user)
@@ -78,8 +78,8 @@ test('[BERHASIL] summary mengembalikan data ringkasan', function () {
 
 test('[BERHASIL] resend mengembalikan apiSuccess saat provider berhasil', function () {
     $log = NotificationLog::factory()->create([
-        'status'       => 'failed',
-        'type'         => 'manual_broadcast',
+        'status' => 'failed',
+        'type' => 'manual_broadcast',
         'target_phone' => '08123',
         'message_body' => 'test',
     ]);
@@ -97,8 +97,8 @@ test('[BERHASIL] resend mengembalikan apiSuccess saat provider berhasil', functi
 
 test('[GAGAL] resend mengembalikan 403 jika status sudah sent', function () {
     $log = NotificationLog::factory()->create([
-        'status'       => 'sent',
-        'type'         => 'manual_broadcast',
+        'status' => 'sent',
+        'type' => 'manual_broadcast',
         'target_phone' => '08123',
         'message_body' => 'test',
     ]);

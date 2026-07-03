@@ -26,13 +26,12 @@ class FineController extends Controller
      * Daftar Denda
      *
      * Mengambil daftar semua denda (fines) yang dibebankan kepada penghuni. (Hanya Admin)
-     * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
         $perPage = (int) $request->query('per_page', 15);
         $filters = array_filter([
-            'status'         => $request->query('status'),
+            'status' => $request->query('status'),
             'tenant_user_id' => $request->query('tenant_user_id'),
         ]);
 
@@ -47,7 +46,6 @@ class FineController extends Controller
      * Buat Denda Baru
      *
      * Menambahkan denda baru untuk penghuni tertentu. (Hanya Admin)
-     * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreFineRequest $request): JsonResponse
     {
@@ -60,7 +58,6 @@ class FineController extends Controller
      * Detail Denda
      *
      * Melihat detail lengkap sebuah denda. (Hanya Admin)
-     * @return \Illuminate\Http\JsonResponse
      */
     public function show(int $id): JsonResponse
     {
@@ -77,7 +74,6 @@ class FineController extends Controller
      * Maafkan Denda (Waive)
      *
      * Menghapus kewajiban bayar denda dengan alasan tertentu (waive). (Hanya Admin)
-     * @return \Illuminate\Http\JsonResponse
      */
     public function waive(WaiveFineRequest $request, int $id): JsonResponse
     {
@@ -90,7 +86,6 @@ class FineController extends Controller
      * Batalkan Denda
      *
      * Membatalkan denda yang salah kirim/input. (Hanya Admin)
-     * @return \Illuminate\Http\JsonResponse
      */
     public function cancel(int $id): JsonResponse
     {
@@ -103,22 +98,15 @@ class FineController extends Controller
      * Calon Penerima Denda
      *
      * Mendapatkan daftar user/penghuni yang valid untuk diberikan denda. (Hanya Admin)
-     * @return \Illuminate\Http\JsonResponse
      */
     public function eligibleUsers(): JsonResponse
     {
         $users = DB::table('users')
             ->join('model_has_roles', function ($join) {
                 $join->on('users.id', '=', 'model_has_roles.model_id')
-                     ->where('model_has_roles.model_type', 'Modules\Auth\Models\User');
+                    ->where('model_has_roles.model_type', 'Modules\Auth\Models\User');
             })
             ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-            ->leftJoin('room_schedules', function ($join) {
-                $join->on('users.id', '=', 'room_schedules.tenant_user_id')
-                     ->where('room_schedules.status', 'active')
-                     ->where('room_schedules.type', 'sewa');
-            })
-            ->leftJoin('rooms', 'room_schedules.room_id', '=', 'rooms.id')
             ->leftJoin('user_profiles', 'users.id', '=', 'user_profiles.user_id')
             ->whereIn('roles.name', ['member', 'resident'])
             ->where('roles.guard_name', 'api')
@@ -128,13 +116,30 @@ class FineController extends Controller
                 'users.email',
                 'user_profiles.phone_number',
                 'roles.name as role',
-                'rooms.number as active_room_number',
-                'rooms.title as active_room_title',
-                DB::raw("DATE_FORMAT(room_schedules.end_date, '%Y-%m-%d') as schedule_end_date"),
             ])
             ->orderByRaw("FIELD(roles.name, 'resident', 'member')")
             ->orderBy('users.name')
             ->get();
+
+        if (\App\Support\ModuleGate::isActive('Schedule')) {
+            $schedules = \Modules\Schedule\Services\ScheduleService::getActiveSewaByTenantUserIds($users->pluck('id')->toArray());
+            $users->transform(function ($user) use ($schedules) {
+                $schedule = $schedules[$user->id] ?? null;
+                $user->active_room_number = $schedule['room']['number'] ?? null;
+                $user->active_room_title = $schedule['room']['title'] ?? null;
+                $user->schedule_end_date = isset($schedule['end_date']) ? substr($schedule['end_date'], 0, 10) : null;
+
+                return $user;
+            });
+        } else {
+            $users->transform(function ($user) {
+                $user->active_room_number = null;
+                $user->active_room_title = null;
+                $user->schedule_end_date = null;
+
+                return $user;
+            });
+        }
 
         return $this->apiSuccess($users, 'Daftar pengguna eligible berhasil dimuat.');
     }

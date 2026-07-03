@@ -81,11 +81,11 @@ test('[BERHASIL] aktifkanJadwal berhasil dari status terkonfirmasi', function ()
     Event::fake([JadwalSewaAktif::class]);
 
     $schedule = Schedule::create([
-        'room_id'    => 1,
-        'type'       => ScheduleType::SEWA->value,
-        'status'     => ScheduleStatus::TERKONFIRMASI->value,
+        'room_id' => 1,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::TERKONFIRMASI->value,
         'start_date' => now()->toDateString(),
-        'end_date'   => now()->addDays(30)->toDateString(),
+        'end_date' => now()->addDays(30)->toDateString(),
     ]);
 
     $service = app(ScheduleService::class);
@@ -100,11 +100,11 @@ test('[BERHASIL] konfirmasiJadwal mengubah status pending ke terkonfirmasi', fun
     Event::fake([JadwalSewaAktif::class]);
 
     $schedule = Schedule::create([
-        'room_id'    => 2,
-        'type'       => ScheduleType::SEWA->value,
-        'status'     => ScheduleStatus::PENDING->value,
+        'room_id' => 2,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::PENDING->value,
         'start_date' => now()->addDays(10)->toDateString(),
-        'end_date'   => now()->addDays(40)->toDateString(),
+        'end_date' => now()->addDays(40)->toDateString(),
     ]);
 
     $service = app(ScheduleService::class);
@@ -116,11 +116,11 @@ test('[BERHASIL] konfirmasiJadwal mengubah status pending ke terkonfirmasi', fun
 
 test('[BERHASIL] konfirmasiJadwal mengubah status dp_terbayar ke terkonfirmasi', function () {
     $schedule = Schedule::create([
-        'room_id'        => 3,
-        'type'           => ScheduleType::SEWA->value,
-        'status'         => ScheduleStatus::DP_TERBAYAR->value,
-        'start_date'     => now()->addDays(10)->toDateString(),
-        'end_date'       => now()->addDays(40)->toDateString(),
+        'room_id' => 3,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::DP_TERBAYAR->value,
+        'start_date' => now()->addDays(10)->toDateString(),
+        'end_date' => now()->addDays(40)->toDateString(),
     ]);
 
     $service = app(ScheduleService::class);
@@ -131,11 +131,11 @@ test('[BERHASIL] konfirmasiJadwal mengubah status dp_terbayar ke terkonfirmasi',
 
 test('[GAGAL] konfirmasiJadwal gagal jika status sudah active', function () {
     $schedule = Schedule::create([
-        'room_id'    => 4,
-        'type'       => ScheduleType::SEWA->value,
-        'status'     => ScheduleStatus::ACTIVE->value,
+        'room_id' => 4,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::ACTIVE->value,
         'start_date' => '2026-06-01',
-        'end_date'   => '2026-07-01',
+        'end_date' => '2026-07-01',
     ]);
 
     $service = app(ScheduleService::class);
@@ -290,11 +290,11 @@ test('[GAGAL] buatJadwal ditolak jika profil ada tapi field wajib tidak lengkap'
 
     $user = User::factory()->create();
     UserProfile::create([
-        'user_id'        => $user->id,
+        'user_id' => $user->id,
         'id_card_number' => '',
-        'phone_number'   => '08123456789',
-        'gender'         => 'male',
-        'address_ktp'    => 'Jl. Contoh',
+        'phone_number' => '08123456789',
+        'gender' => 'male',
+        'address_ktp' => 'Jl. Contoh',
     ]);
     $service = app(ScheduleService::class);
 
@@ -314,11 +314,11 @@ test('[BERHASIL] buatJadwal berhasil jika tenant_user_id ada dan profil lengkap'
 
     $user = User::factory()->create();
     UserProfile::create([
-        'user_id'        => $user->id,
+        'user_id' => $user->id,
         'id_card_number' => '1234567890123456',
-        'phone_number'   => '08123456789',
-        'gender'         => 'male',
-        'address_ktp'    => 'Jl. Contoh No. 1, Gorontalo',
+        'phone_number' => '08123456789',
+        'gender' => 'male',
+        'address_ktp' => 'Jl. Contoh No. 1, Gorontalo',
     ]);
     $service = app(ScheduleService::class);
 
@@ -342,11 +342,11 @@ test('[BERHASIL] buatJadwal mengisi tenant_phone dari profil jika tidak dikirim'
 
     $user = User::factory()->create();
     UserProfile::create([
-        'user_id'        => $user->id,
+        'user_id' => $user->id,
         'id_card_number' => '1234567890123456',
-        'phone_number'   => '08199999999',
-        'gender'         => 'male',
-        'address_ktp'    => 'Jl. Contoh No. 1, Gorontalo',
+        'phone_number' => '08199999999',
+        'gender' => 'male',
+        'address_ktp' => 'Jl. Contoh No. 1, Gorontalo',
     ]);
     $service = app(ScheduleService::class);
 
@@ -396,7 +396,7 @@ test('[STATIC] getById mengembalikan array data dengan relasi room jika ditemuka
     ]);
 
     $data = ScheduleService::getById($schedule->id);
-    
+
     expect($data)->toBeArray();
     expect($data['id'])->toBe($schedule->id);
     expect($data['room']['number'])->toBe('101');
@@ -439,7 +439,7 @@ test('[STATIC] getActiveByTenantUserId mengembalikan jadwal aktif tenant beserta
     ]);
 
     $data = ScheduleService::getActiveByTenantUserId(123);
-    
+
     expect($data)->toBeArray();
     expect($data['id'])->toBe($schedule->id);
     expect($data['room']['number'])->toBe('102');

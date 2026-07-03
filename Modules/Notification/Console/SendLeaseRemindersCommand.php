@@ -18,6 +18,7 @@ class SendLeaseRemindersCommand extends Command
     {
         if (! $settingService->isFeatureEnabled('notif_due_reminder')) {
             $this->info('Fitur pengingat jatuh tempo dinonaktifkan. Command dibatalkan.');
+
             return Command::SUCCESS;
         }
 

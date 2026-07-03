@@ -11,6 +11,7 @@ interface DamageReportRepositoryInterface
     public function getByUserId(int $userId);
 
     public function getAll();
+
     public function getPaginated(int $perPage = 10);
 
     public function findById(int $id);

@@ -8,6 +8,7 @@ use Modules\Inventory\Models\Inventory;
 interface InventoryRepositoryInterface
 {
     public function getAll(): Collection;
+
     public function getPaginated(int $perPage = 10);
 
     public function findById(int $id): ?Inventory;

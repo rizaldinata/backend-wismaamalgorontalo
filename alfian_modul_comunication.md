@@ -29,9 +29,21 @@ sequenceDiagram
 ```
 
 **Kenapa boleh langsung?** 
-Membaca data (*Read*) tidak mengubah stat (*State*) aplikasi, sehingga aman memanggil *Model/Repository* dari modul lain secara langsung. Ini membuat *query* sangat efisien (bisa memanfaatkan `JOIN` atau *Eager Loading* di level database).
+Membaca data (*Read*) tidak mengubah stat (*State*) aplikasi. Namun, **demi menjaga batas antar modul (Module Boundaries)**, pemanggilan data lintas modul (kecuali modul dasar seperti `Auth` atau `Setting`) **TIDAK BOLEH** menggunakan `belongsTo` atau memanggil Model secara langsung.
 
----
+Alih-alih, gunakan **Direct Service Access** dengan bantuan `ModuleGate`.
+
+**Contoh yang Benar:**
+```php
+// Di dalam DashboardController
+if (ModuleGate::isActive('Finance')) {
+    $monthlyIncome = \Modules\Finance\Services\FinanceService::getMonthlyIncome();
+}
+```
+
+Pola ini memastikan:
+1. Tidak ada ketergantungan relasional Eloquent (`hasMany`/`belongsTo`) antar modul bisnis.
+2. Jika modul dimatikan, sistem tidak akan mengalami 500 Server Error (karena dilindungi oleh `ModuleGate::isActive()`).
 
 ## 2. Komunikasi Berbasis Event / *Event-Driven* (Untuk ADD/UPDATE/DELETE Data)
 Saat sebuah modul **menambah atau mengubah data (Write)** dan perubahan tersebut memiliki efek samping ke modul lain, komunikasi **TIDAK BOLEH** dilakukan secara langsung (memanggil *Controller/Service* modul lain). Hal ini agar jika modul tujuan dimatikan, modul asal tidak mengalami *error* atau *crash*.
@@ -78,5 +90,5 @@ sequenceDiagram
 
 ## Kesimpulan Aturan Emas (Golden Rule)
 Di *backend* Anda, tim pengembang menerapkan aturan:
-- **Butuh Baca Data Tetangga?** $\rightarrow$ *Direct Call* (Gunakan Model/Relasi `belongsTo`).
-- **Butuh Mengubah/Menambah Data Tetangga?** $\rightarrow$ *Event-Driven* (Buat *Event* di modul sumber, buat *Listener* di modul target).
+- **Butuh Baca Data Tetangga? (GET)** $\rightarrow$ **Direct Service Access** (Panggil `Service::metodeStatis()` dibungkus dengan `ModuleGate::isActive()`). *Dilarang menggunakan `belongsTo`/`hasMany` lintas modul (kecuali ke modul `Auth`).*
+- **Butuh Mengubah/Menambah Data Tetangga? (WRITE)** $\rightarrow$ **Event-Driven** (Buat *Event* di modul sumber, buat *Listener* di modul target).

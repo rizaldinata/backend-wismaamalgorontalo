@@ -90,7 +90,7 @@ test('[BERHASIL] admin dapat mengaktifkan fitur Midtrans pembayaran', function (
         ->assertJsonFragment(['message' => 'Seluruh konfigurasi internal berhasil diperbarui!']);
 
     $this->assertDatabaseHas('app_settings', [
-        'key'   => 'feature_payment_midtrans',
+        'key' => 'feature_payment_midtrans',
         'value' => 'true',
     ]);
 });
@@ -108,7 +108,7 @@ test('[BERHASIL] admin dapat menonaktifkan fitur sewa harian', function () {
         ->assertJsonPath('data.feature_daily_rental', false);
 
     $this->assertDatabaseHas('app_settings', [
-        'key'   => 'feature_daily_rental',
+        'key' => 'feature_daily_rental',
         'value' => 'false',
     ]);
 });
@@ -116,10 +116,10 @@ test('[BERHASIL] admin dapat menonaktifkan fitur sewa harian', function () {
 test('[BERHASIL] admin dapat update beberapa setting keuangan sekaligus', function () {
     $response = $this->postJson('/api/v1/settings/update-bulk', [
         'settings' => [
-            'feature_payment_midtrans'   => true,
-            'feature_whatsapp_receipt'   => true,
-            'feature_whatsapp_pdf_link'  => false,
-            'feature_daily_rental'       => false,
+            'feature_payment_midtrans' => true,
+            'feature_whatsapp_receipt' => true,
+            'feature_whatsapp_pdf_link' => false,
+            'feature_daily_rental' => false,
         ],
     ]);
 
@@ -139,7 +139,7 @@ test('[BERHASIL] update-bulk hanya membuat satu record per key meskipun diupdate
 
     expect(AppSetting::where('key', 'feature_payment_midtrans')->count())->toBe(1);
     $this->assertDatabaseHas('app_settings', [
-        'key'   => 'feature_payment_midtrans',
+        'key' => 'feature_payment_midtrans',
         'value' => 'false',
     ]);
 });

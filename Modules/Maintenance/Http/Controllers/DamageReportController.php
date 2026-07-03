@@ -21,6 +21,7 @@ class DamageReportController extends Controller
      * Laporan Kerusakan Saya
      *
      * Melihat riwayat laporan kerusakan (maintenance) milik pengguna saat ini.
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function myReports()
@@ -34,6 +35,7 @@ class DamageReportController extends Controller
      * Buat Laporan Kerusakan
      *
      * Membuat laporan kerusakan baru (sebagai penghuni).
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreMaintenanceRequest $request)
@@ -50,6 +52,7 @@ class DamageReportController extends Controller
      * Detail Laporan Kerusakan
      *
      * Melihat detail dari sebuah laporan kerusakan beserta progress pekerjaannya.
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function show($id)

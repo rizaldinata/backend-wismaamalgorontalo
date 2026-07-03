@@ -22,12 +22,11 @@ class PaymentMethodController extends Controller
      * Daftar Metode Pembayaran (Midtrans)
      *
      * Mengambil daftar metode pembayaran yang sedang aktif beserta status maintenance-nya dari Midtrans.
-     * @return JsonResponse
      */
     public function index(): JsonResponse
     {
-        $catalog  = SettingService::midtransMethodCatalog();
-        $enabled  = $this->settingService->getEnabledMidtransPaymentMethods();
+        $catalog = SettingService::midtransMethodCatalog();
+        $enabled = $this->settingService->getEnabledMidtransPaymentMethods();
 
         // Hanya metode yang aktif di setting yang diproses
         $activeCodes = array_filter(array_keys($catalog), fn ($code) => in_array($code, $enabled, true));
@@ -39,9 +38,9 @@ class PaymentMethodController extends Controller
         $statusList = $this->statusService->getMethodsStatus(array_values($activeCodes));
 
         $data = array_map(fn (array $status) => [
-            'code'        => $status['code'],
-            'label'       => $catalog[$status['code']] ?? $status['code'],
-            'available'   => $status['available'],
+            'code' => $status['code'],
+            'label' => $catalog[$status['code']] ?? $status['code'],
+            'available' => $status['available'],
             'maintenance' => $status['maintenance'],
         ], $statusList);
 

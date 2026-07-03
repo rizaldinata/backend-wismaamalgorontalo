@@ -31,12 +31,12 @@ class Invoice extends Model
     ];
 
     protected $casts = [
-        'due_date'           => 'date',
+        'due_date' => 'date',
         'payment_expires_at' => 'datetime',
-        'period_start'       => 'date',
-        'period_end'         => 'date',
-        'status'             => InvoiceStatus::class,
-        'type'               => InvoiceType::class,
+        'period_start' => 'date',
+        'period_end' => 'date',
+        'status' => InvoiceStatus::class,
+        'type' => InvoiceType::class,
     ];
 
     public function payments()
@@ -44,10 +44,7 @@ class Invoice extends Model
         return $this->hasMany(Payment::class);
     }
 
-    public function schedule()
-    {
-        return $this->belongsTo(Schedule::class);
-    }
+    // Relasi schedule() telah dihapus untuk mematuhi arsitektur Direct Service Access
 
     public function fines()
     {

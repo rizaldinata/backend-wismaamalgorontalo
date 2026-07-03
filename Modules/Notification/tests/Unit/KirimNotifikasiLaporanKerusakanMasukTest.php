@@ -21,8 +21,8 @@ class KirimNotifikasiLaporanKerusakanMasukTest extends TestCase
     {
         parent::setUp();
         $this->notificationService = $this->createMock(NotificationService::class);
-        $this->settingService      = $this->createMock(SettingService::class);
-        $this->listener            = new KirimNotifikasiLaporanKerusakanMasuk(
+        $this->settingService = $this->createMock(SettingService::class);
+        $this->listener = new KirimNotifikasiLaporanKerusakanMasuk(
             $this->notificationService,
             $this->settingService,
         );
@@ -31,12 +31,12 @@ class KirimNotifikasiLaporanKerusakanMasukTest extends TestCase
     private function buatEvent(string $reporterPhone = '08123456789', ?string $roomNumber = '101'): LaporanKerusakanMasuk
     {
         return new LaporanKerusakanMasuk(
-            reportId:      1,
-            reporterName:  'Budi Santoso',
+            reportId: 1,
+            reporterName: 'Budi Santoso',
             reporterPhone: $reporterPhone,
-            description:   'AC tidak dingin',
-            roomId:        $roomNumber ? 1 : null,
-            roomNumber:    $roomNumber,
+            description: 'AC tidak dingin',
+            roomId: $roomNumber ? 1 : null,
+            roomNumber: $roomNumber,
         );
     }
 
@@ -124,7 +124,7 @@ class KirimNotifikasiLaporanKerusakanMasukTest extends TestCase
         $this->listener->handle($event);
     }
 
-    public function test_pesan_tanpa_info_kamar_jika_roomNumber_null(): void
+    public function test_pesan_tanpa_info_kamar_jika_room_number_null(): void
     {
         $event = $this->buatEvent(roomNumber: null);
 

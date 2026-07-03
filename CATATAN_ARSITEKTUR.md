@@ -75,7 +75,7 @@ MODUL BISNIS (opsional, bisa ON/OFF per klien)
 | `Rental` | **Diubah jadi Inti Jadwal** | Lease IS jadwal, bukan modul terpisah |
 | `Finance` | Tetap, jadi Modul Bisnis | Cara komunikasi diubah (pakai event) |
 | `Maintenance` | Tetap, jadi Modul Bisnis | Cara komunikasi diubah (pakai event) |
-| `Guest` | Tetap, jadi Modul Bisnis | Cara komunikasi diubah (pakai event) |
+| `Guest` | Tetap, jadi Modul Bisnis | Sedikit penyesuaian |
 | `Inventory` | Tetap, jadi Modul Bisnis | Sedikit penyesuaian |
 | `Notification` | Tetap, jadi Modul Bisnis | Mendengarkan semua event |
 

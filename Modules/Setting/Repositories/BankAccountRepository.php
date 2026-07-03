@@ -2,9 +2,9 @@
 
 namespace Modules\Setting\Repositories;
 
+use Illuminate\Database\Eloquent\Collection;
 use Modules\Setting\Models\BankAccount;
 use Modules\Setting\Repositories\Contracts\BankAccountRepositoryInterface;
-use Illuminate\Database\Eloquent\Collection;
 
 class BankAccountRepository implements BankAccountRepositoryInterface
 {

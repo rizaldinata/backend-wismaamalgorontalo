@@ -11,12 +11,12 @@ function makeFeeConfig(string $bearer = 'merchant', array $overrides = []): arra
 {
     $fees = array_merge([
         'bank_transfer' => ['type' => 'flat',    'amount' => 4000],
-        'gopay'         => ['type' => 'percent', 'rate'   => 2.0],
-        'qris'          => ['type' => 'percent', 'rate'   => 0.7],
-        'shopeepay'     => ['type' => 'percent', 'rate'   => 2.0],
-        'dana'          => ['type' => 'percent', 'rate'   => 1.5],
-        'ovo'           => ['type' => 'percent', 'rate'   => 1.5],
-        'linkaja'       => ['type' => 'percent', 'rate'   => 1.5],
+        'gopay' => ['type' => 'percent', 'rate' => 2.0],
+        'qris' => ['type' => 'percent', 'rate' => 0.7],
+        'shopeepay' => ['type' => 'percent', 'rate' => 2.0],
+        'dana' => ['type' => 'percent', 'rate' => 1.5],
+        'ovo' => ['type' => 'percent', 'rate' => 1.5],
+        'linkaja' => ['type' => 'percent', 'rate' => 1.5],
     ], $overrides);
 
     return ['bearer' => $bearer, 'fees' => $fees];

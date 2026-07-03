@@ -33,8 +33,8 @@ class GenerateFixedExpenses extends Command
             $this->info("Berhasil membuat {$jumlah} entri pengeluaran tetap untuk {$targetBulan}/{$targetTahun}.");
 
             Log::info('GenerateFixedExpenses: selesai.', [
-                'bulan'        => $targetBulan,
-                'tahun'        => $targetTahun,
+                'bulan' => $targetBulan,
+                'tahun' => $targetTahun,
                 'jumlah_dibuat' => $jumlah,
             ]);
         } catch (\Throwable $e) {

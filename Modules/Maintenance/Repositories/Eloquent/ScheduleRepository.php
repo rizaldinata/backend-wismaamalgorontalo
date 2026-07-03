@@ -2,8 +2,8 @@
 
 namespace Modules\Maintenance\Repositories\Eloquent;
 
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Modules\Maintenance\Models\MaintenanceSchedule;
 use Modules\Maintenance\Models\MaintenanceScheduleUpdate;
 use Modules\Maintenance\Repositories\Contracts\ScheduleRepositoryInterface;

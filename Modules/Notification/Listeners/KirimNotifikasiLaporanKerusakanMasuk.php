@@ -2,12 +2,12 @@
 
 namespace Modules\Notification\Listeners;
 
+use App\Contracts\ConfigProviderInterface;
 use App\Events\Maintenance\LaporanKerusakanMasuk;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Modules\Notification\Enums\NotificationType;
 use Modules\Notification\Services\NotificationService;
-use App\Contracts\ConfigProviderInterface;
 
 class KirimNotifikasiLaporanKerusakanMasuk implements ShouldQueue
 {
@@ -31,12 +31,12 @@ class KirimNotifikasiLaporanKerusakanMasuk implements ShouldQueue
         $roomInfo = $event->roomNumber ? " (Kamar {$event->roomNumber})" : '';
 
         $message = "*LAPORAN KERUSAKAN DITERIMA*\n"
-            . "Wisma Amal Gorontalo\n\n"
-            . "Yth. Bpk/Ibu {$event->reporterName},\n\n"
-            . "Laporan kerusakan Anda{$roomInfo} telah kami terima dan akan segera ditindaklanjuti.\n\n"
-            . "*Deskripsi:* {$event->description}\n\n"
-            . "Terima kasih atas laporannya.\n\n"
-            . "Hormat kami,\n*Manajemen Wisma Amal Gorontalo*";
+            ."Wisma Amal Gorontalo\n\n"
+            ."Yth. Bpk/Ibu {$event->reporterName},\n\n"
+            ."Laporan kerusakan Anda{$roomInfo} telah kami terima dan akan segera ditindaklanjuti.\n\n"
+            ."*Deskripsi:* {$event->description}\n\n"
+            ."Terima kasih atas laporannya.\n\n"
+            ."Hormat kami,\n*Manajemen Wisma Amal Gorontalo*";
 
         $this->notificationService->sendNotification(
             NotificationType::LAPORAN_KERUSAKAN,

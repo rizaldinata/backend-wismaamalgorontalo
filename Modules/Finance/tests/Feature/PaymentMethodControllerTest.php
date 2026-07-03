@@ -31,7 +31,7 @@ test('[BERHASIL] mengembalikan list kosong jika tidak ada metode yang diaktifkan
 
 test('[BERHASIL] hanya metode yang diaktifkan di setting yang dikembalikan', function () {
     AppSetting::create([
-        'key'   => 'midtrans_enabled_payment_methods',
+        'key' => 'midtrans_enabled_payment_methods',
         'value' => '["qris","gopay"]',
     ]);
 
@@ -48,7 +48,7 @@ test('[BERHASIL] hanya metode yang diaktifkan di setting yang dikembalikan', fun
 
 test('[BERHASIL] setiap item berisi code, label, available, dan maintenance', function () {
     AppSetting::create([
-        'key'   => 'midtrans_enabled_payment_methods',
+        'key' => 'midtrans_enabled_payment_methods',
         'value' => '["qris"]',
     ]);
 
@@ -64,12 +64,12 @@ test('[BERHASIL] setiap item berisi code, label, available, dan maintenance', fu
 
 test('[BERHASIL] label yang benar dikembalikan untuk setiap metode', function () {
     AppSetting::create([
-        'key'   => 'midtrans_enabled_payment_methods',
+        'key' => 'midtrans_enabled_payment_methods',
         'value' => '["qris","bca_va","mandiri_va"]',
     ]);
 
     $response = $this->getJson('/api/finance/payment-methods');
-    $data     = collect($response->json('data'));
+    $data = collect($response->json('data'));
 
     expect($data->firstWhere('code', 'qris')['label'])->toBe('QRIS');
     expect($data->firstWhere('code', 'bca_va')['label'])->toBe('BCA Virtual Account');
@@ -78,7 +78,7 @@ test('[BERHASIL] label yang benar dikembalikan untuk setiap metode', function ()
 
 test('[BERHASIL] metode yang sedang maintenance tetap muncul dengan available false', function () {
     AppSetting::create([
-        'key'   => 'midtrans_enabled_payment_methods',
+        'key' => 'midtrans_enabled_payment_methods',
         'value' => '["qris","bca_va"]',
     ]);
 
@@ -93,9 +93,9 @@ test('[BERHASIL] metode yang sedang maintenance tetap muncul dengan available fa
     $this->app->instance(MidtransStatusService::class, $mock);
 
     $response = $this->getJson('/api/finance/payment-methods');
-    $data     = collect($response->json('data'));
+    $data = collect($response->json('data'));
 
-    $qris  = $data->firstWhere('code', 'qris');
+    $qris = $data->firstWhere('code', 'qris');
     $bcaVa = $data->firstWhere('code', 'bca_va');
 
     expect($qris['available'])->toBeTrue();
@@ -106,7 +106,7 @@ test('[BERHASIL] metode yang sedang maintenance tetap muncul dengan available fa
 
 test('[BERHASIL] fail open — semua metode available jika Midtrans API error', function () {
     AppSetting::create([
-        'key'   => 'midtrans_enabled_payment_methods',
+        'key' => 'midtrans_enabled_payment_methods',
         'value' => '["gopay","bni_va"]',
     ]);
 
@@ -120,7 +120,7 @@ test('[BERHASIL] fail open — semua metode available jika Midtrans API error', 
     $this->app->instance(MidtransStatusService::class, $mock);
 
     $response = $this->getJson('/api/finance/payment-methods');
-    $data     = $response->json('data');
+    $data = $response->json('data');
 
     foreach ($data as $method) {
         expect($method['available'])->toBeTrue();

@@ -18,7 +18,7 @@ class BatalkanInvoiceSetelahJadwalBatal
         if ($cancelled > 0) {
             Log::info('BatalkanInvoiceSetelahJadwalBatal: invoice unpaid dibatalkan.', [
                 'schedule_id' => $event->scheduleId,
-                'count'       => $cancelled,
+                'count' => $cancelled,
             ]);
         }
     }

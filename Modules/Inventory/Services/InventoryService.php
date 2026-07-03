@@ -63,4 +63,26 @@ class InventoryService
             return $deleted;
         });
     }
+
+    // =========================================================================
+    // CROSS-MODULE GET METHODS (STATIC)
+    // Digunakan oleh modul lain melalui pola Direct Service Access
+    // =========================================================================
+
+    /**
+     * Mengambil total jumlah kuantitas semua barang inventaris.
+     */
+    public static function getTotalItems(): int
+    {
+        return (int) Inventory::sum('quantity');
+    }
+
+    /**
+     * Mengambil jumlah barang inventaris yang rusak (kondisi bukan GOOD).
+     */
+    public static function getBrokenItems(): int
+    {
+        return (int) Inventory::where('condition', '!=', \Modules\Inventory\Enums\ItemCondition::GOOD->value)
+            ->sum('quantity');
+    }
 }

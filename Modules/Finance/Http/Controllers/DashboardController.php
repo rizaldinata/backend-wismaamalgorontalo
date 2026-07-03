@@ -19,6 +19,7 @@ class DashboardController extends Controller
      * KPI Summary
      *
      * Mengambil ringkasan indikator kinerja utama (KPI) keuangan untuk bulan tertentu. (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function kpiSummary(\Illuminate\Http\Request $request)
@@ -35,6 +36,7 @@ class DashboardController extends Controller
      * Grafik Pendapatan
      *
      * Mengambil data pendapatan 6 bulan terakhir untuk divisualisasikan dalam bentuk grafik. (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function revenueChart()
@@ -48,6 +50,7 @@ class DashboardController extends Controller
      * Tagihan Jatuh Tempo (Widget)
      *
      * Mengambil data singkat tentang tagihan yang sudah atau akan segera jatuh tempo. (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function dueInvoices()
@@ -61,6 +64,7 @@ class DashboardController extends Controller
      * Pembayaran Tertunda (Widget)
      *
      * Mengambil data singkat tentang pembayaran manual yang menunggu verifikasi admin. (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function pendingPayments()
@@ -74,7 +78,6 @@ class DashboardController extends Controller
      * Monitoring Midtrans
      *
      * Mengambil data ringkas terkait status transaksi gateway pembayaran (Midtrans). (Hanya Admin)
-     * @return JsonResponse
      */
     public function midtransMonitoring(): JsonResponse
     {

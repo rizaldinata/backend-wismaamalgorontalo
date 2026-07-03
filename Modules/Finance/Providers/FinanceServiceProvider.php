@@ -2,24 +2,24 @@
 
 namespace Modules\Finance\Providers;
 
+use App\Contracts\PaymentStatusCheckerInterface;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
-use App\Contracts\PaymentStatusCheckerInterface;
+use Modules\Finance\Console\Commands\ExpireManualPaymentInvoices;
+use Modules\Finance\Console\Commands\GenerateFixedExpenses;
 use Modules\Finance\Repositories\Contracts\ExpenseRepositoryInterface;
-use Modules\Finance\Repositories\Contracts\FixedExpenseEntryRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\FineRepositoryInterface;
+use Modules\Finance\Repositories\Contracts\FixedExpenseEntryRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\RefundRequestRepositoryInterface;
 use Modules\Finance\Repositories\ExpenseRepository;
-use Modules\Finance\Repositories\FixedExpenseEntryRepository;
 use Modules\Finance\Repositories\FineRepository;
-use Modules\Finance\Services\PaymentStatusChecker;
+use Modules\Finance\Repositories\FixedExpenseEntryRepository;
 use Modules\Finance\Repositories\InvoiceRepository;
 use Modules\Finance\Repositories\PaymentRepository;
 use Modules\Finance\Repositories\RefundRequestRepository;
-use Modules\Finance\Console\Commands\ExpireManualPaymentInvoices;
-use Modules\Finance\Console\Commands\GenerateFixedExpenses;
+use Modules\Finance\Services\PaymentStatusChecker;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;

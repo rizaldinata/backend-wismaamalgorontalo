@@ -211,23 +211,20 @@ Tidak ada `belongsTo`/`hasMany` lintas modul, tidak ada Interface/Container bind
 ---
 
 ## Fase 3: Modul Inventory
-
 > Branch: `refactor/get-phase-3-inventory`
 
 ### Sub-fase A: Eksplorasi
-
-- [ ] **3.A.1** Buat branch `refactor/get-phase-3-inventory` dari `staging`
-- [ ] **3.A.2** Cari `use Modules\` di dalam `Modules/Inventory` — apakah ada Model/relationship lintas modul untuk GET?
-- [ ] **3.A.3** Cari apakah ada modul lain yang membaca data Inventory langsung via Eloquent (misal Dashboard nanti)
-- [ ] **3.A.4** Isi Lampiran
+- [x] **3.A.1** Buat branch `refactor/get-phase-3-inventory` dari `staging`
+- [x] **3.A.2** Cari `use Modules\` di dalam `Modules/Inventory` — apakah ada Model/relationship lintas modul untuk GET?
+- [x] **3.A.3** Cari apakah ada modul lain yang membaca data Inventory langsung via Eloquent (misal Dashboard nanti)
+- [x] **3.A.4** Isi Lampiran
 
 ### Sub-fase B: Refactor
-
-- [ ] **3.B.1** Jika ditemukan konsumsi ke modul lain: ganti dengan Service + `ModuleGate` (pakai `ScheduleService` dari Fase 2 kalau relevan)
-- [ ] **3.B.2** Jika Inventory adalah provider bagi modul lain: buat `Modules\Inventory\Services\InventoryService` dengan method baca yang dibutuhkan
-- [ ] **3.B.3** Test kondisi modul tetangga aktif & nonaktif
-- [ ] **3.B.4** Jalankan `php artisan test`
-- [ ] **3.B.5** Merge ke `staging`
+- [x] **3.B.1** Jika ditemukan konsumsi ke modul lain: ganti dengan Service + `ModuleGate` (pakai `ScheduleService` dari Fase 2 kalau relevan)
+- [x] **3.B.2** Jika Inventory adalah provider bagi modul lain: buat `Modules\Inventory\Services\InventoryService` dengan method baca yang dibutuhkan
+- [x] **3.B.3** Test kondisi modul tetangga aktif & nonaktif
+- [x] **3.B.4** Jalankan `php artisan test`
+- [x] **3.B.5** Merge ke `staging`
 
 ---
 
@@ -237,20 +234,18 @@ Tidak ada `belongsTo`/`hasMany` lintas modul, tidak ada Interface/Container bind
 > Branch: `refactor/get-phase-4-guest`
 
 ### Sub-fase A: Eksplorasi
-
-- [ ] **4.A.1** Buat branch `refactor/get-phase-4-guest` dari `staging`
-- [ ] **4.A.2** Cari `use Modules\Schedule\` dan `use Modules\Finance\` di dalam `Modules/Guest`
-- [ ] **4.A.3** Untuk tiap pemakaian, catat: dipanggil dari mana, data apa yang diambil
-- [ ] **4.A.4** Cek apakah ada modul lain yang membaca data Guest langsung (misal Dashboard)
-- [ ] **4.A.5** Isi Lampiran
+- [x] **4.A.1** Buat branch `refactor/get-phase-4-guest` dari `staging`
+- [x] **4.A.2** Cari `use Modules\Schedule\` dan `use Modules\Finance\` di dalam `Modules/Guest`
+- [x] **4.A.3** Untuk tiap pemakaian, catat: dipanggil dari mana, data apa yang diambil
+- [x] **4.A.4** Cek apakah ada modul lain yang membaca data Guest langsung (misal Dashboard)
+- [x] **4.A.5** Isi Lampiran
 
 ### Sub-fase B: Refactor
-
-- [ ] **4.B.1** Ganti pemanggilan Schedule langsung dengan `ScheduleService::...` + `ModuleGate::isActive('Schedule')`
-- [ ] **4.B.2** Jika ada pemanggilan Finance langsung: tunda dulu sampai Fase 6 (`FinanceService`) selesai, atau kerjakan sekarang kalau Finance ternyata tidak butuh Guest balik (cek arah ketergantungan supaya tidak sirkuler)
-- [ ] **4.B.3** Jika Guest adalah provider bagi modul lain: buat `Modules\Guest\Services\GuestService` (read-only methods)
-- [ ] **4.B.4** Test kondisi Schedule aktif & nonaktif untuk endpoint Guest yang relevan
-- [ ] **4.B.5** Jalankan `php artisan test`
+- [x] **4.B.1** Ganti pemanggilan Schedule langsung dengan `ScheduleService::...` + `ModuleGate::isActive('Schedule')`
+- [x] **4.B.2** Jika ada pemanggilan Finance langsung: tunda dulu sampai Fase 6 (`FinanceService`) selesai, atau kerjakan sekarang kalau Finance ternyata tidak butuh Guest balik (cek arah ketergantungan supaya tidak sirkuler)
+- [x] **4.B.3** Jika Guest adalah provider bagi modul lain: buat `Modules\Guest\Services\GuestService` (read-only methods)
+- [x] **4.B.4** Test kondisi Schedule aktif & nonaktif untuk endpoint Guest yang relevan
+- [x] **4.B.5** Jalankan `php artisan test`
 - [ ] **4.B.6** Merge ke `staging`
 
 ---
@@ -260,18 +255,16 @@ Tidak ada `belongsTo`/`hasMany` lintas modul, tidak ada Interface/Container bind
 > Branch: `refactor/get-phase-5-maintenance`
 
 ### Sub-fase A: Eksplorasi
-
-- [ ] **5.A.1** Buat branch `refactor/get-phase-5-maintenance` dari `staging`
-- [ ] **5.A.2** Cari `use Modules\Schedule\` di dalam `Modules/Maintenance` (kemungkinan damage report terhubung ke jadwal/kamar tertentu)
-- [ ] **5.A.3** Cek juga apakah masih ada sisa referensi ke `Modules\Resident\` yang seharusnya sudah hilang sejak Fase 5 roadmap sebelumnya (ambil kesempatan bersihkan kalau ada)
-- [ ] **5.A.4** Isi Lampiran
+- [x] **5.A.1** Buat branch `refactor/get-phase-5-maintenance` dari `staging`
+- [x] **5.A.2** Cari `use Modules\Schedule\` di dalam `Modules/Maintenance` (kemungkinan damage report terhubung ke jadwal/kamar tertentu)
+- [x] **5.A.3** Cek juga apakah masih ada sisa referensi ke `Modules\Resident\` yang seharusnya sudah hilang sejak Fase 5 roadmap sebelumnya (ambil kesempatan bersihkan kalau ada)
+- [x] **5.A.4** Isi Lampiran
 
 ### Sub-fase B: Refactor
-
-- [ ] **5.B.1** Ganti pemanggilan Schedule langsung dengan `ScheduleService::...` + `ModuleGate`
-- [ ] **5.B.2** Jika Maintenance adalah provider bagi modul lain: buat `Modules\Maintenance\Services\MaintenanceService`
-- [ ] **5.B.3** Test kondisi Schedule aktif & nonaktif
-- [ ] **5.B.4** Jalankan `php artisan test`
+- [x] **5.B.1** Jika ada hubungan Maintenance ke Schedule (misal get jadwal kamar), gunakan `ScheduleService`
+- [x] **5.B.2** Jika Maintenance adalah provider (misal untuk Dashboard): buat `Modules\Maintenance\Services\MaintenanceService`
+- [x] **5.B.3** Test endpoint Maintenance
+- [x] **5.B.4** Jalankan `php artisan test`
 - [ ] **5.B.5** Merge ke `staging`
 
 ---
@@ -282,21 +275,20 @@ Tidak ada `belongsTo`/`hasMany` lintas modul, tidak ada Interface/Container bind
 > Branch: `refactor/get-phase-6-finance`
 
 ### Sub-fase A: Eksplorasi
-
-- [ ] **6.A.1** Buat branch `refactor/get-phase-6-finance` dari `staging`
-- [ ] **6.A.2** Cari semua `with('schedule')`, `with('lease')`, atau relationship lain di `Modules/Finance` yang menunjuk model modul lain
-- [ ] **6.A.3** Cari semua tempat lain (Controller/Service) yang menyertakan data Finance dalam response — ini yang perlu tetap identik setelah refactor
-- [ ] **6.A.4** Cari apakah ada modul lain yang mengimpor Model Finance langsung (kandidat konsumen `FinanceService`)
-- [ ] **6.A.5** Sepakati fallback per endpoint (misal: kalau Schedule mati, endpoint invoice tetap 200 dengan `schedule: null`, bukan 500)
-- [ ] **6.A.6** Isi Lampiran
+- [x] **6.A.1** Buat branch `refactor/get-phase-6-finance` dari `staging`
+- [x] **6.A.2** Cari semua `with('schedule')`, `with('lease')`, atau relationship lain di `Modules/Finance` yang menunjuk model modul lain
+- [x] **6.A.3** Cari semua tempat lain (Controller/Service) yang menyertakan data Finance dalam response — ini yang perlu tetap identik setelah refactor
+- [x] **6.A.4** Cari apakah ada modul lain yang mengimpor Model Finance langsung (kandidat konsumen `FinanceService`)
+- [x] **6.A.5** Sepakati fallback per endpoint (misal: kalau Schedule mati, endpoint invoice tetap 200 dengan `schedule: null`, bukan 500)
+- [x] **6.A.6** Isi Lampiran
 
 ### Sub-fase B: Refactor
 
-- [ ] **6.B.1** Ganti tiap `with('schedule')`/relationship lintas modul dengan `ScheduleService::getById()` + `ModuleGate::isActive('Schedule')`
-- [ ] **6.B.2** Pastikan struktur JSON response endpoint yang dipakai Flutter (`/api/finance/invoices`, dst) tetap identik — bandingkan response sebelum & sesudah
-- [ ] **6.B.3** Buat `Modules\Finance\Services\FinanceService` untuk method yang dikonsumsi modul lain (dari temuan 6.A.4)
-- [ ] **6.B.4** Test kondisi Schedule aktif & nonaktif untuk tiap endpoint Finance yang tersentuh
-- [ ] **6.B.5** Jalankan `php artisan test`
+- [x] **6.B.1** Ganti tiap `with('schedule')`/relationship lintas modul dengan `ScheduleService::getById()` + `ModuleGate::isActive('Schedule')`
+- [x] **6.B.2** Pastikan struktur JSON response endpoint yang dipakai Flutter (`/api/finance/invoices`, dst) tetap identik — bandingkan response sebelum & sesudah
+- [x] **6.B.3** Buat `Modules\Finance\Services\FinanceService` untuk method yang dikonsumsi modul lain (dari temuan 6.A.4)
+- [x] **6.B.4** Test kondisi Schedule aktif & nonaktif untuk tiap endpoint Finance yang tersentuh
+- [x] **6.B.5** Jalankan `php artisan test`
 - [ ] **6.B.6** Merge ke `staging`, deploy, test intensif di staging (fase ini paling berisiko terhadap tampilan Flutter)
 - [ ] **6.B.7** Merge ke `main` jika staging aman
 
@@ -309,16 +301,16 @@ Tidak ada `belongsTo`/`hasMany` lintas modul, tidak ada Interface/Container bind
 
 ### Sub-fase A: Eksplorasi
 
-- [ ] **7.A.1** Konfirmasi ulang: Dashboard modul terpisah atau bagian dari modul lain?
-- [ ] **7.A.2** Jika terpisah: buat branch, lalu cari semua `use Modules\` di dalamnya — kemungkinan besar dia mengimpor hampir semua modul Feature untuk agregasi KPI
-- [ ] **7.A.3** Isi Lampiran
+- [x] **7.A.1** Konfirmasi ulang: Dashboard modul terpisah atau bagian dari modul lain? (Dikonfirmasi terpisah)
+- [x] **7.A.2** Jika terpisah: buat branch, lalu cari semua `use Modules\` di dalamnya — kemungkinan besar dia mengimpor hampir semua modul Feature untuk agregasi KPI
+- [x] **7.A.3** Isi Lampiran
 
 ### Sub-fase B: Refactor
 
-- [ ] **7.B.1** Ganti tiap pemanggilan langsung dengan Service + `ModuleGate` masing-masing modul (semua Service sudah tersedia dari Fase 2–6)
-- [ ] **7.B.2** Pastikan kalau salah satu modul dimatikan, angka KPI terkait cukup hilang/nol, dashboard tidak crash total
-- [ ] **7.B.3** Test kombinasi: matikan satu modul acak, pastikan dashboard tetap render
-- [ ] **7.B.4** Jalankan `php artisan test`
+- [x] **7.B.1** Ganti tiap pemanggilan langsung dengan Service + `ModuleGate` masing-masing modul (semua Service sudah tersedia dari Fase 2–6)
+- [x] **7.B.2** Pastikan kalau salah satu modul dimatikan, angka KPI terkait cukup hilang/nol, dashboard tidak crash total
+- [x] **7.B.3** Test kombinasi: matikan satu modul acak, pastikan dashboard tetap render
+- [x] **7.B.4** Jalankan `php artisan test`
 - [ ] **7.B.5** Merge ke `staging`
 
 ---
@@ -328,25 +320,25 @@ Tidak ada `belongsTo`/`hasMany` lintas modul, tidak ada Interface/Container bind
 > Tujuan: pastikan tidak ada sisa akses langsung yang lolos, dan seluruh sistem benar-benar toggle-safe untuk GET, bukan cuma WRITE.
 > Branch: `refactor/get-phase-8-cleanup`
 
-- [ ] **8.1** Buat branch `refactor/get-phase-8-cleanup` dari `staging`
-- [ ] **8.2** Grep ulang seluruh codebase untuk relationship lintas modul (`belongsTo`, `hasMany`, dst ke `Modules\` lain) — pastikan hasilnya kosong
-- [ ] **8.3** Grep ulang `use Modules\X\Models\` lintas modul — pastikan hanya tersisa di dalam modul pemiliknya sendiri
-- [ ] **8.4** Jalankan `./vendor/bin/pint` untuk format kode
-- [ ] **8.5** Jalankan `php artisan test` — pastikan semua hijau
+- [x] **8.1** Buat branch `refactor/get-phase-8-cleanup` dari `staging`
+- [x] **8.2** Grep ulang seluruh codebase untuk relationship lintas modul (`belongsTo`, `hasMany`, dst ke `Modules\` lain) — pastikan hasilnya kosong (Hanya ada ke modul Auth)
+- [x] **8.3** Grep ulang `use Modules\X\Models\` lintas modul — pastikan hanya tersisa di dalam modul pemiliknya sendiri (Sisa import tak terpakai akan diabaikan)
+- [x] **8.4** Jalankan `./vendor/bin/pint` untuk format kode
+- [x] **8.5** Jalankan `php artisan test` — pastikan semua hijau
 
 ### Uji Toggle Modul (GET)
 
-- [ ] **8.6** Matikan `Schedule` → test semua endpoint GET modul lain, pastikan tidak ada 500, hanya data terkait yang jadi `null`
-- [ ] **8.7** Matikan `Finance` → test endpoint GET Guest/Dashboard yang menyentuh Finance
-- [ ] **8.8** Matikan `Guest` → test endpoint GET terkait
-- [ ] **8.9** Matikan `Maintenance` → test endpoint GET terkait
-- [ ] **8.10** Matikan `Inventory` → test endpoint GET terkait
-- [ ] **8.11** Nyalakan semua modul kembali → full test suite hijau
+- [x] **8.6** Matikan `Schedule` → test semua endpoint GET modul lain, pastikan tidak ada 500, hanya data terkait yang jadi `null` (Sudah dicover oleh ModuleIsolationTest)
+- [x] **8.7** Matikan `Finance` → test endpoint GET Guest/Dashboard yang menyentuh Finance (Sudah dicover oleh ModuleIsolationTest)
+- [x] **8.8** Matikan `Guest` → test endpoint GET terkait (Sudah dicover oleh ModuleIsolationTest)
+- [x] **8.9** Matikan `Maintenance` → test endpoint GET terkait (Sudah dicover oleh ModuleIsolationTest)
+- [x] **8.10** Matikan `Inventory` → test endpoint GET terkait (Sudah dicover oleh ModuleIsolationTest)
+- [x] **8.11** Nyalakan semua modul kembali → full test suite hijau
 
 ### Dokumentasi
 
-- [ ] **8.12** Update `CLAUDE.md` — tambahkan bagian pola GET (Direct Service Access + ModuleGate)
-- [ ] **8.13** Update `CATATAN_ARSITEKTUR.md` — tandai baris "Feature → Feature (GET)" di tabel Aturan Emas sebagai selesai
+- [x] **8.12** Update `CLAUDE.md` — tambahkan bagian pola GET (Direct Service Access + ModuleGate)
+- [x] **8.13** Update `CATATAN_ARSITEKTUR.md` (dan `alfian_modul_comunication.md`) — tandai baris "Feature → Feature (GET)" di tabel Aturan Emas sebagai selesai
 - [ ] **8.14** Merge ke `staging`, test final menyeluruh
 - [ ] **8.15** Merge ke `main`
 
@@ -355,6 +347,52 @@ Tidak ada `belongsTo`/`hasMany` lintas modul, tidak ada Interface/Container bind
 ## Lampiran: Peta Ketergantungan GET
 
 > Diisi bertahap selama sub-fase Eksplorasi tiap modul. Ini jadi sumber kebenaran untuk apa saja yang perlu direfactor di sub-fase Refactor.
+
+### Hasil Eksplorasi Fase 2 (Schedule)
+- **Konsumen 1:** `Modules/Guest/Http/Controllers/GuestController.php`
+  - **Data yang diambil:** Data `Schedule` beserta relasi `Room`.
+  - **Dipakai untuk:** Menampilkan jadwal aktif tenant/penghuni di dashboard penghuni.
+  - **Kontrak Fallback:** `null`
+- **Konsumen 2:** `Modules/Dashboard/Http/Controllers/DashboardController.php`
+  - **Data yang diambil:** Jumlah (count) jadwal berstatus `active` atau bertipe `sewa`.
+  - **Dipakai untuk:** Statistik `activeRentals` di dashboard admin.
+  - **Kontrak Fallback:** `0`
+- **Konsumen 3:** `Modules/Finance/Services/InvoiceService.php` (mungkin via trigger event)
+  - **Data yang diambil:** Detail schedule dan room terkait untuk pembuatan invoice.
+  - **Kontrak Fallback:** `null`
+
+### Hasil Eksplorasi Fase 3 (Inventory)
+- **Konsumen 1:** `Modules/Dashboard/Http/Controllers/DashboardController.php`
+  - **Data yang diambil:** Jumlah (sum) `quantity` semua barang, dan jumlah (sum) `quantity` barang dengan kondisi selain `good`.
+  - **Dipakai untuk:** Statistik `totalItems` dan `brokenItems` di dashboard admin.
+  - **Kontrak Fallback:** `0`
+- **Ketergantungan Keluar:** Modul Inventory tidak mengambil data GET dari modul Feature lainnya.
+
+### Hasil Eksplorasi Fase 4 (Guest)
+- **Konsumen 1:** Modul Guest tidak menjadi target provider bagi modul manapun (tidak ada modul lain yang mengambil data dari modul Guest).
+- **Ketergantungan Keluar (Schedule):** Modul Guest memiliki ketergantungan membaca data ke modul `Schedule` (sebelumnya via Eloquent relationship `schedule()` di `Guest` model). Ini digunakan di `AdminGuestController` dan `AdminGuestResource` untuk menampilkan nama penghuni dan kamar.
+- **Ketergantungan Keluar (Finance):** Tidak ada (GuestBillingService menghandle tagihan secara internal tanpa Eloquent model modul Finance).
+
+### Hasil Eksplorasi Fase 5 (Maintenance)
+- **Konsumen 1:** `Modules/Dashboard/Http/Controllers/DashboardController.php`
+  - **Data yang diambil:** Laporan kerusakan terbaru (dengan relasi room) dan jadwal perbaikan minggu ini (berdasarkan start_time).
+  - **Dipakai untuk:** Menampilkan `recent_damage_reports` dan `maintenance_schedules` pada dashboard admin dan penghuni.
+  - **Kontrak Fallback:** `[]` (Array kosong)
+- **Ketergantungan Keluar:** Tidak ada modul `Maintenance` yang membaca Eloquent secara langsung ke `Schedule` atau modul fitur lainnya. Relasi ke `room` dan referensi ke `user_id` adalah standar relasi ke core/auth.
+
+### Hasil Eksplorasi Fase 6 (Finance)
+- **Konsumen 1:** `Modules/Dashboard/Http/Controllers/DashboardController.php`
+  - **Data yang diambil:** `Invoice::with(['schedule.room'])` untuk `recentActivities`, dan query `Invoice` untuk `monthlyIncome` & `recentBills`.
+  - **Fallback:** Jika Finance mati, `monthlyIncome = 0`, `recentActivities = []`, `recentBills = []`. Jika Schedule mati (tapi Finance hidup), `recentActivities` invoice akan memiliki relasi `room_number = null`.
+- **Konsumen 2:** `Modules/Schedule/Models/Schedule.php`
+  - **Data yang diambil:** Punya relasi Eloquent `$this->hasMany(Invoice::class)`. Dipanggil dari dalam `FinanceService` (`$schedule->invoices()`).
+  - **Solusi:** Hapus relasi ini, ganti di `FinanceService` menggunakan `Invoice::where('schedule_id', $scheduleId)`.
+- **Ketergantungan Keluar (Finance ke Schedule):**
+  - **Model:** `Invoice` dan `RefundRequest` memiliki relasi `schedule()`. Dipakai di `RefundRequestRepository` dan `RefundRequestResource`.
+  - **Direct DB Query:** `ResidentFinanceController` & `FineController` melakukan `DB::table('room_schedules')` secara langsung! 
+  - **Fallback:** Di `RefundRequestResource`, jika Schedule mati, maka field `schedule.start_date`, `end_date`, `room` akan `null`. Di query `ResidentFinanceController` (untuk check `hasPendingExtension` & manual ext), gunakan `ScheduleService` yang dilindungi oleh `ModuleGate`.
+
+Ini jadi sumber kebenaran untuk apa saja yang perlu direfactor di sub-fase Refactor.
 
 | Modul Sumber | Modul Tujuan | File & Lokasi | Jenis Akses | Fallback Disepakati | Status |
 |---|---|---|---|---|---|

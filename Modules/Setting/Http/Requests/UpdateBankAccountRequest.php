@@ -14,12 +14,12 @@ class UpdateBankAccountRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'bank_name'            => 'sometimes|required|string|max:100',
-            'account_number'       => 'sometimes|required|string|max:50',
-            'account_holder'       => 'sometimes|required|string|max:100',
+            'bank_name' => 'sometimes|required|string|max:100',
+            'account_number' => 'sometimes|required|string|max:50',
+            'account_holder' => 'sometimes|required|string|max:100',
             'payment_instructions' => 'nullable|string|max:5000',
-            'is_active'            => 'nullable|boolean',
-            'sort_order'           => 'nullable|integer|min:0',
+            'is_active' => 'nullable|boolean',
+            'sort_order' => 'nullable|integer|min:0',
         ];
     }
 }

@@ -20,18 +20,18 @@ class NotificationLogController extends Controller
     {
         $perPage = (int) $request->query('per_page', 15);
         $filters = array_filter([
-            'status'    => $request->query('status'),
-            'type'      => $request->query('type'),
-            'search'    => $request->query('search'),
+            'status' => $request->query('status'),
+            'type' => $request->query('type'),
+            'search' => $request->query('search'),
             'date_from' => $request->query('date_from'),
-            'date_to'   => $request->query('date_to'),
+            'date_to' => $request->query('date_to'),
         ]);
 
         $logs = $this->notificationService->getLogHistory($perPage, $filters);
 
         return response()->json([
-            'success'      => true,
-            'data'         => $logs,
+            'success' => true,
+            'data' => $logs,
             'unread_count' => $this->notificationService->countUnread(),
         ]);
     }
@@ -42,7 +42,7 @@ class NotificationLogController extends Controller
 
         return response()->json([
             'success' => true,
-            'data'    => $logs,
+            'data' => $logs,
         ]);
     }
 

@@ -17,8 +17,6 @@ class SettingService implements ConfigProviderInterface
         return $this->featureToggleService->isEnabled($featureKey);
     }
 
-
-
     public function updateSetting(string $key, $value, string $description = ''): void
     {
         if (is_array($value)) {
@@ -38,15 +36,15 @@ class SettingService implements ConfigProviderInterface
     public static function midtransMethodCatalog(): array
     {
         return [
-            'qris'       => 'QRIS',
-            'gopay'      => 'GoPay',
-            'shopeepay'  => 'ShopeePay',
-            'dana'       => 'DANA',
-            'ovo'        => 'OVO',
-            'linkaja'    => 'LinkAja',
-            'bca_va'     => 'BCA Virtual Account',
-            'bni_va'     => 'BNI Virtual Account',
-            'bri_va'     => 'BRI Virtual Account',
+            'qris' => 'QRIS',
+            'gopay' => 'GoPay',
+            'shopeepay' => 'ShopeePay',
+            'dana' => 'DANA',
+            'ovo' => 'OVO',
+            'linkaja' => 'LinkAja',
+            'bca_va' => 'BCA Virtual Account',
+            'bni_va' => 'BNI Virtual Account',
+            'bri_va' => 'BRI Virtual Account',
             'permata_va' => 'Permata Virtual Account',
             'mandiri_va' => 'Mandiri Virtual Account',
         ];
@@ -103,7 +101,7 @@ class SettingService implements ConfigProviderInterface
 
     public function getJenisPengeluaranTetapAktif(): array
     {
-        $raw     = $this->settingRepository->getValueByKey('pengeluaran_tetap_jenis_aktif', '[]');
+        $raw = $this->settingRepository->getValueByKey('pengeluaran_tetap_jenis_aktif', '[]');
         $decoded = json_decode(is_string($raw) ? $raw : '[]', true);
 
         return is_array($decoded) ? $decoded : [];
@@ -142,12 +140,12 @@ class SettingService implements ConfigProviderInterface
     {
         return [
             'bank_transfer' => ['label' => 'Transfer Bank (VA)',  'type' => 'flat'],
-            'gopay'         => ['label' => 'GoPay',               'type' => 'percent'],
-            'qris'          => ['label' => 'QRIS',                'type' => 'percent'],
-            'shopeepay'     => ['label' => 'ShopeePay',           'type' => 'percent'],
-            'dana'          => ['label' => 'DANA',                'type' => 'percent'],
-            'ovo'           => ['label' => 'OVO',                 'type' => 'percent'],
-            'linkaja'       => ['label' => 'LinkAja',             'type' => 'percent'],
+            'gopay' => ['label' => 'GoPay',               'type' => 'percent'],
+            'qris' => ['label' => 'QRIS',                'type' => 'percent'],
+            'shopeepay' => ['label' => 'ShopeePay',           'type' => 'percent'],
+            'dana' => ['label' => 'DANA',                'type' => 'percent'],
+            'ovo' => ['label' => 'OVO',                 'type' => 'percent'],
+            'linkaja' => ['label' => 'LinkAja',             'type' => 'percent'],
         ];
     }
 
@@ -155,21 +153,21 @@ class SettingService implements ConfigProviderInterface
     {
         return [
             'bearer' => 'merchant',
-            'fees'   => [
+            'fees' => [
                 'bank_transfer' => ['type' => 'flat',    'amount' => 4000],
-                'gopay'         => ['type' => 'percent', 'rate'   => 2.0],
-                'qris'          => ['type' => 'percent', 'rate'   => 0.7],
-                'shopeepay'     => ['type' => 'percent', 'rate'   => 2.0],
-                'dana'          => ['type' => 'percent', 'rate'   => 1.5],
-                'ovo'           => ['type' => 'percent', 'rate'   => 1.5],
-                'linkaja'       => ['type' => 'percent', 'rate'   => 1.5],
+                'gopay' => ['type' => 'percent', 'rate' => 2.0],
+                'qris' => ['type' => 'percent', 'rate' => 0.7],
+                'shopeepay' => ['type' => 'percent', 'rate' => 2.0],
+                'dana' => ['type' => 'percent', 'rate' => 1.5],
+                'ovo' => ['type' => 'percent', 'rate' => 1.5],
+                'linkaja' => ['type' => 'percent', 'rate' => 1.5],
             ],
         ];
     }
 
     public function getMidtransFeeConfig(): array
     {
-        $raw     = $this->settingRepository->getValueByKey('midtrans_fee_config', null);
+        $raw = $this->settingRepository->getValueByKey('midtrans_fee_config', null);
         $decoded = $raw ? json_decode(is_string($raw) ? $raw : '{}', true) : null;
 
         return is_array($decoded) ? $decoded : self::defaultMidtransFeeConfig();

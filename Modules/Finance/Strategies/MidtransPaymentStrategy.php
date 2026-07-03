@@ -33,54 +33,59 @@ class MidtransPaymentStrategy implements PaymentStrategyInterface
     public function process(Invoice $invoice, array $data): Payment
     {
         // Hitung fee di awal sebelum apapun agar bisa disimpan ke payment record
-        $paymentType    = $data['payment_type'] ?? null;
+        $paymentType = $data['payment_type'] ?? null;
         $originalAmount = (int) $invoice->amount;
-        $isCustomer     = $this->feeCalculator->isCustomerBearer();
-        $calculatedFee  = $paymentType ? $this->feeCalculator->calculateFee($paymentType, $originalAmount) : 0;
-        $chargedToUser  = $isCustomer ? $calculatedFee : 0;  // ditambahkan ke tagihan user
-        $merchantFee    = $isCustomer ? 0 : $calculatedFee;  // dipotong dari penerimaan merchant
+        $isCustomer = $this->feeCalculator->isCustomerBearer();
+        $calculatedFee = $paymentType ? $this->feeCalculator->calculateFee($paymentType, $originalAmount) : 0;
+        $chargedToUser = $isCustomer ? $calculatedFee : 0;  // ditambahkan ke tagihan user
+        $merchantFee = $isCustomer ? 0 : $calculatedFee;  // dipotong dari penerimaan merchant
 
         $transactionId = 'TRX-'.time().'-'.$invoice->id;
 
         $payment = $this->paymentRepository->create([
-            'invoice_id'     => $invoice->id,
+            'invoice_id' => $invoice->id,
             'payment_method' => PaymentMethod::MIDTRANS->value,
-            'status'         => PaymentStatus::PENDING->value,
+            'status' => PaymentStatus::PENDING->value,
             'transaction_id' => $transactionId,
-            'midtrans_fee'   => $merchantFee,
-            'fee_bearer'     => $isCustomer ? 'customer' : 'merchant',
+            'midtrans_fee' => $merchantFee,
+            'fee_bearer' => $isCustomer ? 'customer' : 'merchant',
         ]);
 
-        $invoice->loadMissing('schedule');
-        $schedule   = $invoice->schedule;
-        $tenantUser = $schedule?->tenant_user_id ? User::find($schedule->tenant_user_id) : null;
+        $tenantUser = null;
+        if (\App\Support\ModuleGate::isActive('Schedule') && $invoice->schedule_id) {
+            $scheduleData = \Modules\Schedule\Services\ScheduleService::getByIds([$invoice->schedule_id]);
+            $schedule = $scheduleData[$invoice->schedule_id] ?? null;
+            if ($schedule && isset($schedule['tenant_user_id'])) {
+                $tenantUser = \Modules\Auth\Models\User::find($schedule['tenant_user_id']);
+            }
+        }
 
         $grossAmount = $originalAmount + $chargedToUser;
         $itemDetails = [[
-            'id'       => $invoice->id,
-            'price'    => $originalAmount,
+            'id' => $invoice->id,
+            'price' => $originalAmount,
             'quantity' => 1,
-            'name'     => 'Pembayaran Tagihan #'.$invoice->invoice_number,
+            'name' => 'Pembayaran Tagihan #'.$invoice->invoice_number,
         ]];
 
         if ($chargedToUser > 0) {
             $itemDetails[] = [
-                'id'       => 'FEE-'.$invoice->id,
-                'price'    => $chargedToUser,
+                'id' => 'FEE-'.$invoice->id,
+                'price' => $chargedToUser,
                 'quantity' => 1,
-                'name'     => 'Biaya Transaksi Midtrans',
+                'name' => 'Biaya Transaksi Midtrans',
             ];
         }
 
         $baseParams = [
             'transaction_details' => [
-                'order_id'     => $payment->transaction_id,
+                'order_id' => $payment->transaction_id,
                 'gross_amount' => $grossAmount,
             ],
             'customer_details' => [
-                'first_name' => $schedule?->tenant_name ?? '',
-                'email'      => $tenantUser?->email ?? '',
-                'phone'      => $schedule?->tenant_phone ?? '',
+                'first_name' => $invoice->tenant_name ?? '',
+                'email' => $tenantUser?->email ?? '',
+                'phone' => $invoice->tenant_phone ?? '',
             ],
             'item_details' => $itemDetails,
         ];
@@ -92,9 +97,9 @@ class MidtransPaymentStrategy implements PaymentStrategyInterface
                 // ── Core API: langsung charge dengan metode spesifik ──────────
                 $params = array_merge($baseParams, $coreApiExtra, [
                     'custom_expiry' => [
-                        'order_time'      => now()->format('Y-m-d H:i:s O'),
+                        'order_time' => now()->format('Y-m-d H:i:s O'),
                         'expiry_duration' => 15,
-                        'unit'            => 'minute',
+                        'unit' => 'minute',
                     ],
                 ]);
                 $response = CoreApi::charge($params);

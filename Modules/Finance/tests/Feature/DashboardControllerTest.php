@@ -120,12 +120,12 @@ test('[BERHASIL] endpoint dueInvoices merespons 200 dengan pesan yang tepat', fu
 
 test('[BERHASIL] dueInvoices menampilkan invoice yang jatuh tempo dalam 7 hari', function () {
     Invoice::factory()->count(2)->create([
-        'status'   => InvoiceStatus::UNPAID,
+        'status' => InvoiceStatus::UNPAID,
         'due_date' => now()->addDays(3),
     ]);
     // Tidak masuk — terlalu jauh
     Invoice::factory()->create([
-        'status'   => InvoiceStatus::UNPAID,
+        'status' => InvoiceStatus::UNPAID,
         'due_date' => now()->addDays(30),
     ]);
 

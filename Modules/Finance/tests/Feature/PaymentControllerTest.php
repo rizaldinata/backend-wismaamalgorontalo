@@ -70,7 +70,7 @@ test('[GAGAL] parameter per_page kurang dari 1 ditolak dengan validasi error', f
 test('[BERHASIL] admin dapat melihat detail pembayaran yang ada', function () {
     $payment = Payment::factory()->create([
         'payment_method' => 'manual',
-        'status'         => PaymentStatus::PENDING,
+        'status' => PaymentStatus::PENDING,
     ]);
 
     $response = $this->getJson("/api/finance/payments/{$payment->id}");
@@ -94,11 +94,11 @@ test('[GAGAL] menampilkan 404 jika pembayaran tidak ditemukan', function () {
 test('[BERHASIL] penghuni dapat membayar invoice dengan bukti transfer manual', function () {
     Storage::fake('public');
     $invoice = Invoice::factory()->create(['status' => InvoiceStatus::UNPAID]);
-    $file    = UploadedFile::fake()->image('bukti_transfer.jpg');
+    $file = UploadedFile::fake()->image('bukti_transfer.jpg');
 
     $response = $this->post("/api/finance/invoices/{$invoice->id}/pay", [
         'payment_method' => 'manual',
-        'payment_proof'  => $file,
+        'payment_proof' => $file,
     ]);
 
     $response->assertCreated()
@@ -110,11 +110,11 @@ test('[BERHASIL] penghuni dapat membayar invoice dengan bukti transfer manual', 
 test('[BERHASIL] pembayaran manual tersimpan dengan bukti transfer di storage', function () {
     Storage::fake('public');
     $invoice = Invoice::factory()->create(['status' => InvoiceStatus::UNPAID]);
-    $file    = UploadedFile::fake()->image('bukti.jpg');
+    $file = UploadedFile::fake()->image('bukti.jpg');
 
     $this->post("/api/finance/invoices/{$invoice->id}/pay", [
         'payment_method' => 'manual',
-        'payment_proof'  => $file,
+        'payment_proof' => $file,
     ]);
 
     $payment = Payment::where('invoice_id', $invoice->id)->first();
@@ -150,7 +150,7 @@ test('[BERHASIL] admin dapat menyetujui pembayaran dan mengubah invoice menjadi 
     $invoice = Invoice::factory()->create(['status' => InvoiceStatus::UNPAID]);
     $payment = Payment::factory()->create([
         'invoice_id' => $invoice->id,
-        'status'     => PaymentStatus::PENDING,
+        'status' => PaymentStatus::PENDING,
     ]);
 
     $response = $this->postJson("/api/finance/payments/{$payment->id}/verify", [
@@ -205,7 +205,7 @@ test('[GAGAL] refund gagal jika reason tidak disertakan', function () {
 test('[GAGAL] refund gagal jika metode pembayaran bukan midtrans', function () {
     $payment = Payment::factory()->create([
         'payment_method' => 'manual',
-        'status'         => PaymentStatus::PAID,
+        'status' => PaymentStatus::PAID,
     ]);
 
     $response = $this->postJson("/api/finance/payments/{$payment->id}/refund", [
@@ -222,14 +222,14 @@ test('[GAGAL] refund gagal jika metode pembayaran bukan midtrans', function () {
 test('[BERHASIL] webhook settlement memperbarui status payment dan invoice menjadi paid', function () {
     $invoice = Invoice::factory()->create(['status' => InvoiceStatus::UNPAID]);
     $payment = Payment::factory()->create([
-        'invoice_id'     => $invoice->id,
+        'invoice_id' => $invoice->id,
         'payment_method' => 'midtrans',
         'transaction_id' => 'TXN-WEBHOOK-001',
-        'status'         => PaymentStatus::PENDING,
+        'status' => PaymentStatus::PENDING,
     ]);
 
     $response = $this->postJson('/api/finance/payments/midtrans/notification', [
-        'order_id'           => 'TXN-WEBHOOK-001',
+        'order_id' => 'TXN-WEBHOOK-001',
         'transaction_status' => 'settlement',
     ]);
 
@@ -243,14 +243,14 @@ test('[BERHASIL] webhook settlement memperbarui status payment dan invoice menja
 test('[BERHASIL] webhook expire memperbarui status payment menjadi failed', function () {
     $invoice = Invoice::factory()->create(['status' => InvoiceStatus::UNPAID]);
     $payment = Payment::factory()->create([
-        'invoice_id'     => $invoice->id,
+        'invoice_id' => $invoice->id,
         'payment_method' => 'midtrans',
         'transaction_id' => 'TXN-WEBHOOK-002',
-        'status'         => PaymentStatus::PENDING,
+        'status' => PaymentStatus::PENDING,
     ]);
 
     $response = $this->postJson('/api/finance/payments/midtrans/notification', [
-        'order_id'           => 'TXN-WEBHOOK-002',
+        'order_id' => 'TXN-WEBHOOK-002',
         'transaction_status' => 'expire',
     ]);
 
@@ -261,7 +261,7 @@ test('[BERHASIL] webhook expire memperbarui status payment menjadi failed', func
 
 test('[BERHASIL] webhook dengan order_id tidak dikenal direspons 200 tanpa error', function () {
     $response = $this->postJson('/api/finance/payments/midtrans/notification', [
-        'order_id'           => 'ORDER-TIDAK-ADA-999',
+        'order_id' => 'ORDER-TIDAK-ADA-999',
         'transaction_status' => 'settlement',
     ]);
 

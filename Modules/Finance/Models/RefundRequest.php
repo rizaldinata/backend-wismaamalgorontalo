@@ -23,10 +23,10 @@ class RefundRequest extends Model
     ];
 
     protected $casts = [
-        'refund_amount'      => 'decimal:2',
-        'admin_fee'          => 'decimal:2',
+        'refund_amount' => 'decimal:2',
+        'admin_fee' => 'decimal:2',
         'is_refund_eligible' => 'boolean',
-        'processed_at'       => 'datetime',
+        'processed_at' => 'datetime',
     ];
 
     public function payment()
@@ -34,10 +34,7 @@ class RefundRequest extends Model
         return $this->belongsTo(Payment::class);
     }
 
-    public function schedule()
-    {
-        return $this->belongsTo(Schedule::class);
-    }
+    // Relasi schedule() telah dihapus untuk mematuhi arsitektur Direct Service Access
 
     public function getProofUrlAttribute(): ?string
     {

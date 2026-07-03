@@ -4,10 +4,10 @@ namespace Modules\Schedule\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Modules\Schedule\Models\Schedule;
-use Modules\Schedule\Enums\ScheduleType;
-use Modules\Schedule\Enums\ScheduleStatus;
 use Modules\Room\Models\Room;
+use Modules\Schedule\Enums\ScheduleStatus;
+use Modules\Schedule\Enums\ScheduleType;
+use Modules\Schedule\Models\Schedule;
 
 class AdminResidentController extends Controller
 {
@@ -27,7 +27,7 @@ class AdminResidentController extends Controller
         }
 
         // Base query for sewa schedules
-        $query = Schedule::with(['tenant', 'room', 'invoices'])
+        $query = Schedule::with(['tenant', 'room'])
             ->where('type', ScheduleType::SEWA)
             ->whereIn('status', [ScheduleStatus::ACTIVE, ScheduleStatus::PENDING, ScheduleStatus::FINISHED]);
 
@@ -39,7 +39,7 @@ class AdminResidentController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->whereHas('tenant', function ($tenantQ) use ($search) {
                     $tenantQ->where('name', 'like', "%{$search}%")
-                            ->orWhere('phone_number', 'like', "%{$search}%");
+                        ->orWhere('phone_number', 'like', "%{$search}%");
                 })->orWhereHas('room', function ($roomQ) use ($search) {
                     $roomQ->where('number', 'like', "%{$search}%");
                 });
@@ -48,13 +48,12 @@ class AdminResidentController extends Controller
 
         $schedules = $query->orderBy('created_at', 'desc')->get();
 
+        $scheduleIds = $schedules->pluck('id')->toArray();
+        $paymentStatuses = \Modules\Finance\Services\FinanceService::getPaymentStatusByScheduleIds($scheduleIds);
+
         // Process schedules to append computed detailBayar and format
-        $mapped = $schedules->map(function ($schedule) {
-            // Check payment status logic
-            // Assuming if any invoice is unpaid, it's 'Belum Lunas'
-            $hasUnpaid = $schedule->invoices->where('status', \Modules\Finance\Enums\InvoiceStatus::UNPAID)->count() > 0;
-            $hasInvoices = $schedule->invoices->count() > 0;
-            $detailBayar = ($hasInvoices && !$hasUnpaid) ? 'Lunas' : 'Belum Lunas';
+        $mapped = $schedules->map(function ($schedule) use ($paymentStatuses) {
+            $detailBayar = $paymentStatuses[$schedule->id] ?? 'Belum Lunas';
 
             return [
                 'id' => (string) $schedule->id,
@@ -75,10 +74,10 @@ class AdminResidentController extends Controller
         $currentPage = \Illuminate\Pagination\Paginator::resolveCurrentPage() ?: 1;
         $paginatedItems = $mapped->slice(($currentPage - 1) * $perPage, $perPage)->values();
         $paginator = new \Illuminate\Pagination\LengthAwarePaginator(
-            $paginatedItems, 
-            $mapped->count(), 
-            $perPage, 
-            $currentPage, 
+            $paginatedItems,
+            $mapped->count(),
+            $perPage,
+            $currentPage,
             ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
         );
 
@@ -102,8 +101,8 @@ class AdminResidentController extends Controller
                     'penghuniAktif' => $penghuniAktif,
                     'kontrakPending' => $kontrakPending,
                     'kamarTersedia' => $kamarTersedia,
-                ]
-            ]
+                ],
+            ],
         ]);
     }
 }
