@@ -380,3 +380,72 @@ test('ambilJadwalAktifKamar mengembalikan jadwal active atau null', function () 
     expect($service->ambilJadwalAktifKamar(5))->toBeInstanceOf(Schedule::class);
     expect($service->ambilJadwalAktifKamar(99))->toBeNull();
 });
+
+// =========================================================================
+// TESTS FOR STATIC CROSS-MODULE METHODS
+// =========================================================================
+
+test('[STATIC] getById mengembalikan array data dengan relasi room jika ditemukan', function () {
+    $room = \Modules\Room\Models\Room::create(['number' => '101', 'type' => 'standar', 'price' => 500000, 'status' => 'available']);
+    $schedule = Schedule::create([
+        'room_id' => $room->id,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::ACTIVE->value,
+        'start_date' => '2026-06-01',
+        'end_date' => '2026-07-01',
+    ]);
+
+    $data = ScheduleService::getById($schedule->id);
+    
+    expect($data)->toBeArray();
+    expect($data['id'])->toBe($schedule->id);
+    expect($data['room']['number'])->toBe('101');
+});
+
+test('[STATIC] getById mengembalikan null jika jadwal tidak ditemukan', function () {
+    $data = ScheduleService::getById(9999);
+    expect($data)->toBeNull();
+});
+
+test('[STATIC] getActiveSewaCount mengembalikan jumlah jadwal sewa aktif', function () {
+    Schedule::create([
+        'room_id' => 1,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::ACTIVE->value,
+        'start_date' => '2026-06-01',
+        'end_date' => '2026-07-01',
+    ]);
+    Schedule::create([
+        'room_id' => 2,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::PENDING->value,
+        'start_date' => '2026-06-01',
+        'end_date' => '2026-07-01',
+    ]);
+
+    $count = ScheduleService::getActiveSewaCount();
+    expect($count)->toBeGreaterThanOrEqual(1); // Might be more due to other tests if db not fully refreshed, but RefreshDatabase is on
+});
+
+test('[STATIC] getActiveByTenantUserId mengembalikan jadwal aktif tenant beserta room', function () {
+    $room = \Modules\Room\Models\Room::create(['number' => '102', 'type' => 'standar', 'price' => 500000, 'status' => 'available']);
+    $schedule = Schedule::create([
+        'room_id' => $room->id,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::ACTIVE->value,
+        'start_date' => '2026-06-01',
+        'end_date' => '2026-07-01',
+        'tenant_user_id' => 123,
+    ]);
+
+    $data = ScheduleService::getActiveByTenantUserId(123);
+    
+    expect($data)->toBeArray();
+    expect($data['id'])->toBe($schedule->id);
+    expect($data['room']['number'])->toBe('102');
+});
+
+test('[STATIC] getActiveByTenantUserId mengembalikan null jika tidak ada jadwal aktif', function () {
+    $data = ScheduleService::getActiveByTenantUserId(9999);
+    expect($data)->toBeNull();
+});

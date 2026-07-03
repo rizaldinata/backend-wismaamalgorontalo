@@ -232,4 +232,51 @@ class ScheduleService
     {
         return $this->scheduleRepository->getByRoomId($roomId);
     }
+
+    // =========================================================================
+    // CROSS-MODULE GET METHODS (STATIC)
+    // Digunakan oleh modul lain melalui pola Direct Service Access
+    // =========================================================================
+
+    /**
+     * Mengambil detail jadwal berdasarkan ID.
+     * Mengembalikan array (termasuk relasi room) atau null jika tidak ditemukan.
+     *
+     * @param int $scheduleId
+     * @return array|null
+     */
+    public static function getById(int $scheduleId): ?array
+    {
+        $schedule = Schedule::with('room')->find($scheduleId);
+        return $schedule ? $schedule->toArray() : null;
+    }
+
+    /**
+     * Mengambil jumlah jadwal sewa yang sedang aktif.
+     *
+     * @return int
+     */
+    public static function getActiveSewaCount(): int
+    {
+        return Schedule::where('type', ScheduleType::SEWA)
+            ->where('status', ScheduleStatus::ACTIVE)
+            ->count();
+    }
+
+    /**
+     * Mengambil jadwal aktif untuk seorang tenant (penyewa).
+     * Mengembalikan array (termasuk relasi room) atau null jika tidak ditemukan.
+     *
+     * @param int $userId
+     * @return array|null
+     */
+    public static function getActiveByTenantUserId(int $userId): ?array
+    {
+        $schedule = Schedule::where('tenant_user_id', $userId)
+            ->where('status', ScheduleStatus::ACTIVE)
+            ->with('room')
+            ->first();
+            
+        return $schedule ? $schedule->toArray() : null;
+    }
 }
