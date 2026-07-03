@@ -51,18 +51,27 @@ echo "Sample IDs - Room: {$roomId}, Schedule: {$scheduleId}, Invoice: {$invoiceI
 
 // === TEST FUNCTION ===
 function testEndpoint(string $method, string $uri, string $token, string $label = '', array $data = []): array {
-    $app = app();
+    $client = new \GuzzleHttp\Client([
+        'base_uri' => 'http://localhost:8000',
+        'http_errors' => false,
+        'timeout' => 5,
+    ]);
     
     try {
-        $request = \Illuminate\Http\Request::create($uri, $method, $data);
+        $headers = ['Accept' => 'application/json'];
         if ($token) {
-            $request->headers->set('Authorization', 'Bearer ' . $token);
+            $headers['Authorization'] = 'Bearer ' . $token;
         }
-        $request->headers->set('Accept', 'application/json');
         
-        $response = $app->handle($request);
+        $options = ['headers' => $headers];
+        if (!empty($data)) {
+            $options['json'] = $data;
+        }
+        
+        $response = $client->request($method, ltrim($uri, '/'), $options);
         $statusCode = $response->getStatusCode();
-        $content = json_decode($response->getContent(), true);
+        $body = $response->getBody()->getContents();
+        $content = json_decode($body, true);
         
         $keys = [];
         if (is_array($content)) {
@@ -78,7 +87,7 @@ function testEndpoint(string $method, string $uri, string $token, string $label 
             'status' => $statusCode,
             'ok' => $ok,
             'keys' => implode(', ', array_slice($keys, 0, 6)),
-            'note' => $ok ? '' : 'ERROR: ' . ($content['message'] ?? 'Unknown'),
+            'note' => $ok ? '' : 'ERROR: ' . ($content['message'] ?? substr($body, 0, 100)),
         ];
     } catch (\Throwable $e) {
         return [
