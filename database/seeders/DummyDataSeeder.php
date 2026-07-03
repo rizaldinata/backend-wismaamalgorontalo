@@ -5,23 +5,23 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 use Modules\Auth\Models\User;
+use Modules\Guest\Enums\GuestBillStatus;
+use Modules\Guest\Enums\GuestRelationship;
+use Modules\Guest\Models\Guest;
+use Modules\Guest\Models\GuestBill;
 use Modules\Room\Models\Room;
 use Modules\Room\Models\RoomImage;
 use Modules\Schedule\Models\Schedule;
-use Modules\Guest\Models\Guest;
-use Modules\Guest\Enums\GuestRelationship;
-use Modules\Guest\Models\GuestBill;
-use Modules\Guest\Enums\GuestBillStatus;
 
 class DummyDataSeeder extends Seeder
 {
     public function run(): void
     {
         // Ensure directories exist
-        if (!Storage::disk('public')->exists('rooms')) {
+        if (! Storage::disk('public')->exists('rooms')) {
             Storage::disk('public')->makeDirectory('rooms');
         }
-        if (!Storage::disk('public')->exists('payments')) {
+        if (! Storage::disk('public')->exists('payments')) {
             Storage::disk('public')->makeDirectory('payments');
         }
 
@@ -312,7 +312,7 @@ class DummyDataSeeder extends Seeder
 
             // Create dummy images for each room
             for ($i = 1; $i <= $imagesCount; $i++) {
-                $imagePath = 'rooms/dummy-room-' . $room->number . '-' . $i . '.jpg';
+                $imagePath = 'rooms/dummy-room-'.$room->number.'-'.$i.'.jpg';
                 RoomImage::firstOrCreate(
                     [
                         'room_id' => $room->id,
@@ -324,9 +324,9 @@ class DummyDataSeeder extends Seeder
                 );
 
                 // Generate physical file
-                $fullpath = storage_path('app/public/' . $imagePath);
+                $fullpath = storage_path('app/public/'.$imagePath);
                 $statusText = $room->status instanceof \BackedEnum ? $room->status->value : (string) $room->status;
-                $this->generatePlaceholder($fullpath, 'Room ' . $room->number, $statusText, 800, 600);
+                $this->generatePlaceholder($fullpath, 'Room '.$room->number, $statusText, 800, 600);
             }
         }
 
@@ -493,7 +493,7 @@ class DummyDataSeeder extends Seeder
             if ($gData['charge_amount'] > 0) {
                 GuestBill::create([
                     'guest_id' => $guest->id,
-                    'bill_number' => 'GB-' . strtoupper(uniqid()),
+                    'bill_number' => 'GB-'.strtoupper(uniqid()),
                     'amount' => $gData['charge_amount'],
                     'status' => $gData['bill_status'] ?? GuestBillStatus::UNPAID,
                     'payment_method' => $gData['payment_method'] ?? null,
@@ -514,7 +514,7 @@ class DummyDataSeeder extends Seeder
     private function generatePlaceholder($path, $text1, $text2, $width, $height)
     {
         $directory = dirname($path);
-        if (!is_dir($directory)) {
+        if (! is_dir($directory)) {
             mkdir($directory, 0755, true);
         }
 

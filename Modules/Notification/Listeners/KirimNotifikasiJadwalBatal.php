@@ -2,12 +2,12 @@
 
 namespace Modules\Notification\Listeners;
 
+use App\Contracts\ConfigProviderInterface;
 use App\Events\Jadwal\JadwalBatal;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Modules\Notification\Enums\NotificationType;
 use Modules\Notification\Services\NotificationService;
-use App\Contracts\ConfigProviderInterface;
 
 class KirimNotifikasiJadwalBatal implements ShouldQueue
 {

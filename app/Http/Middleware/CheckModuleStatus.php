@@ -38,7 +38,7 @@ class CheckModuleStatus
             'api/inventory' => 'inventory',
             'api/guests' => 'guest', // <-- menggunakan s (guests) sesuai route list
             'api/notification' => 'notification',
-            
+
             // Modul Inti (Core)
             'api/room' => 'room',
             'api/schedule' => 'schedule',
@@ -49,9 +49,9 @@ class CheckModuleStatus
             // Jika request path dimulai dengan prefix modul
             if (str_starts_with($path, $prefix)) {
                 // Cek apakah modul aktif menggunakan FeatureToggleService
-                if (!$featureToggleService->isEnabled($moduleKey)) {
+                if (! $featureToggleService->isEnabled($moduleKey)) {
                     return response()->json([
-                        'message' => 'Modul ' . ucfirst($moduleKey) . ' sedang dinonaktifkan oleh administrator.'
+                        'message' => 'Modul '.ucfirst($moduleKey).' sedang dinonaktifkan oleh administrator.',
                     ], Response::HTTP_FORBIDDEN);
                 }
                 break; // Hanya perlu cek satu prefix terpanjang/pertama yang match

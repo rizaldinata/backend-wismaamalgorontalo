@@ -31,7 +31,7 @@ class FinishExpiredSchedules extends Command
             ->get();
 
         $finished = 0;
-        $skipped  = 0;
+        $skipped = 0;
 
         foreach ($expiredSchedules as $schedule) {
             $hasPendingExtension = $this->paymentStatusChecker->hasPendingExtensionInvoice(
@@ -41,6 +41,7 @@ class FinishExpiredSchedules extends Command
 
             if ($hasPendingExtension) {
                 $skipped++;
+
                 continue;
             }
 
@@ -50,13 +51,13 @@ class FinishExpiredSchedules extends Command
 
                 Log::info('FinishExpiredSchedules: jadwal diselesaikan otomatis.', [
                     'schedule_id' => $schedule->id,
-                    'room_id'     => $schedule->room_id,
-                    'end_date'    => $schedule->end_date,
+                    'room_id' => $schedule->room_id,
+                    'end_date' => $schedule->end_date,
                 ]);
             } catch (\Throwable $e) {
                 Log::error('FinishExpiredSchedules: gagal menyelesaikan jadwal.', [
                     'schedule_id' => $schedule->id,
-                    'error'       => $e->getMessage(),
+                    'error' => $e->getMessage(),
                 ]);
             }
         }

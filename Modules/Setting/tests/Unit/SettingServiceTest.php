@@ -112,7 +112,7 @@ test('[BERHASIL] getEnabledMidtransPaymentMethods mengembalikan array kosong jik
 
 test('[BERHASIL] getEnabledMidtransPaymentMethods membaca dari database dengan benar', function () {
     AppSetting::create([
-        'key'   => 'midtrans_enabled_payment_methods',
+        'key' => 'midtrans_enabled_payment_methods',
         'value' => '["qris","gopay","bca_va"]',
     ]);
 
@@ -135,7 +135,7 @@ test('[BERHASIL] setEnabledMidtransPaymentMethods menyimpan JSON ke database', f
 
 test('[BERHASIL] setEnabledMidtransPaymentMethods memperbarui nilai yang sudah ada', function () {
     AppSetting::create([
-        'key'   => 'midtrans_enabled_payment_methods',
+        'key' => 'midtrans_enabled_payment_methods',
         'value' => '["qris"]',
     ]);
 
@@ -167,7 +167,7 @@ test('[BERHASIL] midtransMethodCatalog mengembalikan 11 metode yang diizinkan', 
 
 test('[BERHASIL] getPublicSettings mengembalikan midtrans_enabled_payments dari database', function () {
     AppSetting::create([
-        'key'   => 'midtrans_enabled_payment_methods',
+        'key' => 'midtrans_enabled_payment_methods',
         'value' => '["qris","bca_va"]',
     ]);
 

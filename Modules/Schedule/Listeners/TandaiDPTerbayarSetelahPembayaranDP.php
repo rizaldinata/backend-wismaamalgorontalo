@@ -35,7 +35,7 @@ class TandaiDPTerbayarSetelahPembayaranDP
         } catch (\Throwable) {
             Log::warning('TandaiDPTerbayarSetelahPembayaranDP: schedule tidak ditemukan.', [
                 'schedule_id' => $event->scheduleId,
-                'invoice_id'  => $event->invoiceId,
+                'invoice_id' => $event->invoiceId,
             ]);
 
             return;
@@ -48,7 +48,7 @@ class TandaiDPTerbayarSetelahPembayaranDP
         DB::table('room_schedules')
             ->where('id', $schedule->id)
             ->update([
-                'status'     => ScheduleStatus::DP_TERBAYAR->value,
+                'status' => ScheduleStatus::DP_TERBAYAR->value,
                 'dp_paid_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -66,24 +66,24 @@ class TandaiDPTerbayarSetelahPembayaranDP
             : ($event->periodEnd ?? $schedule->end_date->toDateString());
 
         event(new DPDibayar(
-            scheduleId:         $schedule->id,
-            roomNumber:         $schedule->room->number ?? '',
-            tenantName:         $schedule->tenant_name ?? '',
-            tenantPhone:        $schedule->tenant_phone ?? '',
-            dpAmount:           (float) $schedule->dp_amount,
-            pelunasanAmount:    $pelunasanAmount,
-            startDate:          $schedule->start_date->toDateString(),
-            endDate:            $schedule->end_date->toDateString(),
+            scheduleId: $schedule->id,
+            roomNumber: $schedule->room->number ?? '',
+            tenantName: $schedule->tenant_name ?? '',
+            tenantPhone: $schedule->tenant_phone ?? '',
+            dpAmount: (float) $schedule->dp_amount,
+            pelunasanAmount: $pelunasanAmount,
+            startDate: $schedule->start_date->toDateString(),
+            endDate: $schedule->end_date->toDateString(),
             roomNumberSnapshot: $roomNumberSnapshot,
-            periodStart:        $periodStart,
-            periodEnd:          $periodEnd,
-            tenantUserId:       $schedule->tenant_user_id,
-            dpInvoiceId:        $event->invoiceId,
+            periodStart: $periodStart,
+            periodEnd: $periodEnd,
+            tenantUserId: $schedule->tenant_user_id,
+            dpInvoiceId: $event->invoiceId,
         ));
 
         Log::info('TandaiDPTerbayarSetelahPembayaranDP: jadwal ditandai DP Terbayar.', [
-            'schedule_id'     => $schedule->id,
-            'dp_amount'       => $schedule->dp_amount,
+            'schedule_id' => $schedule->id,
+            'dp_amount' => $schedule->dp_amount,
             'pelunasan_amount' => $pelunasanAmount,
         ]);
     }

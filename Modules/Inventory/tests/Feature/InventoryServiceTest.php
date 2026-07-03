@@ -148,3 +148,26 @@ test('InventoryService dapat digunakan tanpa Finance module aktif', function () 
     expect($inventory->name)->toBe('Barang Test');
     Event::assertDispatched(InventariBaru::class);
 });
+
+// ----- CROSS-MODULE GET METHODS (STATIC) -----
+
+test('[STATIC] getTotalItems mengembalikan total quantity seluruh inventaris', function () {
+    Inventory::factory()->create(['quantity' => 5]);
+    Inventory::factory()->create(['quantity' => 10]);
+
+    $total = InventoryService::getTotalItems();
+    expect($total)->toBeGreaterThanOrEqual(15); // Can be > 15 due to previous tests
+});
+
+test('[STATIC] getBrokenItems mengembalikan total quantity barang rusak', function () {
+    // Clear inventory first to be safe, since there is no transaction wrapper in pest if not fully isolated
+    // Actually RefreshDatabase is used, so it's fresh per test
+    Inventory::query()->delete();
+
+    Inventory::factory()->create(['quantity' => 5, 'condition' => \Modules\Inventory\Enums\ItemCondition::GOOD->value]);
+    Inventory::factory()->create(['quantity' => 3, 'condition' => \Modules\Inventory\Enums\ItemCondition::BROKEN->value]);
+    Inventory::factory()->create(['quantity' => 2, 'condition' => \Modules\Inventory\Enums\ItemCondition::LOST->value]);
+
+    $broken = InventoryService::getBrokenItems();
+    expect($broken)->toBe(5); // 3 broken + 2 lost
+});

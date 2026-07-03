@@ -25,12 +25,11 @@ class FixedExpenseController extends Controller
      * Daftar Pengeluaran Tetap
      *
      * Mengambil daftar pengeluaran rutin bulanan (listrik, air, kebersihan, dll). (Hanya Admin)
-     * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
-        $perPage  = min((int) $request->query('per_page', 20), 100);
-        $filters  = $request->only(['jenis', 'bulan', 'tahun']);
+        $perPage = min((int) $request->query('per_page', 20), 100);
+        $filters = $request->only(['jenis', 'bulan', 'tahun']);
 
         $entries = $this->fixedExpenseService->getAll($filters, $perPage);
 
@@ -44,7 +43,6 @@ class FixedExpenseController extends Controller
      * Detail Pengeluaran Tetap
      *
      * Melihat detail dari satu record pengeluaran bulanan. (Hanya Admin)
-     * @return \Illuminate\Http\JsonResponse
      */
     public function show(int $id): JsonResponse
     {
@@ -61,7 +59,6 @@ class FixedExpenseController extends Controller
      * Update Pengeluaran Tetap
      *
      * Memasukkan jumlah nominal/tagihan real untuk pengeluaran di bulan terkait. (Hanya Admin)
-     * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateFixedExpenseRequest $request, int $id): JsonResponse
     {
@@ -80,7 +77,6 @@ class FixedExpenseController extends Controller
      * Generate Pengeluaran Bulan Ini
      *
      * Meng-generate secara otomatis kerangka tagihan rutin untuk bulan/tahun berjalan. (Hanya Admin)
-     * @return \Illuminate\Http\JsonResponse
      */
     public function generateBulanIni(Request $request): JsonResponse
     {
@@ -96,7 +92,6 @@ class FixedExpenseController extends Controller
      * Status Pengisian Pengeluaran
      *
      * Mengecek apakah admin sudah melengkapi/mengisi semua tagihan rutin bulan ini. (Hanya Admin)
-     * @return \Illuminate\Http\JsonResponse
      */
     public function status(Request $request): JsonResponse
     {

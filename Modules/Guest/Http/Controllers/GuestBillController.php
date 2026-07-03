@@ -30,6 +30,7 @@ class GuestBillController extends Controller
      * Detail Tagihan Tamu
      *
      * Melihat rincian tagihan untuk tamu tertentu.
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(int $guestId)
@@ -55,6 +56,7 @@ class GuestBillController extends Controller
      * Bayar Tagihan Tamu
      *
      * Memproses pembayaran tagihan tamu (bisa manual via transfer atau otomatis via Midtrans).
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function pay(PayGuestBillRequest $request, int $guestId)
@@ -65,7 +67,7 @@ class GuestBillController extends Controller
 
             if ($method === 'manual') {
                 $bill = $this->billingService->payManual($guestId, $userId, $request->file('payment_proof'));
-            } else if ($method === 'cash') {
+            } elseif ($method === 'cash') {
                 $bill = $this->billingService->payCash($guestId, $userId);
             } else {
                 $bill = $this->billingService->payMidtrans($guestId, $userId);
@@ -87,7 +89,9 @@ class GuestBillController extends Controller
      * Midtrans Webhook (Tamu)
      *
      * Endpoint untuk menerima notifikasi status pembayaran dari Midtrans (khusus tagihan tamu).
+     *
      * @unauthenticated
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function midtransNotification(Request $request)

@@ -44,7 +44,7 @@ test('[GAGAL] parameter per_page kurang dari 1 ditolak dengan validasi error', f
 
 test('[BERHASIL] admin dapat melihat detail pengeluaran yang ada', function () {
     $expense = Expense::factory()->create([
-        'title'  => 'Beli Lampu',
+        'title' => 'Beli Lampu',
         'amount' => 75000,
     ]);
 
@@ -57,10 +57,10 @@ test('[BERHASIL] admin dapat melihat detail pengeluaran yang ada', function () {
 });
 
 test('[BERHASIL] response detail pengeluaran menampilkan flag is_integrated dengan benar', function () {
-    $manual      = Expense::factory()->create(['reference_type' => null]);
+    $manual = Expense::factory()->create(['reference_type' => null]);
     $terintegrasi = Expense::factory()->create([
         'reference_type' => 'Modules\\Inventory\\Models\\Inventory',
-        'reference_id'   => 1,
+        'reference_id' => 1,
     ]);
 
     $this->getJson("/api/finance/expenses/{$manual->id}")
@@ -84,9 +84,9 @@ test('[GAGAL] menampilkan 404 jika pengeluaran tidak ditemukan', function () {
 
 test('[BERHASIL] admin dapat mencatat pengeluaran manual baru', function () {
     $response = $this->postJson('/api/finance/expenses', [
-        'title'        => 'Beli Deterjen',
-        'description'  => 'Untuk kebutuhan laundry',
-        'amount'       => 50000,
+        'title' => 'Beli Deterjen',
+        'description' => 'Untuk kebutuhan laundry',
+        'amount' => 50000,
         'expense_date' => now()->toDateString(),
     ]);
 
@@ -100,20 +100,20 @@ test('[BERHASIL] admin dapat mencatat pengeluaran manual baru', function () {
 
 test('[BERHASIL] pengeluaran manual tersimpan dengan reference_type null', function () {
     $this->postJson('/api/finance/expenses', [
-        'title'        => 'Beli Sabun',
-        'amount'       => 15000,
+        'title' => 'Beli Sabun',
+        'amount' => 15000,
         'expense_date' => now()->toDateString(),
     ]);
 
     $this->assertDatabaseHas('expenses', [
-        'title'          => 'Beli Sabun',
+        'title' => 'Beli Sabun',
         'reference_type' => null,
     ]);
 });
 
 test('[GAGAL] store gagal jika title tidak disertakan', function () {
     $response = $this->postJson('/api/finance/expenses', [
-        'amount'       => 50000,
+        'amount' => 50000,
         'expense_date' => now()->toDateString(),
     ]);
 
@@ -123,8 +123,8 @@ test('[GAGAL] store gagal jika title tidak disertakan', function () {
 
 test('[GAGAL] store gagal jika amount kurang dari 1', function () {
     $response = $this->postJson('/api/finance/expenses', [
-        'title'        => 'Pengeluaran Nol',
-        'amount'       => 0,
+        'title' => 'Pengeluaran Nol',
+        'amount' => 0,
         'expense_date' => now()->toDateString(),
     ]);
 
@@ -134,8 +134,8 @@ test('[GAGAL] store gagal jika amount kurang dari 1', function () {
 
 test('[GAGAL] store gagal jika expense_date bukan format tanggal yang valid', function () {
     $response = $this->postJson('/api/finance/expenses', [
-        'title'        => 'Pengeluaran Salah Tanggal',
-        'amount'       => 10000,
+        'title' => 'Pengeluaran Salah Tanggal',
+        'amount' => 10000,
         'expense_date' => 'bukan-tanggal',
     ]);
 
@@ -149,13 +149,13 @@ test('[GAGAL] store gagal jika expense_date bukan format tanggal yang valid', fu
 
 test('[BERHASIL] admin dapat mengubah pengeluaran manual', function () {
     $expense = Expense::factory()->create([
-        'title'          => 'Pengeluaran Lama',
-        'amount'         => 100000,
+        'title' => 'Pengeluaran Lama',
+        'amount' => 100000,
         'reference_type' => null,
     ]);
 
     $response = $this->putJson("/api/finance/expenses/{$expense->id}", [
-        'title'  => 'Pengeluaran Diperbarui',
+        'title' => 'Pengeluaran Diperbarui',
         'amount' => 150000,
     ]);
 
@@ -168,7 +168,7 @@ test('[BERHASIL] admin dapat mengubah pengeluaran manual', function () {
 test('[GAGAL] update gagal jika pengeluaran terintegrasi dengan inventory', function () {
     $expense = Expense::factory()->create([
         'reference_type' => 'Modules\\Inventory\\Models\\Inventory',
-        'reference_id'   => 3,
+        'reference_id' => 3,
     ]);
 
     $response = $this->putJson("/api/finance/expenses/{$expense->id}", [
@@ -208,7 +208,7 @@ test('[BERHASIL] admin dapat menghapus pengeluaran manual', function () {
 test('[GAGAL] hapus gagal jika pengeluaran terintegrasi dengan inventory', function () {
     $expense = Expense::factory()->create([
         'reference_type' => 'Modules\\Inventory\\Models\\Inventory',
-        'reference_id'   => 7,
+        'reference_id' => 7,
     ]);
 
     $response = $this->deleteJson("/api/finance/expenses/{$expense->id}");

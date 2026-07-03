@@ -21,8 +21,8 @@ class KirimNotifikasiPembayaranDibatalkanTest extends TestCase
     {
         parent::setUp();
         $this->notificationService = $this->createMock(NotificationService::class);
-        $this->settingService      = $this->createMock(SettingService::class);
-        $this->listener            = new KirimNotifikasiPembayaranDibatalkan(
+        $this->settingService = $this->createMock(SettingService::class);
+        $this->listener = new KirimNotifikasiPembayaranDibatalkan(
             $this->notificationService,
             $this->settingService,
         );
@@ -31,12 +31,12 @@ class KirimNotifikasiPembayaranDibatalkanTest extends TestCase
     private function buatEvent(?string $tenantPhone = '08123456789', ?float $amount = 750000.0): PembayaranDibatalkan
     {
         return new PembayaranDibatalkan(
-            paymentId:   20,
-            invoiceId:   30,
-            scheduleId:  1,
-            tenantName:  'Budi Santoso',
+            paymentId: 20,
+            invoiceId: 30,
+            scheduleId: 1,
+            tenantName: 'Budi Santoso',
             tenantPhone: $tenantPhone,
-            amount:      $amount,
+            amount: $amount,
         );
     }
 

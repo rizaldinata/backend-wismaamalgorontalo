@@ -49,11 +49,11 @@ test('[BERHASIL] calculateBilling menghasilkan billable_days 0 jika total_days k
 
 test('[BERHASIL] createBillIfNeeded membuat tagihan jika charge_amount lebih dari 0', function () {
     $guest = Guest::create([
-        'name'         => 'Andi',
-        'check_in_at'  => now()->subDays(5),
+        'name' => 'Andi',
+        'check_in_at' => now()->subDays(5),
         'check_out_at' => now(),
         'relationship' => GuestRelationship::FRIEND,
-        'total_days'   => 5,
+        'total_days' => 5,
         'billable_days' => 3,
         'charge_amount' => 75000,
     ]);
@@ -67,11 +67,11 @@ test('[BERHASIL] createBillIfNeeded membuat tagihan jika charge_amount lebih dar
 
 test('[BERHASIL] createBillIfNeeded mengembalikan null jika charge_amount adalah 0', function () {
     $guest = Guest::create([
-        'name'         => 'Budi',
-        'check_in_at'  => now()->subDay(),
+        'name' => 'Budi',
+        'check_in_at' => now()->subDay(),
         'check_out_at' => now(),
         'relationship' => GuestRelationship::SIBLING,
-        'total_days'   => 1,
+        'total_days' => 1,
         'billable_days' => 0,
         'charge_amount' => 0,
     ]);

@@ -21,6 +21,21 @@ class RoomService implements RoomAvailabilityService
         return $this->roomRepository->getAllPaginated($filters);
     }
 
+    public static function getTotalRoomsCount(): int
+    {
+        return Room::count();
+    }
+
+    public static function getOccupiedRoomsCount(): int
+    {
+        return Room::where('status', RoomStatus::OCCUPIED)->count();
+    }
+
+    public static function getAvailableRoomsCount(): int
+    {
+        return Room::where('status', RoomStatus::AVAILABLE)->count();
+    }
+
     public function getRoomSchedules()
     {
         return $this->roomRepository->getAllWithSchedules();

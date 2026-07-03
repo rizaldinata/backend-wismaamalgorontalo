@@ -19,9 +19,9 @@ class Fine extends Model
     ];
 
     protected $casts = [
-        'status'  => FineStatus::class,
+        'status' => FineStatus::class,
         'paid_at' => 'datetime',
-        'amount'  => 'decimal:2',
+        'amount' => 'decimal:2',
     ];
 
     public function tenant()

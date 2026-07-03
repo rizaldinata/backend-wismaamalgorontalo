@@ -31,7 +31,7 @@ class AktifkanJadwalSetelahPelunasan
         } catch (\Throwable) {
             Log::warning('AktifkanJadwalSetelahPelunasan: schedule tidak ditemukan.', [
                 'schedule_id' => $event->scheduleId,
-                'invoice_id'  => $event->invoiceId,
+                'invoice_id' => $event->invoiceId,
             ]);
 
             return;
@@ -40,7 +40,7 @@ class AktifkanJadwalSetelahPelunasan
         if ($schedule->status !== ScheduleStatus::DP_TERBAYAR) {
             Log::warning('AktifkanJadwalSetelahPelunasan: status jadwal bukan dp_terbayar, dilewati.', [
                 'schedule_id' => $schedule->id,
-                'status'      => $schedule->status->value,
+                'status' => $schedule->status->value,
             ]);
 
             return;
@@ -52,7 +52,7 @@ class AktifkanJadwalSetelahPelunasan
 
             Log::info('Jadwal dikonfirmasi (start_date belum tiba) setelah pelunasan dibayar.', [
                 'schedule_id' => $schedule->id,
-                'start_date'  => $schedule->start_date->toDateString(),
+                'start_date' => $schedule->start_date->toDateString(),
             ]);
         } else {
             // Start date sudah tiba atau hari ini → aktifkan langsung
@@ -60,7 +60,7 @@ class AktifkanJadwalSetelahPelunasan
 
             Log::info('Jadwal diaktifkan setelah pelunasan dibayar.', [
                 'schedule_id' => $schedule->id,
-                'invoice_id'  => $event->invoiceId,
+                'invoice_id' => $event->invoiceId,
             ]);
         }
     }

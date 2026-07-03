@@ -4,7 +4,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Modules\Finance\Models\FixedExpenseEntry;
 use Modules\Finance\Services\FinanceDashboardService;
-use Modules\Finance\Services\FixedExpenseService;
 use Modules\Setting\Models\AppSetting;
 use Modules\Setting\Models\FeatureToggle;
 use Modules\Setting\Services\SettingService;
@@ -96,7 +95,7 @@ test('[INTEGRASI] update-bulk ditolak jika fitur aktif tapi jenis kosong', funct
     $this->withoutMiddleware();
     $response = $this->postJson('/api/v1/settings/update-bulk', [
         'settings' => [
-            'feature_pengeluaran_tetap'     => true,
+            'feature_pengeluaran_tetap' => true,
             'pengeluaran_tetap_jenis_aktif' => [],
         ],
     ]);
@@ -108,7 +107,7 @@ test('[INTEGRASI] update-bulk berhasil jika fitur aktif dengan minimal satu jeni
     $this->withoutMiddleware();
     $response = $this->postJson('/api/v1/settings/update-bulk', [
         'settings' => [
-            'feature_pengeluaran_tetap'     => true,
+            'feature_pengeluaran_tetap' => true,
             'pengeluaran_tetap_jenis_aktif' => ['listrik'],
         ],
     ]);
@@ -122,7 +121,7 @@ test('[INTEGRASI] update-bulk berhasil nonaktifkan tanpa pilih jenis', function 
     $this->withoutMiddleware();
     $response = $this->postJson('/api/v1/settings/update-bulk', [
         'settings' => [
-            'feature_pengeluaran_tetap'     => false,
+            'feature_pengeluaran_tetap' => false,
             'pengeluaran_tetap_jenis_aktif' => [],
         ],
     ]);

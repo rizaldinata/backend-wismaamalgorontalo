@@ -26,8 +26,8 @@ class NotificationLog extends Model
     ];
 
     protected $casts = [
-        'status'  => NotificationStatus::class,
-        'type'    => NotificationType::class,
+        'status' => NotificationStatus::class,
+        'type' => NotificationType::class,
         'is_read' => 'boolean',
     ];
 }

@@ -10,8 +10,8 @@ class StoreFineRequest extends FormRequest
     {
         return [
             'tenant_user_id' => ['required', 'integer', 'exists:users,id'],
-            'amount'         => ['required', 'numeric', 'min:1000'],
-            'reason'         => ['required', 'string', 'max:500'],
+            'amount' => ['required', 'numeric', 'min:1000'],
+            'reason' => ['required', 'string', 'max:500'],
         ];
     }
 }

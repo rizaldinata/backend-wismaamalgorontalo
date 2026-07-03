@@ -15,16 +15,16 @@ class Schedule extends Model
     protected $guarded = ['id'];
 
     protected $casts = [
-        'type'           => ScheduleType::class,
-        'status'         => ScheduleStatus::class,
+        'type' => ScheduleType::class,
+        'status' => ScheduleStatus::class,
         'payment_scheme' => SchedulePaymentScheme::class,
-        'start_date'     => 'date',
-        'end_date'       => 'date',
-        'agreed_price'   => 'decimal:2',
-        'dp_amount'      => 'decimal:2',
-        'dp_paid_at'     => 'datetime',
-        'activated_at'   => 'datetime',
-        'finished_at'    => 'datetime',
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'agreed_price' => 'decimal:2',
+        'dp_amount' => 'decimal:2',
+        'dp_paid_at' => 'datetime',
+        'activated_at' => 'datetime',
+        'finished_at' => 'datetime',
     ];
 
     public function room()
@@ -37,8 +37,5 @@ class Schedule extends Model
         return $this->belongsTo(\Modules\Auth\Models\User::class, 'tenant_user_id');
     }
 
-    public function invoices()
-    {
-        return $this->hasMany(\Modules\Finance\Models\Invoice::class, 'schedule_id');
-    }
+    // Relasi ke modul Finance (invoices) dihapus karena melanggar batasan arsitektur modul
 }

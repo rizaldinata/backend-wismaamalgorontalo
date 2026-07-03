@@ -22,8 +22,8 @@ class PaymentMethodSettingController extends Controller
         $enabled = $this->settingService->getEnabledMidtransPaymentMethods();
 
         $data = array_map(fn (string $code, string $label) => [
-            'code'    => $code,
-            'label'   => $label,
+            'code' => $code,
+            'label' => $label,
             'enabled' => in_array($code, $enabled, true),
         ], array_keys($catalog), $catalog);
 
@@ -35,12 +35,12 @@ class PaymentMethodSettingController extends Controller
         $methods = array_unique($request->validated()['enabled_methods']);
         $this->settingService->setEnabledMidtransPaymentMethods(array_values($methods));
 
-        $catalog  = SettingService::midtransMethodCatalog();
-        $enabled  = $this->settingService->getEnabledMidtransPaymentMethods();
+        $catalog = SettingService::midtransMethodCatalog();
+        $enabled = $this->settingService->getEnabledMidtransPaymentMethods();
 
         $data = array_map(fn (string $code, string $label) => [
-            'code'    => $code,
-            'label'   => $label,
+            'code' => $code,
+            'label' => $label,
             'enabled' => in_array($code, $enabled, true),
         ], array_keys($catalog), $catalog);
 

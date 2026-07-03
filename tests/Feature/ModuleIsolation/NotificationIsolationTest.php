@@ -3,16 +3,15 @@
 namespace Tests\Feature\ModuleIsolation;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Auth\Models\User;
+use Modules\Room\Models\Room;
 use Nwidart\Modules\Facades\Module;
 use Tests\TestCase;
 use Tests\Traits\ManagesModuleIsolation;
-use Modules\Auth\Models\User;
-use Modules\Room\Models\Room;
-use Modules\Schedule\Models\Schedule;
 
 class NotificationIsolationTest extends TestCase
 {
-    use RefreshDatabase, ManagesModuleIsolation;
+    use ManagesModuleIsolation, RefreshDatabase;
 
     protected function setUp(): void
     {
@@ -44,17 +43,17 @@ class NotificationIsolationTest extends TestCase
         $this->assertFalse(Module::isEnabled('Notification'));
         $this->assertTrue(Module::isEnabled('Schedule'));
 
-        $room   = Room::factory()->create(['status' => 'available']);
+        $room = Room::factory()->create(['status' => 'available']);
         $tenant = User::factory()->create();
-        $admin  = User::factory()->create();
+        $admin = User::factory()->create();
 
         $response = $this->actingAs($admin)->withoutMiddleware()->postJson('/api/v1/room-schedules', [
-            'room_id'        => $room->id,
+            'room_id' => $room->id,
             'tenant_user_id' => $tenant->id,
-            'type'           => 'sewa',
-            'start_date'     => now()->format('Y-m-d'),
-            'end_date'       => now()->addMonths(1)->format('Y-m-d'),
-            'price'          => 1500000,
+            'type' => 'sewa',
+            'start_date' => now()->format('Y-m-d'),
+            'end_date' => now()->addMonths(1)->format('Y-m-d'),
+            'price' => 1500000,
         ]);
 
         $this->assertNotEquals(500, $response->status(), 'Modul Schedule crash karena Notification tidak aktif.');

@@ -1,6 +1,5 @@
 <?php
 
-use App\Events\Jadwal\DPDibayar;
 use App\Events\Jadwal\JadwalDibuat;
 use App\Events\Jadwal\JadwalSewaAktif;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -19,17 +18,17 @@ test('[BERHASIL] buatJadwal dengan payment_scheme=dp menyimpan dp_amount sebesar
 
     $service = app(ScheduleService::class);
     $startDate = now()->addDays(10)->toDateString();
-    $endDate   = now()->addDays(40)->toDateString();
+    $endDate = now()->addDays(40)->toDateString();
 
     $schedule = $service->buatJadwal([
-        'room_id'        => 1,
-        'type'           => 'sewa',
+        'room_id' => 1,
+        'type' => 'sewa',
         'payment_scheme' => 'dp',
-        'start_date'     => $startDate,
-        'end_date'       => $endDate,
-        'tenant_name'    => 'Budi Santoso',
-        'tenant_phone'   => '08123456789',
-        'agreed_price'   => 1000000,
+        'start_date' => $startDate,
+        'end_date' => $endDate,
+        'tenant_name' => 'Budi Santoso',
+        'tenant_phone' => '08123456789',
+        'agreed_price' => 1000000,
     ]);
 
     expect($schedule->payment_scheme)->toBe(SchedulePaymentScheme::DP);
@@ -39,16 +38,16 @@ test('[BERHASIL] buatJadwal dengan payment_scheme=dp menyimpan dp_amount sebesar
 test('[BERHASIL] buatJadwal dengan payment_scheme=dp memicu JadwalDibuat dengan dpAmount', function () {
     Event::fake([JadwalDibuat::class]);
 
-    $service   = app(ScheduleService::class);
+    $service = app(ScheduleService::class);
     $startDate = now()->addDays(10)->toDateString();
 
     $schedule = $service->buatJadwal([
-        'room_id'        => 1,
-        'type'           => 'sewa',
+        'room_id' => 1,
+        'type' => 'sewa',
         'payment_scheme' => 'dp',
-        'start_date'     => $startDate,
-        'end_date'       => now()->addDays(40)->toDateString(),
-        'agreed_price'   => 800000,
+        'start_date' => $startDate,
+        'end_date' => now()->addDays(40)->toDateString(),
+        'agreed_price' => 800000,
     ]);
 
     Event::assertDispatched(JadwalDibuat::class, function ($e) use ($schedule) {
@@ -64,12 +63,12 @@ test('[GAGAL] buatJadwal dengan payment_scheme=dp ditolak jika start_date <= 7 h
     $service = app(ScheduleService::class);
 
     expect(fn () => $service->buatJadwal([
-        'room_id'        => 1,
-        'type'           => 'sewa',
+        'room_id' => 1,
+        'type' => 'sewa',
         'payment_scheme' => 'dp',
-        'start_date'     => now()->addDays(5)->toDateString(),
-        'end_date'       => now()->addDays(35)->toDateString(),
-        'agreed_price'   => 500000,
+        'start_date' => now()->addDays(5)->toDateString(),
+        'end_date' => now()->addDays(35)->toDateString(),
+        'agreed_price' => 500000,
     ]))->toThrow(\DomainException::class, 'lebih dari 7 hari');
 
     Event::assertNotDispatched(JadwalDibuat::class);
@@ -81,12 +80,12 @@ test('[BERHASIL] buatJadwal dengan payment_scheme=full tidak menyimpan dp_amount
     $service = app(ScheduleService::class);
 
     $schedule = $service->buatJadwal([
-        'room_id'        => 1,
-        'type'           => 'sewa',
+        'room_id' => 1,
+        'type' => 'sewa',
         'payment_scheme' => 'full',
-        'start_date'     => now()->addDays(3)->toDateString(),
-        'end_date'       => now()->addDays(33)->toDateString(),
-        'agreed_price'   => 500000,
+        'start_date' => now()->addDays(3)->toDateString(),
+        'end_date' => now()->addDays(33)->toDateString(),
+        'agreed_price' => 500000,
     ]);
 
     expect($schedule->payment_scheme)->toBe(SchedulePaymentScheme::FULL);
@@ -97,15 +96,15 @@ test('[BERHASIL] aktifkanJadwalDariDP mengubah status dp_terbayar ke active', fu
     Event::fake([JadwalSewaAktif::class]);
 
     $schedule = Schedule::create([
-        'room_id'        => 1,
-        'type'           => ScheduleType::SEWA->value,
-        'status'         => ScheduleStatus::DP_TERBAYAR->value,
+        'room_id' => 1,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::DP_TERBAYAR->value,
         'payment_scheme' => SchedulePaymentScheme::DP->value,
-        'dp_amount'      => 500000,
-        'dp_paid_at'     => now(),
-        'start_date'     => now()->addDays(5)->toDateString(),
-        'end_date'       => now()->addDays(35)->toDateString(),
-        'agreed_price'   => 1000000,
+        'dp_amount' => 500000,
+        'dp_paid_at' => now(),
+        'start_date' => now()->addDays(5)->toDateString(),
+        'end_date' => now()->addDays(35)->toDateString(),
+        'agreed_price' => 1000000,
     ]);
 
     $service = app(ScheduleService::class);
@@ -118,11 +117,11 @@ test('[BERHASIL] aktifkanJadwalDariDP mengubah status dp_terbayar ke active', fu
 
 test('[GAGAL] aktifkanJadwalDariDP gagal jika status bukan dp_terbayar', function () {
     $schedule = Schedule::create([
-        'room_id'    => 1,
-        'type'       => ScheduleType::SEWA->value,
-        'status'     => ScheduleStatus::PENDING->value,
+        'room_id' => 1,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::PENDING->value,
         'start_date' => now()->addDays(5)->toDateString(),
-        'end_date'   => now()->addDays(35)->toDateString(),
+        'end_date' => now()->addDays(35)->toDateString(),
     ]);
 
     $service = app(ScheduleService::class);
@@ -135,60 +134,60 @@ test('[BERHASIL] batalkanJadwal bisa dilakukan dari status dp_terbayar', functio
     Event::fake();
 
     $schedule = Schedule::create([
-        'room_id'        => 1,
-        'type'           => ScheduleType::SEWA->value,
-        'status'         => ScheduleStatus::DP_TERBAYAR->value,
+        'room_id' => 1,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::DP_TERBAYAR->value,
         'payment_scheme' => SchedulePaymentScheme::DP->value,
-        'dp_amount'      => 500000,
-        'dp_paid_at'     => now(),
-        'start_date'     => now()->addDays(5)->toDateString(),
-        'end_date'       => now()->addDays(35)->toDateString(),
-        'agreed_price'   => 1000000,
+        'dp_amount' => 500000,
+        'dp_paid_at' => now(),
+        'start_date' => now()->addDays(5)->toDateString(),
+        'end_date' => now()->addDays(35)->toDateString(),
+        'agreed_price' => 1000000,
     ]);
 
-    $service  = app(ScheduleService::class);
-    $updated  = $service->batalkanJadwal($schedule->id);
+    $service = app(ScheduleService::class);
+    $updated = $service->batalkanJadwal($schedule->id);
 
     expect($updated->status)->toBe(ScheduleStatus::CANCELLED);
 });
 
 test('[BERHASIL] hasPendingOrActiveByRoomId = true jika ada jadwal dp_terbayar di kamar yang sama', function () {
     Schedule::create([
-        'room_id'        => 99,
-        'type'           => ScheduleType::SEWA->value,
-        'status'         => ScheduleStatus::DP_TERBAYAR->value,
+        'room_id' => 99,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::DP_TERBAYAR->value,
         'payment_scheme' => SchedulePaymentScheme::DP->value,
-        'start_date'     => now()->addDays(5)->toDateString(),
-        'end_date'       => now()->addDays(35)->toDateString(),
+        'start_date' => now()->addDays(5)->toDateString(),
+        'end_date' => now()->addDays(35)->toDateString(),
     ]);
 
     $service = app(ScheduleService::class);
 
     expect(fn () => $service->buatJadwal([
-        'room_id'    => 99,
-        'type'       => 'sewa',
+        'room_id' => 99,
+        'type' => 'sewa',
         'start_date' => now()->addDays(10)->toDateString(),
-        'end_date'   => now()->addDays(40)->toDateString(),
+        'end_date' => now()->addDays(40)->toDateString(),
         'agreed_price' => 500000,
     ]))->toThrow(\DomainException::class);
 });
 
 test('[BERHASIL] hasPendingOrActiveByRoomId = true jika ada jadwal terkonfirmasi di kamar yang sama', function () {
     Schedule::create([
-        'room_id'    => 98,
-        'type'       => ScheduleType::SEWA->value,
-        'status'     => ScheduleStatus::TERKONFIRMASI->value,
+        'room_id' => 98,
+        'type' => ScheduleType::SEWA->value,
+        'status' => ScheduleStatus::TERKONFIRMASI->value,
         'start_date' => now()->addDays(3)->toDateString(),
-        'end_date'   => now()->addDays(33)->toDateString(),
+        'end_date' => now()->addDays(33)->toDateString(),
     ]);
 
     $service = app(ScheduleService::class);
 
     expect(fn () => $service->buatJadwal([
-        'room_id'    => 98,
-        'type'       => 'sewa',
+        'room_id' => 98,
+        'type' => 'sewa',
         'start_date' => now()->addDays(5)->toDateString(),
-        'end_date'   => now()->addDays(35)->toDateString(),
+        'end_date' => now()->addDays(35)->toDateString(),
         'agreed_price' => 500000,
     ]))->toThrow(\DomainException::class);
 });

@@ -30,18 +30,18 @@ beforeEach(function () {
 test('[BERHASIL] admin dapat melihat daftar inventaris', function () {
     $admin = User::factory()->create();
     $admin->givePermissionTo('view-inventory');
-    
+
     Inventory::factory()->create([
         'name' => 'Lemari Kayu',
         'quantity' => 5,
         'condition' => 'good',
-        'purchase_price' => 500000
+        'purchase_price' => 500000,
     ]);
 
     $response = $this->actingAs($admin)->getJson('/api/inventory');
 
     $response->assertStatus(200)
-             ->assertJsonFragment(['name' => 'Lemari Kayu']);
+        ->assertJsonFragment(['name' => 'Lemari Kayu']);
 });
 
 test('[BERHASIL] admin dapat menambah inventaris baru', function () {
@@ -52,58 +52,58 @@ test('[BERHASIL] admin dapat menambah inventaris baru', function () {
         'name' => 'Meja Belajar',
         'quantity' => 10,
         'condition' => 'good',
-        'purchase_price' => 200000
+        'purchase_price' => 200000,
     ]);
 
     $response->assertStatus(201)
-             ->assertJsonPath('data.name', 'Meja Belajar');
+        ->assertJsonPath('data.name', 'Meja Belajar');
 
     $this->assertDatabaseHas('inventories', [
         'name' => 'Meja Belajar',
-        'quantity' => 10
+        'quantity' => 10,
     ]);
 });
 
 test('[BERHASIL] admin dapat mengubah data inventaris', function () {
     $admin = User::factory()->create();
     $admin->givePermissionTo('update-inventory');
-    
+
     $inventory = Inventory::factory()->create([
         'name' => 'Kipas Angin',
         'quantity' => 2,
-        'condition' => 'good'
+        'condition' => 'good',
     ]);
 
     $response = $this->actingAs($admin)->putJson("/api/inventory/{$inventory->id}", [
         'name' => 'Kipas Angin Dinding',
         'quantity' => 3,
-        'condition' => 'broken'
+        'condition' => 'broken',
     ]);
 
     $response->assertStatus(200)
-             ->assertJsonFragment(['name' => 'Kipas Angin Dinding', 'condition' => 'broken']);
+        ->assertJsonFragment(['name' => 'Kipas Angin Dinding', 'condition' => 'broken']);
 });
 
 test('[BERHASIL] admin dapat menghapus data inventaris', function () {
     $admin = User::factory()->create();
     $admin->givePermissionTo('delete-inventory');
-    
+
     $inventory = Inventory::factory()->create([
         'name' => 'Kasur Busa',
-        'quantity' => 1
+        'quantity' => 1,
     ]);
 
     $response = $this->actingAs($admin)->deleteJson("/api/inventory/{$inventory->id}");
 
     $response->assertStatus(200);
     $this->assertDatabaseMissing('inventories', [
-        'id' => $inventory->id
+        'id' => $inventory->id,
     ]);
 });
 
 test('[GAGAL] request ditolak jika tidak ada permission view-inventory', function () {
     $user = User::factory()->create();
-    
+
     $response = $this->actingAs($user)->getJson('/api/inventory');
 
     $response->assertStatus(403);

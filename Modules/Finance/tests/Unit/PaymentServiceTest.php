@@ -50,7 +50,7 @@ test('[GAGAL] verifyPayment menolak pembayaran yang sudah ditolak sebelumnya', f
 test('[GAGAL] refundPayment menolak jika metode bukan midtrans', function () {
     $payment = Payment::factory()->create([
         'payment_method' => 'manual',
-        'status'         => PaymentStatus::PAID,
+        'status' => PaymentStatus::PAID,
     ]);
     $service = app(FinanceService::class);
 
@@ -61,7 +61,7 @@ test('[GAGAL] refundPayment menolak jika metode bukan midtrans', function () {
 test('[GAGAL] refundPayment menolak jika status bukan paid', function () {
     $payment = Payment::factory()->create([
         'payment_method' => 'midtrans',
-        'status'         => PaymentStatus::PENDING,
+        'status' => PaymentStatus::PENDING,
     ]);
     $service = app(FinanceService::class);
 
@@ -76,15 +76,15 @@ test('[GAGAL] refundPayment menolak jika status bukan paid', function () {
 test('[BERHASIL] webhook settlement mengubah payment menjadi paid dan invoice menjadi paid', function () {
     $invoice = Invoice::factory()->create(['status' => InvoiceStatus::UNPAID]);
     $payment = Payment::factory()->create([
-        'invoice_id'     => $invoice->id,
+        'invoice_id' => $invoice->id,
         'payment_method' => 'midtrans',
         'transaction_id' => 'ORDER-TEST-001',
-        'status'         => PaymentStatus::PENDING,
+        'status' => PaymentStatus::PENDING,
     ]);
     $service = app(FinanceService::class);
 
     $service->handleMidtransNotification([
-        'order_id'           => 'ORDER-TEST-001',
+        'order_id' => 'ORDER-TEST-001',
         'transaction_status' => 'settlement',
     ]);
 
@@ -95,15 +95,15 @@ test('[BERHASIL] webhook settlement mengubah payment menjadi paid dan invoice me
 test('[BERHASIL] webhook capture mengubah payment menjadi paid dan invoice menjadi paid', function () {
     $invoice = Invoice::factory()->create(['status' => InvoiceStatus::UNPAID]);
     $payment = Payment::factory()->create([
-        'invoice_id'     => $invoice->id,
+        'invoice_id' => $invoice->id,
         'payment_method' => 'midtrans',
         'transaction_id' => 'ORDER-TEST-002',
-        'status'         => PaymentStatus::PENDING,
+        'status' => PaymentStatus::PENDING,
     ]);
     $service = app(FinanceService::class);
 
     $service->handleMidtransNotification([
-        'order_id'           => 'ORDER-TEST-002',
+        'order_id' => 'ORDER-TEST-002',
         'transaction_status' => 'capture',
     ]);
 
@@ -114,15 +114,15 @@ test('[BERHASIL] webhook capture mengubah payment menjadi paid dan invoice menja
 test('[BERHASIL] webhook expire mengubah payment menjadi failed dan invoice tetap unpaid', function () {
     $invoice = Invoice::factory()->create(['status' => InvoiceStatus::UNPAID]);
     $payment = Payment::factory()->create([
-        'invoice_id'     => $invoice->id,
+        'invoice_id' => $invoice->id,
         'payment_method' => 'midtrans',
         'transaction_id' => 'ORDER-TEST-003',
-        'status'         => PaymentStatus::PENDING,
+        'status' => PaymentStatus::PENDING,
     ]);
     $service = app(FinanceService::class);
 
     $service->handleMidtransNotification([
-        'order_id'           => 'ORDER-TEST-003',
+        'order_id' => 'ORDER-TEST-003',
         'transaction_status' => 'expire',
     ]);
 
@@ -133,15 +133,15 @@ test('[BERHASIL] webhook expire mengubah payment menjadi failed dan invoice teta
 test('[BERHASIL] webhook cancel mengubah payment menjadi failed', function () {
     $invoice = Invoice::factory()->create(['status' => InvoiceStatus::UNPAID]);
     $payment = Payment::factory()->create([
-        'invoice_id'     => $invoice->id,
+        'invoice_id' => $invoice->id,
         'payment_method' => 'midtrans',
         'transaction_id' => 'ORDER-TEST-004',
-        'status'         => PaymentStatus::PENDING,
+        'status' => PaymentStatus::PENDING,
     ]);
     $service = app(FinanceService::class);
 
     $service->handleMidtransNotification([
-        'order_id'           => 'ORDER-TEST-004',
+        'order_id' => 'ORDER-TEST-004',
         'transaction_status' => 'cancel',
     ]);
 
@@ -152,7 +152,7 @@ test('[BERHASIL] webhook dengan order_id tidak dikenal diabaikan tanpa error', f
     $service = app(FinanceService::class);
 
     expect(fn () => $service->handleMidtransNotification([
-        'order_id'           => 'ORDER-TIDAK-ADA',
+        'order_id' => 'ORDER-TIDAK-ADA',
         'transaction_status' => 'settlement',
     ]))->not->toThrow(\Exception::class);
 });

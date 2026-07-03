@@ -31,7 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (\Throwable $e, $request) {
-            \Log::error('API Error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+            \Log::error('API Error: '.$e->getMessage().' in '.$e->getFile().':'.$e->getLine());
             if ($request->is('api/*') || $request->expectsJson()) {
                 $statusCode = 500;
                 $message = 'Terjadi kesalahan pada sistem kami. Silakan coba lagi nanti.';

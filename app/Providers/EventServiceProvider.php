@@ -6,7 +6,6 @@ use App\Events\Finance\DendaDibuat;
 use App\Events\Finance\PembayaranDibatalkan;
 use App\Events\Finance\PembayaranDiterima;
 use App\Events\Finance\PembayaranDiverifikasi;
-use Modules\Finance\Events\PaymentSettled;
 use App\Events\Inventory\InventariBaru;
 use App\Events\Inventory\InventarisDihapus;
 use App\Events\Inventory\InventarisDiperbarui;
@@ -18,6 +17,7 @@ use App\Events\Jadwal\JadwalSewaSelesai;
 use App\Events\Jadwal\StatusKamarBerubah;
 use App\Events\Maintenance\LaporanKerusakanMasuk;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Modules\Finance\Events\PaymentSettled;
 
 class EventServiceProvider extends ServiceProvider
 {

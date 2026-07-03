@@ -9,7 +9,7 @@ use Modules\Guest\Repositories\Contracts\GuestRepositoryInterface;
 use Modules\Notification\Enums\NotificationType;
 use Modules\Notification\Services\NotificationService;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-    use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class GuestService
 {
@@ -23,6 +23,24 @@ class GuestService
         if (app()->bound(NotificationService::class)) {
             app(NotificationService::class)->logSystemNotification($type, $message);
         }
+    }
+
+    public static function getRecentGuestsByUserId(int $userId, int $limit = 5): array
+    {
+        return Guest::where('user_id', $userId)
+            ->latest()
+            ->limit($limit)
+            ->get()
+            ->map(function ($guest) {
+                return [
+                    'id' => $guest->id,
+                    'name' => $guest->name,
+                    'relationship' => $guest->relationship->value ?? $guest->relationship,
+                    'check_in_at' => $guest->check_in_at,
+                    'check_out_at' => $guest->check_out_at,
+                ];
+            })
+            ->toArray();
     }
 
     public function getMyGuests(int $userId): Collection
@@ -39,6 +57,7 @@ class GuestService
     public function addGuest(int $userId, array $data): Collection
     {
         $context = $this->resolveActiveContext($userId);
+
         return $this->processMultipleGuests($context, $data);
     }
 
@@ -76,7 +95,7 @@ class GuestService
             $data['check_out_at']
         );
 
-        $createdGuests = new Collection();
+        $createdGuests = new Collection;
         $guestNames = [];
 
         foreach ($data['guests'] as $guestData) {
@@ -97,7 +116,7 @@ class GuestService
             ]);
 
             $this->billingService->createBillIfNeeded($guest, $billing['billable_days'], (float) $billing['charge_amount']);
-            
+
             $createdGuests->push($guest);
             $guestNames[] = $guest->name;
         }
@@ -127,7 +146,7 @@ class GuestService
     {
         $guest = $this->guestRepository->findById($guestId);
 
-        if (!$guest) {
+        if (! $guest) {
             throw new NotFoundHttpException('Data tamu tidak ditemukan.');
         }
 
@@ -175,7 +194,7 @@ class GuestService
             'check_out_at' => $endDate,
             'stay_completed_notified_at' => now(),
         ]);
-        
+
         $status = $isEarly ? 'keluar lebih awal' : 'selesai menginap';
         $message = "Tamu {$guest->name} telah {$status} pada {$endDate}.";
         $this->logNotification(NotificationType::GUEST_STAY_ENDED, $message);
@@ -183,17 +202,19 @@ class GuestService
         return $guest;
     }
 
-
-
     public function extendGuestStay(int $guestId, string $newCheckOutAt): Guest
     {
         $guest = $this->guestRepository->findById($guestId);
-        if (!$guest) throw new NotFoundHttpException('Tamu tidak ditemukan.');
-        
+        if (! $guest) {
+            throw new NotFoundHttpException('Tamu tidak ditemukan.');
+        }
+
         $context = GuestActiveContext::where('schedule_id', $guest->schedule_reference_id)
             ->where('is_active', true)->first();
-            
-        if (!$context) throw new HttpException(422, 'Sewa penghuni sudah tidak aktif, tidak dapat diperpanjang.');
+
+        if (! $context) {
+            throw new HttpException(422, 'Sewa penghuni sudah tidak aktif, tidak dapat diperpanjang.');
+        }
 
         $billing = $this->billingService->calculateBilling(
             (float) $context->room_price,
@@ -225,7 +246,7 @@ class GuestService
                     // Update the existing unpaid/pending bill
                     $bill->update([
                         'amount' => $bill->amount + $diffAmount,
-                        'admin_notes' => 'Diperbarui karena perpanjangan menginap. ' . $bill->admin_notes
+                        'admin_notes' => 'Diperbarui karena perpanjangan menginap. '.$bill->admin_notes,
                     ]);
                 }
             } else {

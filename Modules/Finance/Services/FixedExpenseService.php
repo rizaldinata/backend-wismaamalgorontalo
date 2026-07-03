@@ -6,7 +6,6 @@ use App\Contracts\ConfigProviderInterface;
 use Carbon\Carbon;
 use DomainException;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Modules\Finance\Enums\JenisPengeluaranTetap;
 use Modules\Finance\Models\FixedExpenseEntry;
@@ -42,10 +41,10 @@ class FixedExpenseService
         $tahun = $tahun ?? (int) now()->format('Y');
 
         $jenisAktif = $this->settingService->getJenisPengeluaranTetapAktif();
-        $statusMap  = $this->repository->getStatusBulan($jenisAktif, $bulan, $tahun);
+        $statusMap = $this->repository->getStatusBulan($jenisAktif, $bulan, $tahun);
 
         $belumDiisi = [];
-        $detail     = [];
+        $detail = [];
 
         foreach ($jenisAktif as $jenis) {
             $entry = $statusMap[$jenis] ?? null;
@@ -53,26 +52,26 @@ class FixedExpenseService
             if ($entry === null || ! $entry->is_filled) {
                 $belumDiisi[] = $jenis;
                 $detail[$jenis] = [
-                    'filled'   => false,
+                    'filled' => false,
                     'entry_id' => $entry?->id,
                 ];
             } else {
                 $detail[$jenis] = [
-                    'filled'      => true,
-                    'entry_id'    => $entry->id,
-                    'amount'      => (float) $entry->amount,
-                    'notes'       => $entry->notes,
+                    'filled' => true,
+                    'entry_id' => $entry->id,
+                    'amount' => (float) $entry->amount,
+                    'notes' => $entry->notes,
                     'recorded_at' => $entry->updated_at->toIso8601String(),
                 ];
             }
         }
 
         return [
-            'bulan'        => $bulan,
-            'tahun'        => $tahun,
+            'bulan' => $bulan,
+            'tahun' => $tahun,
             'semua_terisi' => empty($belumDiisi),
-            'belum_diisi'  => $belumDiisi,
-            'detail'       => $detail,
+            'belum_diisi' => $belumDiisi,
+            'detail' => $detail,
         ];
     }
 
@@ -94,9 +93,9 @@ class FixedExpenseService
 
         return DB::transaction(function () use ($entry, $data, $userId) {
             $updated = $this->repository->update($entry, [
-                'amount'      => $data['amount'],
-                'notes'       => $data['notes'] ?? $entry->notes,
-                'is_filled'   => true,
+                'amount' => $data['amount'],
+                'notes' => $data['notes'] ?? $entry->notes,
+                'is_filled' => true,
                 'recorded_by' => $userId ?? $entry->recorded_by,
             ]);
 
@@ -112,12 +111,12 @@ class FixedExpenseService
 
     private function buildExpenseData(FixedExpenseEntry $entry): array
     {
-        $jenisLabel  = JenisPengeluaranTetap::from($entry->jenis instanceof JenisPengeluaranTetap ? $entry->jenis->value : $entry->jenis)->label();
-        $namaBulan   = Carbon::create($entry->tahun, $entry->bulan, 1)->translatedFormat('F');
+        $jenisLabel = JenisPengeluaranTetap::from($entry->jenis instanceof JenisPengeluaranTetap ? $entry->jenis->value : $entry->jenis)->label();
+        $namaBulan = Carbon::create($entry->tahun, $entry->bulan, 1)->translatedFormat('F');
 
         return [
-            'title'        => "{$jenisLabel} - {$namaBulan} {$entry->tahun}",
-            'amount'       => (float) $entry->amount,
+            'title' => "{$jenisLabel} - {$namaBulan} {$entry->tahun}",
+            'amount' => (float) $entry->amount,
             'expense_date' => Carbon::create($entry->tahun, $entry->bulan, 1)->toDateString(),
         ];
     }

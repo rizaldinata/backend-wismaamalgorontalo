@@ -25,6 +25,7 @@ class PaymentController extends Controller
      * Daftar Pembayaran
      *
      * Mengambil daftar log pembayaran yang masuk ke sistem. (Hanya Admin)
+     *
      * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
      */
     public function index(Request $request)
@@ -50,6 +51,7 @@ class PaymentController extends Controller
      * Detail Pembayaran
      *
      * Melihat detail dari sebuah pembayaran. (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(int $id)
@@ -64,7 +66,6 @@ class PaymentController extends Controller
      * Lakukan Pembayaran Tagihan
      *
      * Memproses pembayaran manual atau Midtrans untuk tagihan (invoice) tertentu.
-     * @return JsonResponse
      */
     public function pay(PayInvoiceRequest $request, int $invoiceId): JsonResponse
     {
@@ -81,7 +82,6 @@ class PaymentController extends Controller
      * Verifikasi Pembayaran Manual
      *
      * Menerima atau menolak pembayaran manual (transfer bank) yang diupload pengguna. (Hanya Admin)
-     * @return JsonResponse
      */
     public function verify(VerifyPaymentRequest $request, int $paymentId): JsonResponse
     {
@@ -102,7 +102,6 @@ class PaymentController extends Controller
      * Refund Pembayaran
      *
      * Mengembalikan dana pembayaran. (Hanya Admin)
-     * @return JsonResponse
      */
     public function refund(Request $request, int $paymentId): JsonResponse
     {
@@ -119,7 +118,9 @@ class PaymentController extends Controller
      * Webhook Midtrans (Invoice)
      *
      * Endpoint untuk menerima update otomatis dari Midtrans (khusus pembayaran invoice utama).
+     *
      * @unauthenticated
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function midtransNotification(Request $request)

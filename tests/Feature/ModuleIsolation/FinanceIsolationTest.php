@@ -3,17 +3,16 @@
 namespace Tests\Feature\ModuleIsolation;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Nwidart\Modules\Facades\Module;
-use Tests\TestCase;
-use Tests\Traits\ManagesModuleIsolation;
 use Modules\Auth\Models\User;
 use Modules\Room\Models\Room;
 use Modules\Schedule\Models\Schedule;
-use Spatie\Permission\Models\Role;
+use Nwidart\Modules\Facades\Module;
+use Tests\TestCase;
+use Tests\Traits\ManagesModuleIsolation;
 
 class FinanceIsolationTest extends TestCase
 {
-    use RefreshDatabase, ManagesModuleIsolation;
+    use ManagesModuleIsolation, RefreshDatabase;
 
     protected function setUp(): void
     {
@@ -32,24 +31,24 @@ class FinanceIsolationTest extends TestCase
         $this->assertFalse(Module::isEnabled('Finance'));
 
         $admin = User::factory()->create();
-        
+
         // These routes shouldn't be loaded
         $response = $this->actingAs($admin)->getJson('/api/finance/invoices');
         $response->assertStatus(404);
-        
+
         $response = $this->actingAs($admin)->getJson('/api/finance/payments');
         $response->assertStatus(404);
     }
-    
+
     public function test_schedule_module_functions_normally_when_finance_is_disabled()
     {
         $this->assertFalse(Module::isEnabled('Finance'));
         $this->assertTrue(Module::isEnabled('Schedule'));
-        
+
         // Buat room
         $room = Room::factory()->create(['status' => 'available']);
         $tenant = User::factory()->create();
-        
+
         $schedule = Schedule::create([
             'room_id' => $room->id,
             'tenant_user_id' => $tenant->id,
@@ -57,16 +56,16 @@ class FinanceIsolationTest extends TestCase
             'type' => 'sewa',
             'start_date' => now()->format('Y-m-d'),
             'end_date' => now()->addMonths(1)->format('Y-m-d'),
-            'price' => 1000000
+            'price' => 1000000,
         ]);
-        
+
         $this->assertDatabaseHas('room_schedules', [
             'id' => $schedule->id,
-            'status' => 'pending'
+            'status' => 'pending',
         ]);
-        
+
         $admin = User::factory()->create();
-        
+
         $response = $this->actingAs($admin)->withoutMiddleware()->postJson('/api/v1/room-schedules', [
             'room_id' => $room->id,
             'tenant_user_id' => $tenant->id,
@@ -75,7 +74,7 @@ class FinanceIsolationTest extends TestCase
             'end_date' => now()->addMonths(1)->format('Y-m-d'),
             'price' => 1500000,
         ]);
-        
+
         // As long as it is not a 500 error from a missing listener, the isolation works!
         // 201 means created successfully.
         $this->assertNotEquals(500, $response->status(), 'Module crashed because of missing dependencies.');

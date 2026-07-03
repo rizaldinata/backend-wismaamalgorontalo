@@ -40,6 +40,7 @@ class ExpirePendingSchedules extends Command
 
             if ($hasActivePayment) {
                 $skipped++;
+
                 continue;
             }
 

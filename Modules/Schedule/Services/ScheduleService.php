@@ -2,7 +2,6 @@
 
 namespace Modules\Schedule\Services;
 
-use App\Events\Jadwal\DPDibayar;
 use App\Events\Jadwal\JadwalBatal;
 use App\Events\Jadwal\JadwalDibuat;
 use App\Events\Jadwal\JadwalSewaAktif;
@@ -53,20 +52,20 @@ class ScheduleService
         }
 
         $schedule = $this->scheduleRepository->create([
-            'room_id'          => $data['room_id'],
-            'type'             => $data['type'],
-            'status'           => ScheduleStatus::PENDING->value,
-            'payment_scheme'   => $paymentScheme->value,
-            'dp_amount'        => $dpAmount,
-            'start_date'       => $data['start_date'],
-            'end_date'         => $data['end_date'],
-            'created_by'       => $data['created_by'] ?? null,
-            'tenant_name'      => $data['tenant_name'] ?? null,
+            'room_id' => $data['room_id'],
+            'type' => $data['type'],
+            'status' => ScheduleStatus::PENDING->value,
+            'payment_scheme' => $paymentScheme->value,
+            'dp_amount' => $dpAmount,
+            'start_date' => $data['start_date'],
+            'end_date' => $data['end_date'],
+            'created_by' => $data['created_by'] ?? null,
+            'tenant_name' => $data['tenant_name'] ?? null,
             'tenant_id_number' => $data['tenant_id_number'] ?? null,
-            'tenant_phone'     => $data['tenant_phone'] ?? null,
-            'tenant_id_photo'  => $data['tenant_id_photo'] ?? null,
-            'tenant_user_id'   => $data['tenant_user_id'] ?? null,
-            'agreed_price'     => $data['agreed_price'] ?? null,
+            'tenant_phone' => $data['tenant_phone'] ?? null,
+            'tenant_id_photo' => $data['tenant_id_photo'] ?? null,
+            'tenant_user_id' => $data['tenant_user_id'] ?? null,
+            'agreed_price' => $data['agreed_price'] ?? null,
         ]);
 
         $roomNumber = $data['room_number'] ?? ($schedule->room->number ?? '');
@@ -231,5 +230,92 @@ class ScheduleService
     public function ambilJadwalKamar(int $roomId): iterable
     {
         return $this->scheduleRepository->getByRoomId($roomId);
+    }
+
+    // =========================================================================
+    // CROSS-MODULE GET METHODS (STATIC)
+    // Digunakan oleh modul lain melalui pola Direct Service Access
+    // =========================================================================
+
+    /**
+     * Mengambil detail jadwal berdasarkan ID.
+     * Mengembalikan array (termasuk relasi room) atau null jika tidak ditemukan.
+     */
+    public static function getById(int $scheduleId): ?array
+    {
+        $schedule = Schedule::with('room')->find($scheduleId);
+
+        return $schedule ? $schedule->toArray() : null;
+    }
+
+    /**
+     * Mengambil jumlah jadwal sewa yang sedang aktif.
+     */
+    public static function getActiveSewaCount(): int
+    {
+        return Schedule::where('type', ScheduleType::SEWA)
+            ->where('status', ScheduleStatus::ACTIVE)
+            ->count();
+    }
+
+    /**
+     * Mengambil jadwal aktif untuk seorang tenant (penyewa).
+     * Mengembalikan array (termasuk relasi room) atau null jika tidak ditemukan.
+     */
+    public static function getActiveByTenantUserId(int $userId): ?array
+    {
+        $schedule = Schedule::where('tenant_user_id', $userId)
+            ->where('status', ScheduleStatus::ACTIVE)
+            ->with('room')
+            ->first();
+
+        return $schedule ? $schedule->toArray() : null;
+    }
+
+    public static function hasActiveSewaByRoomId(int $roomId): bool
+    {
+        return Schedule::where('room_id', $roomId)
+            ->where('status', ScheduleStatus::ACTIVE->value)
+            ->where('type', ScheduleType::SEWA->value)
+            ->exists();
+    }
+
+    public static function getIdsByTenant(int $userId): array
+    {
+        return Schedule::where('tenant_user_id', $userId)
+            ->pluck('id')
+            ->toArray();
+    }
+
+    public static function getActiveSewaByTenantUserIds(array $userIds): array
+    {
+        if (empty($userIds)) {
+            return [];
+        }
+
+        return Schedule::with(['room'])
+            ->whereIn('tenant_user_id', $userIds)
+            ->where('status', ScheduleStatus::ACTIVE->value)
+            ->where('type', ScheduleType::SEWA->value)
+            ->get()
+            ->keyBy('tenant_user_id')
+            ->toArray();
+    }
+
+    /**
+     * Mengambil banyak jadwal berdasarkan array ID.
+     * Mengembalikan array associative [id => schedule_array] (termasuk relasi room dan tenant).
+     */
+    public static function getByIds(array $scheduleIds): array
+    {
+        if (empty($scheduleIds)) {
+            return [];
+        }
+
+        $schedules = Schedule::with(['room', 'tenant'])
+            ->whereIn('id', array_unique($scheduleIds))
+            ->get();
+
+        return $schedules->keyBy('id')->toArray();
     }
 }

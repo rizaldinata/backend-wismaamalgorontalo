@@ -9,6 +9,7 @@ use Modules\Guest\Services\GuestService;
 class NotifyGuestStayEndedCommand extends Command
 {
     protected $signature = 'guest:notify-stay-ended';
+
     protected $description = 'Log notifications for guests whose stay has ended.';
 
     public function __construct(
@@ -37,5 +38,4 @@ class NotifyGuestStayEndedCommand extends Command
 
         return self::SUCCESS;
     }
-
 }

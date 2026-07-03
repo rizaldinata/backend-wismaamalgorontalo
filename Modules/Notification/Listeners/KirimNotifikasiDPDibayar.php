@@ -2,8 +2,8 @@
 
 namespace Modules\Notification\Listeners;
 
-use App\Events\Jadwal\DPDibayar;
 use App\Contracts\ConfigProviderInterface;
+use App\Events\Jadwal\DPDibayar;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Modules\Notification\Enums\NotificationType;
@@ -29,7 +29,7 @@ class KirimNotifikasiDPDibayar implements ShouldQueue
         }
 
         $pelunasanFormatted = number_format($event->pelunasanAmount, 0, ',', '.');
-        $dpFormatted        = number_format($event->dpAmount, 0, ',', '.');
+        $dpFormatted = number_format($event->dpAmount, 0, ',', '.');
 
         $message = "*KONFIRMASI DP DITERIMA*\n"
             ."Wisma Amal Gorontalo\n\n"

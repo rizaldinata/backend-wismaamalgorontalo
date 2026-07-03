@@ -19,8 +19,8 @@ class ExpenseResource extends JsonResource
             'is_integrated' => $this->reference_type !== null,
             'source' => match ($this->reference_type) {
                 'fixed_utility' => 'Pengeluaran Tetap / Sistem',
-                null            => 'Manual Finance',
-                default         => 'Inventory / Sistem',
+                null => 'Manual Finance',
+                default => 'Inventory / Sistem',
             },
 
             'created_at' => $this->created_at->toIso8601String(),

@@ -79,26 +79,26 @@ test('[BERHASIL] jadwal aktif TIDAK dibatalkan ketika pembayaran perpanjang gaga
     // Buat finance_active_tenants untuk schedule ini
     DB::table('finance_active_tenants')->insert([
         'schedule_id' => $schedule->id,
-        'user_id'     => 1,
+        'user_id' => 1,
         'room_number' => '101',
         'tenant_name' => 'Budi',
-        'end_date'    => '2026-07-01',
-        'start_date'  => '2026-06-01',
-        'created_at'  => now(),
-        'updated_at'  => now(),
+        'end_date' => '2026-07-01',
+        'start_date' => '2026-06-01',
+        'created_at' => now(),
+        'updated_at' => now(),
     ]);
 
     // Buat invoice perpanjangan yang belum dibayar
     $invoiceId = DB::table('invoices')->insertGetId([
-        'schedule_id'    => $schedule->id,
+        'schedule_id' => $schedule->id,
         'invoice_number' => 'EXT-20260601-0001-XXXX',
-        'amount'         => 1200000,
-        'status'         => 'unpaid',
-        'period_start'   => '2026-07-02',
-        'period_end'     => '2026-08-01',
-        'due_date'       => now()->toDateString(),
-        'created_at'     => now(),
-        'updated_at'     => now(),
+        'amount' => 1200000,
+        'status' => 'unpaid',
+        'period_start' => '2026-07-02',
+        'period_end' => '2026-08-01',
+        'due_date' => now()->toDateString(),
+        'created_at' => now(),
+        'updated_at' => now(),
     ]);
 
     $listener = app(BatalkanJadwalSetelahPembayaranGagal::class);

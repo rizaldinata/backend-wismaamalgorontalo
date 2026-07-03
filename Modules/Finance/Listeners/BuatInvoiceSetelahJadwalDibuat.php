@@ -30,12 +30,12 @@ class BuatInvoiceSetelahJadwalDibuat
         }
 
         if ($event->paymentScheme === 'dp' && $event->dpAmount !== null) {
-            $amount        = $event->dpAmount;
-            $invoiceType   = 'dp';
+            $amount = $event->dpAmount;
+            $invoiceType = 'dp';
             $invoiceNumber = 'DP-'.date('Ymd').'-'.str_pad($event->scheduleId, 4, '0', STR_PAD_LEFT);
         } else {
-            $amount        = $event->agreedPrice;
-            $invoiceType   = 'sewa';
+            $amount = $event->agreedPrice;
+            $invoiceType = 'sewa';
             $invoiceNumber = 'INV-'.date('Ymd').'-'.str_pad($event->scheduleId, 4, '0', STR_PAD_LEFT);
         }
 
@@ -43,16 +43,16 @@ class BuatInvoiceSetelahJadwalDibuat
         // Jalur lama (RentalService):   simpan ke lease_id; schedule_id dibiarkan null
         $invoiceData = [
             'invoice_number' => $invoiceNumber,
-            'type'           => $invoiceType,
-            'amount'         => $amount,
-            'status'         => InvoiceStatus::UNPAID->value,
-            'due_date'       => Carbon::parse($event->startDate),
+            'type' => $invoiceType,
+            'amount' => $amount,
+            'status' => InvoiceStatus::UNPAID->value,
+            'due_date' => Carbon::parse($event->startDate),
             'tenant_user_id' => $event->tenantUserId,
-            'tenant_name'    => $event->tenantName,
-            'tenant_phone'   => $event->tenantPhone,
-            'room_number'    => $event->roomNumber,
-            'period_start'   => $event->startDate,
-            'period_end'     => $event->endDate,
+            'tenant_name' => $event->tenantName,
+            'tenant_phone' => $event->tenantPhone,
+            'room_number' => $event->roomNumber,
+            'period_start' => $event->startDate,
+            'period_end' => $event->endDate,
         ];
 
         if ($event->source === 'schedule') {

@@ -28,6 +28,7 @@ class FineSeeder extends Seeder
 
         if ($users->isEmpty()) {
             $this->command->warn('Tidak ada user dengan role member/resident. Jalankan UserSeeder terlebih dahulu.');
+
             return;
         }
 
@@ -54,60 +55,60 @@ class FineSeeder extends Seeder
 
             // Tentukan status berdasarkan index untuk variasi realistis
             $status = match (true) {
-                $index < 4  => FineStatus::PAID,
+                $index < 4 => FineStatus::PAID,
                 $index === 4 => FineStatus::WAIVED,
                 $index === 5 => FineStatus::CANCELLED,
-                default     => FineStatus::UNPAID,
+                default => FineStatus::UNPAID,
             };
 
             $fine = Fine::create([
                 'tenant_user_id' => $user->id,
-                'schedule_id'    => null,
-                'amount'         => $template['amount'],
-                'reason'         => $template['reason'],
-                'status'         => $status->value,
-                'waive_reason'   => $status === FineStatus::WAIVED
+                'schedule_id' => null,
+                'amount' => $template['amount'],
+                'reason' => $template['reason'],
+                'status' => $status->value,
+                'waive_reason' => $status === FineStatus::WAIVED
                     ? 'Penghuni sudah meminta maaf secara langsung dan berjanji tidak mengulangi.'
                     : null,
-                'paid_at'        => $status === FineStatus::PAID ? $createdAt->copy()->addDays(rand(1, 5)) : null,
-                'created_at'     => $createdAt,
-                'updated_at'     => $createdAt,
+                'paid_at' => $status === FineStatus::PAID ? $createdAt->copy()->addDays(rand(1, 5)) : null,
+                'created_at' => $createdAt,
+                'updated_at' => $createdAt,
             ]);
 
             // Buat invoice + payment untuk denda yang lunas
             if ($status === FineStatus::PAID) {
                 $paidAt = $createdAt->copy()->addDays(rand(1, 5));
-                $suffix = strtoupper(substr(md5($fine->id . $seq), 0, 6));
-                $invoiceNumber = 'FINE-' . $createdAt->format('Ymd') . '-' . str_pad($user->id, 4, '0', STR_PAD_LEFT) . '-' . $suffix;
+                $suffix = strtoupper(substr(md5($fine->id.$seq), 0, 6));
+                $invoiceNumber = 'FINE-'.$createdAt->format('Ymd').'-'.str_pad($user->id, 4, '0', STR_PAD_LEFT).'-'.$suffix;
 
                 $invoice = Invoice::create([
-                    'type'           => 'fine',
+                    'type' => 'fine',
                     'invoice_number' => $invoiceNumber,
-                    'amount'         => $fine->amount,
-                    'status'         => InvoiceStatus::PAID->value,
-                    'due_date'       => $createdAt->copy()->addDays(7)->toDateString(),
+                    'amount' => $fine->amount,
+                    'status' => InvoiceStatus::PAID->value,
+                    'due_date' => $createdAt->copy()->addDays(7)->toDateString(),
                     'tenant_user_id' => $user->id,
-                    'tenant_name'    => $user->name,
-                    'tenant_phone'   => $user->phone_number,
-                    'created_at'     => $createdAt,
-                    'updated_at'     => $paidAt,
+                    'tenant_name' => $user->name,
+                    'tenant_phone' => $user->phone_number,
+                    'created_at' => $createdAt,
+                    'updated_at' => $paidAt,
                 ]);
 
                 DB::table('fine_invoice')->insert([
-                    'fine_id'    => $fine->id,
+                    'fine_id' => $fine->id,
                     'invoice_id' => $invoice->id,
                     'created_at' => $createdAt,
                     'updated_at' => $createdAt,
                 ]);
 
                 Payment::create([
-                    'invoice_id'         => $invoice->id,
-                    'payment_method'     => 'manual',
+                    'invoice_id' => $invoice->id,
+                    'payment_method' => 'manual',
                     'payment_proof_path' => 'proofs/bukti_transfer_sample.jpg',
-                    'status'             => PaymentStatus::VERIFIED->value,
-                    'admin_notes'        => null,
-                    'created_at'         => $paidAt,
-                    'updated_at'         => $paidAt->copy()->addHours(rand(1, 3)),
+                    'status' => PaymentStatus::VERIFIED->value,
+                    'admin_notes' => null,
+                    'created_at' => $paidAt,
+                    'updated_at' => $paidAt->copy()->addHours(rand(1, 3)),
                 ]);
             }
 

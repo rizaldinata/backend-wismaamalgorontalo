@@ -25,8 +25,8 @@ class AktifkanJadwalYangMulaiHariIni extends Command
             ->whereDate('start_date', '<=', today())
             ->get();
 
-        $aktif   = 0;
-        $gagal   = 0;
+        $aktif = 0;
+        $gagal = 0;
 
         foreach ($jadwals as $jadwal) {
             try {
@@ -35,14 +35,14 @@ class AktifkanJadwalYangMulaiHariIni extends Command
 
                 Log::info('AktifkanJadwalYangMulaiHariIni: jadwal diaktifkan.', [
                     'schedule_id' => $jadwal->id,
-                    'start_date'  => $jadwal->start_date->toDateString(),
+                    'start_date' => $jadwal->start_date->toDateString(),
                 ]);
             } catch (\Throwable $e) {
                 $gagal++;
 
                 Log::error('AktifkanJadwalYangMulaiHariIni: gagal mengaktifkan jadwal.', [
                     'schedule_id' => $jadwal->id,
-                    'error'       => $e->getMessage(),
+                    'error' => $e->getMessage(),
                 ]);
             }
         }

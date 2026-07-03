@@ -16,7 +16,7 @@ class StoreNotificationRequest extends FormRequest
         $hasUserId = $this->filled('user_id');
 
         return [
-            'user_id'      => ['nullable', 'integer', 'exists:users,id'],
+            'user_id' => ['nullable', 'integer', 'exists:users,id'],
             'target_phone' => [$hasUserId ? 'nullable' : 'required', 'nullable', 'string', 'max:20'],
             'message_body' => ['required', 'string', 'max:1000'],
         ];

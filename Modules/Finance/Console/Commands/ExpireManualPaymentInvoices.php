@@ -38,13 +38,13 @@ class ExpireManualPaymentInvoices extends Command
             DB::table('invoices')
                 ->where('id', $invoice->id)
                 ->update([
-                    'status'     => InvoiceStatus::CANCELLED->value,
+                    'status' => InvoiceStatus::CANCELLED->value,
                     'updated_at' => now(),
                 ]);
 
             Log::info('ExpireManualPaymentInvoices: invoice dibatalkan karena melewati batas waktu.', [
-                'invoice_id'         => $invoice->id,
-                'invoice_number'     => $invoice->invoice_number,
+                'invoice_id' => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
                 'payment_expires_at' => $invoice->payment_expires_at,
             ]);
 

@@ -1,0 +1,9 @@
+OUTPUT CLE DETECTED!
+#0 /Users/allvvnt/alfianSpace/ngoding/kampus/backend-wismaamalgorontalo/vendor/laravel/framework/config/database.php(1): {closure:/Users/allvvnt/alfianSpace/ngoding/kampus/backend-wismaamalgorontalo/test_cle.php:2}('cle', 1)
+#1 /Users/allvvnt/alfianSpace/ngoding/kampus/backend-wismaamalgorontalo/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/LoadConfiguration.php(191): require('/Users/allvvnt/...')
+#2 /Users/allvvnt/alfianSpace/ngoding/kampus/backend-wismaamalgorontalo/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/LoadConfiguration.php(70): Illuminate\Foundation\Bootstrap\LoadConfiguration->getBaseConfiguration()
+#3 /Users/allvvnt/alfianSpace/ngoding/kampus/backend-wismaamalgorontalo/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/LoadConfiguration.php(39): Illuminate\Foundation\Bootstrap\LoadConfiguration->loadConfigurationFiles(Object(Illuminate\Foundation\Application), Object(Illuminate\Config\Repository))
+#4 /Users/allvvnt/alfianSpace/ngoding/kampus/backend-wismaamalgorontalo/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(342): Illuminate\Foundation\Bootstrap\LoadConfiguration->bootstrap(Object(Illuminate\Foundation\Application))
+#5 /Users/allvvnt/alfianSpace/ngoding/kampus/backend-wismaamalgorontalo/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(474): Illuminate\Foundation\Application->bootstrapWith(Array)
+#6 /Users/allvvnt/alfianSpace/ngoding/kampus/backend-wismaamalgorontalo/test_cle.php(12): Illuminate\Foundation\Console\Kernel->bootstrap()
+#7 {main}

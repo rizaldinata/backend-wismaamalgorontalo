@@ -64,10 +64,10 @@ class NotificationRepository implements NotificationRepositoryInterface
 
     public function getSummary(): array
     {
-        $total  = NotificationLog::count();
-        $sent   = NotificationLog::where('status', 'sent')->count();
+        $total = NotificationLog::count();
+        $sent = NotificationLog::where('status', 'sent')->count();
         $failed = NotificationLog::where('status', 'failed')->count();
-        $today  = NotificationLog::whereDate('created_at', now()->toDateString())->count();
+        $today = NotificationLog::whereDate('created_at', now()->toDateString())->count();
 
         $byType = NotificationLog::select('type', DB::raw('count(*) as total'))
             ->groupBy('type')
@@ -75,10 +75,10 @@ class NotificationRepository implements NotificationRepositoryInterface
             ->toArray();
 
         return [
-            'total'   => $total,
-            'sent'    => $sent,
-            'failed'  => $failed,
-            'today'   => $today,
+            'total' => $total,
+            'sent' => $sent,
+            'failed' => $failed,
+            'today' => $today,
             'by_type' => $byType,
         ];
     }

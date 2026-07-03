@@ -38,32 +38,32 @@ class FinanceDashboardService
 
         if ($this->settingService->isPengeluaranTetapEnabled()) {
             $bulan = $month ?? (int) now()->format('n');
-            $tahun = $year  ?? (int) now()->format('Y');
+            $tahun = $year ?? (int) now()->format('Y');
 
             $jenisAktif = $this->settingService->getJenisPengeluaranTetapAktif();
-            $statusMap  = $this->fixedExpenseRepository->getStatusBulan($jenisAktif, $bulan, $tahun);
+            $statusMap = $this->fixedExpenseRepository->getStatusBulan($jenisAktif, $bulan, $tahun);
 
             $belumDiisi = [];
-            $detail     = [];
+            $detail = [];
 
             foreach ($jenisAktif as $jenis) {
                 $entry = $statusMap[$jenis] ?? null;
                 if ($entry === null) {
-                    $belumDiisi[]   = $jenis;
+                    $belumDiisi[] = $jenis;
                     $detail[$jenis] = ['filled' => false];
                 } else {
                     $detail[$jenis] = [
-                        'filled'      => true,
-                        'entry_id'    => $entry->id,
-                        'amount'      => (float) $entry->amount,
+                        'filled' => true,
+                        'entry_id' => $entry->id,
+                        'amount' => (float) $entry->amount,
                     ];
                 }
             }
 
             $data['pengeluaran_tetap_status'] = [
                 'semua_terisi' => empty($belumDiisi),
-                'belum_diisi'  => $belumDiisi,
-                'detail'       => $detail,
+                'belum_diisi' => $belumDiisi,
+                'detail' => $detail,
             ];
         }
 

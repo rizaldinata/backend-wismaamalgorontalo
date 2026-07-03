@@ -2,6 +2,7 @@
 
 namespace Modules\Finance\Services;
 
+use App\Contracts\ConfigProviderInterface;
 use App\Events\Finance\PembayaranDibatalkan;
 use App\Events\Finance\PembayaranDiterima;
 use App\Events\Finance\PembayaranDiverifikasi;
@@ -20,14 +21,12 @@ use Modules\Finance\Models\RefundRequest;
 use Modules\Finance\Repositories\Contracts\InvoiceRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\PaymentRepositoryInterface;
 use Modules\Finance\Repositories\Contracts\RefundRequestRepositoryInterface;
-use Modules\Finance\Services\ExpenseService;
 use Modules\Finance\Strategies\ManualPaymentStrategy;
 use Modules\Finance\Strategies\MidtransPaymentStrategy;
 use Modules\Schedule\Enums\SchedulePaymentScheme;
 use Modules\Schedule\Enums\ScheduleStatus;
 use Modules\Schedule\Repositories\Contracts\ScheduleRepositoryInterface;
 use Modules\Schedule\Services\ScheduleService;
-use App\Contracts\ConfigProviderInterface;
 
 class FinanceService
 {
@@ -81,8 +80,6 @@ class FinanceService
                 $this->invoiceRepository->updateStatus($payment->invoice, InvoiceStatus::PAID->value);
 
                 $invoice = $payment->invoice;
-                $invoice->load('schedule.room');
-                $room = $invoice->schedule?->room;
 
                 event(new PembayaranDiverifikasi(
                     paymentId: $payment->id,
@@ -92,7 +89,7 @@ class FinanceService
                     tenantName: $invoice->tenant_name ?? '',
                     tenantPhone: $invoice->tenant_phone ?? '',
                     invoiceNumber: $invoice->invoice_number,
-                    roomTitle: $room?->title ?? $room?->number ?? '',
+                    roomTitle: $invoice->room_number ?? '',
                     roomNumber: $invoice->room_number ?? '',
                     startDate: $invoice->period_start?->toDateString() ?? '',
                     endDate: $invoice->period_end?->toDateString() ?? '',
@@ -193,9 +190,6 @@ class FinanceService
             $this->paymentRepository->update($payment, ['status' => PaymentStatus::PAID->value]);
             $this->invoiceRepository->updateStatus($invoice, InvoiceStatus::PAID->value);
 
-            $invoice->load('schedule.room');
-            $room = $invoice->schedule?->room;
-
             $invoiceType = $invoice->type?->value ?? 'sewa';
 
             event(new PembayaranDiterima(
@@ -219,7 +213,7 @@ class FinanceService
                 tenantName: $invoice->tenant_name ?? '',
                 tenantPhone: $invoice->tenant_phone ?? '',
                 invoiceNumber: $invoice->invoice_number ?? '',
-                roomTitle: $room?->title ?? $room?->number ?? '',
+                roomTitle: $invoice->room_number ?? '',
                 roomNumber: $invoice->room_number ?? '',
                 startDate: $invoice->period_start?->toDateString() ?? '',
                 endDate: $invoice->period_end?->toDateString() ?? '',
@@ -265,7 +259,7 @@ class FinanceService
         }
 
         // Cari invoice DP yang sudah dibayar
-        $invoice = $schedule->invoices()
+        $invoice = \Modules\Finance\Models\Invoice::where('schedule_id', $schedule->id)
             ->where('status', InvoiceStatus::PAID->value)
             ->orderBy('created_at')
             ->first();
@@ -288,14 +282,14 @@ class FinanceService
         );
 
         return $this->refundRequestRepository->create([
-            'schedule_id'          => $scheduleId,
-            'payment_id'           => $payment->id,
-            'bank_name'            => $bankData['bank_name'],
-            'account_number'       => $bankData['account_number'],
-            'account_holder_name'  => $bankData['account_holder_name'],
-            'refund_amount'        => $invoice->amount,
-            'is_refund_eligible'   => $isEligible,
-            'status'               => 'pending',
+            'schedule_id' => $scheduleId,
+            'payment_id' => $payment->id,
+            'bank_name' => $bankData['bank_name'],
+            'account_number' => $bankData['account_number'],
+            'account_holder_name' => $bankData['account_holder_name'],
+            'refund_amount' => $invoice->amount,
+            'is_refund_eligible' => $isEligible,
+            'status' => 'pending',
         ]);
     }
 
@@ -309,8 +303,8 @@ class FinanceService
             }
 
             $updateData = [
-                'status'       => 'processed',
-                'admin_notes'  => $notes,
+                'status' => 'processed',
+                'admin_notes' => $notes,
                 'processed_at' => now(),
             ];
 
@@ -321,22 +315,22 @@ class FinanceService
 
                 $proofPath = $this->imageService->uploadAndCompress($proof, 'refund-proofs');
                 $updateData['proof_path'] = $proofPath;
-                $updateData['admin_fee']  = $adminFee;
+                $updateData['admin_fee'] = $adminFee;
 
                 $payment = $refundRequest->payment;
                 $invoice = $payment->invoice;
 
                 $this->paymentRepository->update($payment, [
-                    'status'       => PaymentStatus::REFUNDED->value,
-                    'admin_notes'  => 'Refund manual diproses: '.$notes,
+                    'status' => PaymentStatus::REFUNDED->value,
+                    'admin_notes' => 'Refund manual diproses: '.$notes,
                 ]);
 
                 $this->invoiceRepository->updateStatus($invoice, InvoiceStatus::UNPAID->value);
 
                 $this->expenseService->recordExpense([
-                    'title'        => 'Pengembalian Dana - '.$invoice->invoice_number,
-                    'description'  => 'Refund DP untuk '.$invoice->tenant_name.($notes ? ': '.$notes : ''),
-                    'amount'       => (float) $refundRequest->refund_amount,
+                    'title' => 'Pengembalian Dana - '.$invoice->invoice_number,
+                    'description' => 'Refund DP untuk '.$invoice->tenant_name.($notes ? ': '.$notes : ''),
+                    'amount' => (float) $refundRequest->refund_amount,
                     'expense_date' => now(),
                     'reference_id' => $refundRequest->id,
                     'reference_type' => RefundRequest::class,
@@ -344,9 +338,9 @@ class FinanceService
 
                 if ($adminFee > 0) {
                     $this->expenseService->recordExpense([
-                        'title'        => 'Biaya Admin Transfer Refund - '.$invoice->invoice_number,
-                        'description'  => 'Biaya transfer pengembalian dana untuk '.$invoice->tenant_name,
-                        'amount'       => $adminFee,
+                        'title' => 'Biaya Admin Transfer Refund - '.$invoice->invoice_number,
+                        'description' => 'Biaya transfer pengembalian dana untuk '.$invoice->tenant_name,
+                        'amount' => $adminFee,
                         'expense_date' => now(),
                         'reference_id' => $refundRequest->id,
                         'reference_type' => RefundRequest::class.'_fee',
@@ -354,14 +348,14 @@ class FinanceService
                 }
 
                 event(new PembayaranDibatalkan(
-                    paymentId:     $payment->id,
-                    invoiceId:     $invoice->id,
-                    scheduleId:    $invoice->schedule_id ?? 0,
-                    tenantName:    $invoice->tenant_name ?? '',
-                    tenantPhone:   $invoice->tenant_phone ?? '',
-                    amount:        (float) $refundRequest->refund_amount,
+                    paymentId: $payment->id,
+                    invoiceId: $invoice->id,
+                    scheduleId: $invoice->schedule_id ?? 0,
+                    tenantName: $invoice->tenant_name ?? '',
+                    tenantPhone: $invoice->tenant_phone ?? '',
+                    amount: (float) $refundRequest->refund_amount,
                     paymentStatus: PaymentStatus::REFUNDED->value,
-                    invoiceType:   $invoice->type?->value ?? 'sewa',
+                    invoiceType: $invoice->type?->value ?? 'sewa',
                 ));
             }
 
@@ -380,8 +374,83 @@ class FinanceService
         }
 
         return $this->refundRequestRepository->update($refundRequest, [
-            'status'      => 'rejected',
+            'status' => 'rejected',
             'admin_notes' => $notes,
         ]);
+    }
+
+    public static function getRecentActivities(int $limit = 5): array
+    {
+        $invoices = \Modules\Finance\Models\Invoice::latest()->limit($limit)->get();
+
+        $scheduleIds = $invoices->pluck('schedule_id')->filter()->unique()->toArray();
+        $scheduleData = [];
+
+        if (! empty($scheduleIds) && \App\Support\ModuleGate::isActive('Schedule')) {
+            $scheduleData = \Modules\Schedule\Services\ScheduleService::getByIds($scheduleIds);
+        }
+
+        return $invoices->map(function ($invoice) use ($scheduleData) {
+            $arr = $invoice->toArray();
+            $arr['schedule_data'] = $scheduleData[$invoice->schedule_id] ?? null;
+
+            return $arr;
+        })->toArray();
+    }
+
+    public static function getRecentBills(int $userId, int $limit = 5): array
+    {
+        $invoices = \Modules\Finance\Models\Invoice::where('tenant_user_id', $userId)
+            ->latest()
+            ->limit($limit)
+            ->get();
+
+        $scheduleIds = $invoices->pluck('schedule_id')->filter()->unique()->toArray();
+        $scheduleData = [];
+
+        if (! empty($scheduleIds) && \App\Support\ModuleGate::isActive('Schedule')) {
+            $scheduleData = \Modules\Schedule\Services\ScheduleService::getByIds($scheduleIds);
+        }
+
+        return $invoices->map(function ($invoice) use ($scheduleData) {
+            $arr = $invoice->toArray();
+            $arr['schedule_data'] = $scheduleData[$invoice->schedule_id] ?? null;
+
+            return $arr;
+        })->toArray();
+    }
+
+    /**
+     * Get payment status for multiple schedules
+     * Returns an array mapping schedule_id to 'Lunas' or 'Belum Lunas'
+     *
+     * @param array $scheduleIds
+     * @return array
+     */
+    public static function getPaymentStatusByScheduleIds(array $scheduleIds): array
+    {
+        $invoices = \Modules\Finance\Models\Invoice::whereIn('schedule_id', $scheduleIds)->get();
+        
+        $statusMap = [];
+        foreach ($scheduleIds as $id) {
+            $scheduleInvoices = $invoices->where('schedule_id', $id);
+            $hasUnpaid = $scheduleInvoices->where('status', \Modules\Finance\Enums\InvoiceStatus::UNPAID)->count() > 0;
+            $hasInvoices = $scheduleInvoices->count() > 0;
+            $statusMap[$id] = ($hasInvoices && ! $hasUnpaid) ? 'Lunas' : 'Belum Lunas';
+        }
+        
+        return $statusMap;
+    }
+
+    /**
+     * Get total monthly income for the current month
+     */
+    public static function getMonthlyIncome(): float
+    {
+        return (float) \Modules\Finance\Models\Payment::join('invoices', 'payments.invoice_id', '=', 'invoices.id')
+            ->where('payments.status', \Modules\Finance\Enums\PaymentStatus::VERIFIED)
+            ->whereMonth('payments.created_at', now()->month)
+            ->whereYear('payments.created_at', now()->year)
+            ->sum('invoices.amount');
     }
 }

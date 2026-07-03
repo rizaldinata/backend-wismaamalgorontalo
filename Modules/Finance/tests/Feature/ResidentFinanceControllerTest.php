@@ -50,12 +50,12 @@ test('[BERHASIL] active_leases bernilai array kosong jika tidak ada data di fina
 test('[BERHASIL] active_leases terisi jika penghuni terdaftar di finance_active_tenants', function () {
     DB::table('finance_active_tenants')->insert([
         'schedule_id' => 10,
-        'user_id'     => $this->penghuni->id,
+        'user_id' => $this->penghuni->id,
         'room_number' => '101',
         'tenant_name' => 'Budi Santoso',
-        'end_date'    => now()->addMonths(3)->toDateString(),
-        'created_at'  => now(),
-        'updated_at'  => now(),
+        'end_date' => now()->addMonths(3)->toDateString(),
+        'created_at' => now(),
+        'updated_at' => now(),
     ]);
 
     $response = $this->actingAs($this->penghuni)
@@ -85,19 +85,19 @@ test('[BERHASIL] active_leases mengembalikan semua sewa aktif jika penghuni puny
 test('[BERHASIL] total_unpaid menghitung akumulasi tagihan belum bayar milik penghuni', function () {
     Invoice::factory()->create([
         'tenant_user_id' => $this->penghuni->id,
-        'status'         => InvoiceStatus::UNPAID,
-        'amount'         => 400000,
+        'status' => InvoiceStatus::UNPAID,
+        'amount' => 400000,
     ]);
     Invoice::factory()->create([
         'tenant_user_id' => $this->penghuni->id,
-        'status'         => InvoiceStatus::UNPAID,
-        'amount'         => 600000,
+        'status' => InvoiceStatus::UNPAID,
+        'amount' => 600000,
     ]);
     // invoice paid — tidak masuk kalkulasi
     Invoice::factory()->create([
         'tenant_user_id' => $this->penghuni->id,
-        'status'         => InvoiceStatus::PAID,
-        'amount'         => 999999,
+        'status' => InvoiceStatus::PAID,
+        'amount' => 999999,
     ]);
 
     $response = $this->actingAs($this->penghuni)
@@ -112,13 +112,13 @@ test('[BERHASIL] summary tidak menghitung tagihan milik penghuni lain', function
     $penghuniLain = User::factory()->create();
     Invoice::factory()->create([
         'tenant_user_id' => $penghuniLain->id,
-        'status'         => InvoiceStatus::UNPAID,
-        'amount'         => 500000,
+        'status' => InvoiceStatus::UNPAID,
+        'amount' => 500000,
     ]);
     Invoice::factory()->create([
         'tenant_user_id' => $this->penghuni->id,
-        'status'         => InvoiceStatus::UNPAID,
-        'amount'         => 200000,
+        'status' => InvoiceStatus::UNPAID,
+        'amount' => 200000,
     ]);
 
     $response = $this->actingAs($this->penghuni)
@@ -151,11 +151,11 @@ test('[BERHASIL] penghuni hanya melihat tagihan milik mereka sendiri', function 
 test('[BERHASIL] daftar tagihan dapat difilter berdasarkan status', function () {
     Invoice::factory()->count(2)->create([
         'tenant_user_id' => $this->penghuni->id,
-        'status'         => InvoiceStatus::UNPAID,
+        'status' => InvoiceStatus::UNPAID,
     ]);
     Invoice::factory()->create([
         'tenant_user_id' => $this->penghuni->id,
-        'status'         => InvoiceStatus::PAID,
+        'status' => InvoiceStatus::PAID,
     ]);
 
     $response = $this->actingAs($this->penghuni)
@@ -180,8 +180,8 @@ test('[BERHASIL] mengembalikan list kosong jika penghuni tidak memiliki tagihan'
 test('[BERHASIL] penghuni dapat melihat detail tagihan milik mereka', function () {
     $invoice = Invoice::factory()->create([
         'tenant_user_id' => $this->penghuni->id,
-        'amount'         => 750000,
-        'status'         => InvoiceStatus::UNPAID,
+        'amount' => 750000,
+        'status' => InvoiceStatus::UNPAID,
     ]);
 
     $response = $this->actingAs($this->penghuni)
@@ -202,7 +202,7 @@ test('[GAGAL] showInvoice mengembalikan 404 jika invoice tidak ditemukan', funct
 
 test('[GAGAL] penghuni tidak bisa melihat detail tagihan milik penghuni lain', function () {
     $penghuniLain = User::factory()->create();
-    $invoiceLain  = Invoice::factory()->create(['tenant_user_id' => $penghuniLain->id]);
+    $invoiceLain = Invoice::factory()->create(['tenant_user_id' => $penghuniLain->id]);
 
     $response = $this->actingAs($this->penghuni)
         ->getJson("/api/finance/me/invoices/{$invoiceLain->id}");
@@ -217,11 +217,11 @@ test('[GAGAL] penghuni tidak bisa melihat detail tagihan milik penghuni lain', f
 test('[BERHASIL] penghuni dapat melihat riwayat pembayaran mereka', function () {
     $invoice = Invoice::factory()->create([
         'tenant_user_id' => $this->penghuni->id,
-        'schedule_id'    => 5,
+        'schedule_id' => 5,
     ]);
     Payment::factory()->count(2)->create([
         'invoice_id' => $invoice->id,
-        'status'     => PaymentStatus::VERIFIED,
+        'status' => PaymentStatus::VERIFIED,
     ]);
 
     $response = $this->actingAs($this->penghuni)
@@ -235,8 +235,8 @@ test('[BERHASIL] penghuni dapat melihat riwayat pembayaran mereka', function () 
 });
 
 test('[BERHASIL] penghuni tidak melihat pembayaran milik penghuni lain', function () {
-    $penghuniLain  = User::factory()->create();
-    $invoiceSaya   = Invoice::factory()->create(['tenant_user_id' => $this->penghuni->id, 'schedule_id' => 10]);
+    $penghuniLain = User::factory()->create();
+    $invoiceSaya = Invoice::factory()->create(['tenant_user_id' => $this->penghuni->id, 'schedule_id' => 10]);
     $invoiceMereka = Invoice::factory()->create(['tenant_user_id' => $penghuniLain->id,  'schedule_id' => 20]);
 
     Payment::factory()->count(2)->create(['invoice_id' => $invoiceSaya->id]);
@@ -265,26 +265,26 @@ test('[BERHASIL] mengembalikan list kosong jika penghuni tidak memiliki invoice 
 function buatKonteksPerpanjang(User $penghuni, array $overrideSchedule = []): array
 {
     $scheduleId = DB::table('room_schedules')->insertGetId(array_merge([
-        'room_id'       => 1,
-        'type'          => 'sewa',
-        'status'        => 'active',
-        'start_date'    => now()->subMonth()->toDateString(),
-        'end_date'      => now()->addDays(10)->toDateString(),
-        'tenant_user_id'=> $penghuni->id,
-        'agreed_price'  => 1500000,
-        'activated_at'  => now()->subMonth(),
-        'created_at'    => now()->subMonth(),
-        'updated_at'    => now()->subMonth(),
+        'room_id' => 1,
+        'type' => 'sewa',
+        'status' => 'active',
+        'start_date' => now()->subMonth()->toDateString(),
+        'end_date' => now()->addDays(10)->toDateString(),
+        'tenant_user_id' => $penghuni->id,
+        'agreed_price' => 1500000,
+        'activated_at' => now()->subMonth(),
+        'created_at' => now()->subMonth(),
+        'updated_at' => now()->subMonth(),
     ], $overrideSchedule));
 
     DB::table('finance_active_tenants')->insert([
         'schedule_id' => $scheduleId,
-        'user_id'     => $penghuni->id,
+        'user_id' => $penghuni->id,
         'room_number' => '101',
         'tenant_name' => $penghuni->name,
-        'end_date'    => now()->addDays(10)->toDateString(),
-        'created_at'  => now(),
-        'updated_at'  => now(),
+        'end_date' => now()->addDays(10)->toDateString(),
+        'created_at' => now(),
+        'updated_at' => now(),
     ]);
 
     return ['schedule_id' => $scheduleId, 'end_date' => now()->addDays(10)->toDateString()];
@@ -295,20 +295,20 @@ test('[GAGAL] perpanjang ditolak jika ada tagihan perpanjangan yang belum pernah
 
     // Invoice perpanjangan ada, tapi belum ada payment sama sekali
     Invoice::factory()->create([
-        'schedule_id'    => $scheduleId,
+        'schedule_id' => $scheduleId,
         'tenant_user_id' => $this->penghuni->id,
-        'status'         => InvoiceStatus::UNPAID,
+        'status' => InvoiceStatus::UNPAID,
         'invoice_number' => 'EXT-OLD-001',
-        'period_start'   => now()->addDays(11)->toDateString(),
-        'period_end'     => now()->addDays(41)->toDateString(),
-        'due_date'       => now()->toDateString(),
+        'period_start' => now()->addDays(11)->toDateString(),
+        'period_end' => now()->addDays(41)->toDateString(),
+        'due_date' => now()->toDateString(),
     ]);
 
     $response = $this->actingAs($this->penghuni)
         ->postJson("/api/finance/me/leases/{$scheduleId}/perpanjang", [
             'duration_months' => 1,
-            'payment_method'  => 'manual',
-            'payment_proof'   => \Illuminate\Http\UploadedFile::fake()->image('bukti.jpg'),
+            'payment_method' => 'manual',
+            'payment_proof' => \Illuminate\Http\UploadedFile::fake()->image('bukti.jpg'),
         ]);
 
     $response->assertUnprocessable()
@@ -319,26 +319,26 @@ test('[GAGAL] perpanjang ditolak jika ada tagihan perpanjangan dengan pembayaran
     ['schedule_id' => $scheduleId] = buatKonteksPerpanjang($this->penghuni);
 
     $invoice = Invoice::factory()->create([
-        'schedule_id'    => $scheduleId,
+        'schedule_id' => $scheduleId,
         'tenant_user_id' => $this->penghuni->id,
-        'status'         => InvoiceStatus::UNPAID,
+        'status' => InvoiceStatus::UNPAID,
         'invoice_number' => 'EXT-OLD-002',
-        'period_start'   => now()->addDays(11)->toDateString(),
-        'period_end'     => now()->addDays(41)->toDateString(),
-        'due_date'       => now()->toDateString(),
+        'period_start' => now()->addDays(11)->toDateString(),
+        'period_end' => now()->addDays(41)->toDateString(),
+        'due_date' => now()->toDateString(),
     ]);
 
     // Ada payment yang masih PENDING (bukan failed)
     Payment::factory()->create([
         'invoice_id' => $invoice->id,
-        'status'     => PaymentStatus::PENDING,
+        'status' => PaymentStatus::PENDING,
     ]);
 
     $response = $this->actingAs($this->penghuni)
         ->postJson("/api/finance/me/leases/{$scheduleId}/perpanjang", [
             'duration_months' => 1,
-            'payment_method'  => 'manual',
-            'payment_proof'   => \Illuminate\Http\UploadedFile::fake()->image('bukti.jpg'),
+            'payment_method' => 'manual',
+            'payment_proof' => \Illuminate\Http\UploadedFile::fake()->image('bukti.jpg'),
         ]);
 
     $response->assertUnprocessable();
@@ -348,18 +348,18 @@ test('[BERHASIL] boleh perpanjang lagi setelah admin tolak pembayaran manual (re
     ['schedule_id' => $scheduleId] = buatKonteksPerpanjang($this->penghuni);
 
     $invoiceLama = Invoice::factory()->create([
-        'schedule_id'    => $scheduleId,
+        'schedule_id' => $scheduleId,
         'tenant_user_id' => $this->penghuni->id,
-        'status'         => InvoiceStatus::UNPAID,
+        'status' => InvoiceStatus::UNPAID,
         'invoice_number' => 'EXT-OLD-REJ',
-        'period_start'   => now()->addDays(11)->toDateString(),
-        'period_end'     => now()->addDays(41)->toDateString(),
-        'due_date'       => now()->toDateString(),
+        'period_start' => now()->addDays(11)->toDateString(),
+        'period_end' => now()->addDays(41)->toDateString(),
+        'due_date' => now()->toDateString(),
     ]);
 
     Payment::factory()->create([
         'invoice_id' => $invoiceLama->id,
-        'status'     => PaymentStatus::REJECTED,
+        'status' => PaymentStatus::REJECTED,
     ]);
 
     $fakePayment = Payment::factory()->create(['invoice_id' => $invoiceLama->id, 'status' => PaymentStatus::PENDING]);
@@ -370,8 +370,8 @@ test('[BERHASIL] boleh perpanjang lagi setelah admin tolak pembayaran manual (re
     $response = $this->actingAs($this->penghuni)
         ->postJson("/api/finance/me/leases/{$scheduleId}/perpanjang", [
             'duration_months' => 1,
-            'payment_method'  => 'manual',
-            'payment_proof'   => \Illuminate\Http\UploadedFile::fake()->image('bukti.jpg'),
+            'payment_method' => 'manual',
+            'payment_proof' => \Illuminate\Http\UploadedFile::fake()->image('bukti.jpg'),
         ]);
 
     $response->assertCreated();
@@ -389,8 +389,8 @@ test('[BERHASIL] invoice tidak tersimpan jika processPayment gagal (atomik)', fu
     $response = $this->actingAs($this->penghuni)
         ->postJson("/api/finance/me/leases/{$scheduleId}/perpanjang", [
             'duration_months' => 1,
-            'payment_method'  => 'manual',
-            'payment_proof'   => \Illuminate\Http\UploadedFile::fake()->image('bukti.jpg'),
+            'payment_method' => 'manual',
+            'payment_proof' => \Illuminate\Http\UploadedFile::fake()->image('bukti.jpg'),
         ]);
 
     // Error dari DomainException → 403
@@ -409,19 +409,19 @@ test('[BERHASIL] boleh perpanjang lagi setelah pembayaran gagal dan invoice lama
     ['schedule_id' => $scheduleId] = buatKonteksPerpanjang($this->penghuni);
 
     $invoiceLama = Invoice::factory()->create([
-        'schedule_id'    => $scheduleId,
+        'schedule_id' => $scheduleId,
         'tenant_user_id' => $this->penghuni->id,
-        'status'         => InvoiceStatus::UNPAID,
+        'status' => InvoiceStatus::UNPAID,
         'invoice_number' => 'EXT-OLD-003',
-        'period_start'   => now()->addDays(11)->toDateString(),
-        'period_end'     => now()->addDays(41)->toDateString(),
-        'due_date'       => now()->toDateString(),
+        'period_start' => now()->addDays(11)->toDateString(),
+        'period_end' => now()->addDays(41)->toDateString(),
+        'due_date' => now()->toDateString(),
     ]);
 
     // Semua upaya bayar sudah FAILED
     Payment::factory()->create([
         'invoice_id' => $invoiceLama->id,
-        'status'     => PaymentStatus::FAILED,
+        'status' => PaymentStatus::FAILED,
     ]);
 
     // Mock FinanceService agar tidak perlu hit payment gateway sungguhan
@@ -433,8 +433,8 @@ test('[BERHASIL] boleh perpanjang lagi setelah pembayaran gagal dan invoice lama
     $response = $this->actingAs($this->penghuni)
         ->postJson("/api/finance/me/leases/{$scheduleId}/perpanjang", [
             'duration_months' => 1,
-            'payment_method'  => 'manual',
-            'payment_proof'   => \Illuminate\Http\UploadedFile::fake()->image('bukti.jpg'),
+            'payment_method' => 'manual',
+            'payment_proof' => \Illuminate\Http\UploadedFile::fake()->image('bukti.jpg'),
         ]);
 
     $response->assertCreated();

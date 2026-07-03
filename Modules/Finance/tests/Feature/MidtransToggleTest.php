@@ -3,11 +3,11 @@
 namespace Modules\Finance\tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Auth\Models\User;
 use Modules\Finance\Enums\InvoiceStatus;
 use Modules\Finance\Models\Invoice;
-use Modules\Auth\Models\User;
-use Tests\TestCase;
 use Spatie\Permission\Models\Role;
+use Tests\TestCase;
 
 class MidtransToggleTest extends TestCase
 {
@@ -52,7 +52,7 @@ class MidtransToggleTest extends TestCase
             'payment_method' => 'manual',
             'sender_bank' => 'BCA',
             'sender_name' => 'John Doe',
-            'proof_of_payment' => null
+            'proof_of_payment' => null,
         ]);
 
         // Should not be 500 due to DomainException about midtrans

@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\Auth\Models\User;
 use Modules\Setting\Models\BankAccount;
 use Tests\TestCase;
 
@@ -10,12 +9,12 @@ uses(TestCase::class, RefreshDatabase::class);
 function createBankAccount(array $overrides = []): BankAccount
 {
     return BankAccount::create(array_merge([
-        'bank_name'            => 'Bank Syariah Indonesia',
-        'account_number'       => '7123456789',
-        'account_holder'       => 'Wisma Amal Gorontalo',
+        'bank_name' => 'Bank Syariah Indonesia',
+        'account_number' => '7123456789',
+        'account_holder' => 'Wisma Amal Gorontalo',
         'payment_instructions' => 'Transfer dan kirim bukti.',
-        'is_active'            => true,
-        'sort_order'           => 0,
+        'is_active' => true,
+        'sort_order' => 0,
     ], $overrides));
 }
 
@@ -60,11 +59,11 @@ test('[BERHASIL] admin dapat menambahkan rekening bank baru', function () {
     $this->withoutMiddleware();
 
     $payload = [
-        'bank_name'            => 'BSI',
-        'account_number'       => '7000001234',
-        'account_holder'       => 'Pemilik Wisma',
+        'bank_name' => 'BSI',
+        'account_number' => '7000001234',
+        'account_holder' => 'Pemilik Wisma',
         'payment_instructions' => 'Transfer sesuai nominal.',
-        'is_active'            => true,
+        'is_active' => true,
     ];
 
     $response = $this->postJson('/api/v1/settings/bank-accounts', $payload);
@@ -94,7 +93,7 @@ test('[BERHASIL] admin dapat memperbarui rekening bank', function () {
     $account = createBankAccount();
 
     $response = $this->putJson("/api/v1/settings/bank-accounts/{$account->id}", [
-        'bank_name'      => 'BCA',
+        'bank_name' => 'BCA',
         'account_number' => '8888888',
         'account_holder' => 'Pemilik Baru',
     ]);

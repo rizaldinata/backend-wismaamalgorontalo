@@ -162,9 +162,9 @@ test('[BERHASIL] admin dapat melihat detail entri pengeluaran tetap', function (
     aktifkanFiturPengeluaranTetap();
 
     $entry = FixedExpenseEntry::factory()->create([
-        'jenis'  => 'air',
-        'bulan'  => 5,
-        'tahun'  => 2026,
+        'jenis' => 'air',
+        'bulan' => 5,
+        'tahun' => 2026,
         'amount' => 250000,
     ]);
 
@@ -191,16 +191,16 @@ test('[BERHASIL] admin dapat mengisi nominal entri yang sudah di-generate', func
     aktifkanFiturPengeluaranTetap();
 
     $entry = FixedExpenseEntry::factory()->create([
-        'jenis'     => 'listrik',
-        'bulan'     => 6,
-        'tahun'     => 2026,
-        'amount'    => 0,
+        'jenis' => 'listrik',
+        'bulan' => 6,
+        'tahun' => 2026,
+        'amount' => 0,
         'is_filled' => false,
     ]);
 
     $response = $this->putJson("/api/finance/fixed-expenses/{$entry->id}", [
         'amount' => 1350000,
-        'notes'  => 'Tagihan PLN Juni',
+        'notes' => 'Tagihan PLN Juni',
     ]);
 
     $response->assertOk()
@@ -209,8 +209,8 @@ test('[BERHASIL] admin dapat mengisi nominal entri yang sudah di-generate', func
         ->assertJsonPath('data.is_filled', true);
 
     $this->assertDatabaseHas('fixed_expense_entries', [
-        'id'        => $entry->id,
-        'amount'    => '1350000.00',
+        'id' => $entry->id,
+        'amount' => '1350000.00',
         'is_filled' => true,
     ]);
 });
@@ -219,9 +219,9 @@ test('[BERHASIL] update entri juga memperbarui record di tabel expenses', functi
     aktifkanFiturPengeluaranTetap(['listrik']);
 
     $entry = FixedExpenseEntry::factory()->create([
-        'jenis'  => 'listrik',
-        'bulan'  => 6,
-        'tahun'  => 2026,
+        'jenis' => 'listrik',
+        'bulan' => 6,
+        'tahun' => 2026,
         'amount' => 0,
         'is_filled' => false,
     ]);
@@ -229,9 +229,9 @@ test('[BERHASIL] update entri juga memperbarui record di tabel expenses', functi
     $this->putJson("/api/finance/fixed-expenses/{$entry->id}", ['amount' => 1500000]);
 
     $this->assertDatabaseHas('expenses', [
-        'reference_id'   => $entry->id,
+        'reference_id' => $entry->id,
         'reference_type' => 'fixed_utility',
-        'amount'         => '1500000.00',
+        'amount' => '1500000.00',
     ]);
 });
 
@@ -307,11 +307,11 @@ test('[BERHASIL] status detail menyertakan entry_id meski belum diisi', function
     $tahun = (int) now()->format('Y');
 
     $entry = FixedExpenseEntry::factory()->create([
-        'jenis'     => 'listrik',
-        'bulan'     => $bulan,
-        'tahun'     => $tahun,
+        'jenis' => 'listrik',
+        'bulan' => $bulan,
+        'tahun' => $tahun,
         'is_filled' => false,
-        'amount'    => 0,
+        'amount' => 0,
     ]);
 
     $response = $this->getJson('/api/finance/fixed-expenses/status');

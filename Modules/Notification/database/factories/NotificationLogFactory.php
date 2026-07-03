@@ -12,10 +12,10 @@ class NotificationLogFactory extends Factory
     public function definition(): array
     {
         return [
-            'type'          => fake()->randomElement(['manual_broadcast', 'payment_receipt', 'payment_reminder', 'system_alert']),
-            'target_phone'  => '08'.fake()->numerify('#########'),
-            'message_body'  => fake()->paragraph(),
-            'status'        => fake()->randomElement(['sent', 'failed', 'pending']),
+            'type' => fake()->randomElement(['manual_broadcast', 'payment_receipt', 'payment_reminder', 'system_alert']),
+            'target_phone' => '08'.fake()->numerify('#########'),
+            'message_body' => fake()->paragraph(),
+            'status' => fake()->randomElement(['sent', 'failed', 'pending']),
             'error_response' => null,
         ];
     }
@@ -28,7 +28,7 @@ class NotificationLogFactory extends Factory
     public function failed(): static
     {
         return $this->state(fn () => [
-            'status'         => 'failed',
+            'status' => 'failed',
             'error_response' => 'Provider returned error',
         ]);
     }

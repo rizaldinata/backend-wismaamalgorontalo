@@ -22,7 +22,9 @@ class RoomController extends Controller
      * Daftar Kamar
      *
      * Mengambil daftar seluruh kamar berserta status ketersediaannya.
+     *
      * @unauthenticated
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
@@ -39,7 +41,9 @@ class RoomController extends Controller
      * Jadwal Kamar (Public)
      *
      * Mengambil daftar kamar beserta jadwal kosong terdekat untuk ditampilkan di katalog aplikasi.
+     *
      * @unauthenticated
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function schedules()
@@ -56,6 +60,7 @@ class RoomController extends Controller
      * Tambah Kamar Baru
      *
      * Membuat data kamar baru beserta foto dan fasilitasnya. (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreRoomRequest $request)
@@ -72,7 +77,9 @@ class RoomController extends Controller
      * Detail Kamar
      *
      * Mengambil detail lengkap suatu kamar berdasarkan ID.
+     *
      * @unauthenticated
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function show($id)
@@ -86,6 +93,7 @@ class RoomController extends Controller
      * Update Kamar
      *
      * Memperbarui data kamar berdasarkan ID. (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateRoomRequest $request, $id)
@@ -103,6 +111,7 @@ class RoomController extends Controller
      * Hapus Kamar
      *
      * Menghapus data kamar berdasarkan ID secara permanen. (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($id)
@@ -116,6 +125,7 @@ class RoomController extends Controller
      * Upload Foto Kamar
      *
      * Menambahkan foto-foto baru ke kamar yang sudah ada. (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function uploadImages(Request $request, $id)
@@ -132,6 +142,7 @@ class RoomController extends Controller
      * Hapus Foto Kamar
      *
      * Menghapus foto kamar tertentu. (Hanya Admin)
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function deleteImage($roomId, $imageId)

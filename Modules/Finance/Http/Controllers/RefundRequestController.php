@@ -25,7 +25,7 @@ class RefundRequestController extends Controller
         $refundRequests = $this->refundRequestRepository->getPaginated(15, $filters);
 
         return $this->apiSuccess(
-            RefundRequestResource::collection($refundRequests)->response()->getData(true),
+            RefundRequestResource::collectionWithSchedule($refundRequests)->response()->getData(true),
             'Daftar permintaan refund'
         );
     }
@@ -33,20 +33,20 @@ class RefundRequestController extends Controller
     public function proses(Request $request, int $id): JsonResponse
     {
         $request->validate([
-            'proof'      => 'nullable|file|image|max:5120',
-            'admin_fee'  => 'nullable|numeric|min:0',
+            'proof' => 'nullable|file|image|max:5120',
+            'admin_fee' => 'nullable|numeric|min:0',
             'admin_notes' => 'nullable|string|max:500',
         ]);
 
         $refundRequest = $this->financeService->approveRefundRequest(
-            id:       $id,
-            proof:    $request->file('proof'),
+            id: $id,
+            proof: $request->file('proof'),
             adminFee: (float) ($request->input('admin_fee', 0)),
-            notes:    $request->input('admin_notes', ''),
+            notes: $request->input('admin_notes', ''),
         );
 
         return $this->apiSuccess(
-            new RefundRequestResource($refundRequest),
+            RefundRequestResource::makeWithSchedule($refundRequest),
             'Permintaan pembatalan berhasil diproses'
         );
     }
@@ -58,12 +58,12 @@ class RefundRequestController extends Controller
         ]);
 
         $refundRequest = $this->financeService->rejectRefundRequest(
-            id:    $id,
+            id: $id,
             notes: $request->input('admin_notes'),
         );
 
         return $this->apiSuccess(
-            new RefundRequestResource($refundRequest),
+            RefundRequestResource::makeWithSchedule($refundRequest),
             'Permintaan pembatalan ditolak'
         );
     }

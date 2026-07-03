@@ -15,11 +15,11 @@ class StoreFixedExpenseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'jenis'  => ['required', 'string', 'in:' . implode(',', JenisPengeluaranTetap::values())],
-            'bulan'  => ['required', 'integer', 'min:1', 'max:12'],
-            'tahun'  => ['required', 'integer', 'min:2020'],
+            'jenis' => ['required', 'string', 'in:'.implode(',', JenisPengeluaranTetap::values())],
+            'bulan' => ['required', 'integer', 'min:1', 'max:12'],
+            'tahun' => ['required', 'integer', 'min:2020'],
             'amount' => ['required', 'numeric', 'min:1'],
-            'notes'  => ['nullable', 'string', 'max:500'],
+            'notes' => ['nullable', 'string', 'max:500'],
         ];
     }
 }

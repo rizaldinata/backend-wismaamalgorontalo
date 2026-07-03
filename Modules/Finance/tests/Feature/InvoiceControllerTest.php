@@ -69,8 +69,8 @@ test('[GAGAL] parameter per_page kurang dari 1 ditolak dengan validasi error', f
 test('[BERHASIL] admin dapat melihat detail invoice yang ada', function () {
     $invoice = Invoice::factory()->create([
         'invoice_number' => 'INV-20260601-0001',
-        'amount'         => 600000,
-        'status'         => InvoiceStatus::UNPAID,
+        'amount' => 600000,
+        'status' => InvoiceStatus::UNPAID,
     ]);
 
     $response = $this->getJson("/api/finance/invoices/{$invoice->id}");

@@ -28,8 +28,8 @@ class FonnteService
             $response = Http::withHeaders([
                 'Authorization' => $this->token,
             ])->post($this->endpoint, [
-                'target'      => $target,
-                'message'     => $message,
+                'target' => $target,
+                'message' => $message,
                 'countryCode' => '62',
             ]);
 

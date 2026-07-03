@@ -5,15 +5,15 @@ namespace Modules\Finance\Enums;
 enum JenisPengeluaranTetap: string
 {
     case LISTRIK = 'listrik';
-    case AIR     = 'air';
-    case WIFI    = 'wifi';
+    case AIR = 'air';
+    case WIFI = 'wifi';
 
     public function label(): string
     {
         return match ($this) {
             self::LISTRIK => 'Listrik',
-            self::AIR     => 'Air',
-            self::WIFI    => 'WiFi',
+            self::AIR => 'Air',
+            self::WIFI => 'WiFi',
         };
     }
 

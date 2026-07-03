@@ -24,10 +24,10 @@ class FixedExpenseEntry extends Model
     ];
 
     protected $casts = [
-        'jenis'     => JenisPengeluaranTetap::class,
-        'amount'    => 'decimal:2',
-        'bulan'     => 'integer',
-        'tahun'     => 'integer',
+        'jenis' => JenisPengeluaranTetap::class,
+        'amount' => 'decimal:2',
+        'bulan' => 'integer',
+        'tahun' => 'integer',
         'is_filled' => 'boolean',
     ];
 

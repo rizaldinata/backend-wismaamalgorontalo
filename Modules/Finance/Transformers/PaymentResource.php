@@ -14,9 +14,9 @@ class PaymentResource extends JsonResource
             'invoice_id' => $this->invoice_id,
             'invoice_number' => $this->invoice->invoice_number ?? null,
             'invoice_type' => is_object($this->invoice?->type) ? $this->invoice->type->value : $this->invoice?->type,
-            'amount'       => (float) ($this->invoice->amount ?? 0),
+            'amount' => (float) ($this->invoice->amount ?? 0),
             'midtrans_fee' => (int) ($this->midtrans_fee ?? 0),
-            'fee_bearer'   => $this->fee_bearer,
+            'fee_bearer' => $this->fee_bearer,
             'gross_amount' => (float) ($this->invoice->amount ?? 0)
                 + ($this->fee_bearer === 'customer' ? (int) ($this->midtrans_fee ?? 0) : 0),
             'resident_name' => $this->invoice?->tenant_name,

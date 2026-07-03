@@ -15,7 +15,7 @@ class RefundRequestRepository implements RefundRequestRepositoryInterface
 
     public function findOrFail(int $id): RefundRequest
     {
-        return RefundRequest::with(['payment.invoice', 'schedule.room'])->findOrFail($id);
+        return RefundRequest::with(['payment.invoice'])->findOrFail($id);
     }
 
     public function update(RefundRequest $refundRequest, array $data): RefundRequest
@@ -27,7 +27,7 @@ class RefundRequestRepository implements RefundRequestRepositoryInterface
 
     public function getPaginated(int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
-        $query = RefundRequest::with(['payment.invoice', 'schedule.room'])
+        $query = RefundRequest::with(['payment.invoice'])
             ->orderBy('created_at', 'desc');
 
         if (! empty($filters['status'])) {

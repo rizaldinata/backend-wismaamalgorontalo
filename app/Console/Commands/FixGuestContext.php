@@ -3,13 +3,14 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Modules\Schedule\Models\Schedule;
-use Modules\Guest\Models\GuestActiveContext;
 use Modules\Auth\Models\User;
+use Modules\Guest\Models\GuestActiveContext;
+use Modules\Schedule\Models\Schedule;
 
 class FixGuestContext extends Command
 {
     protected $signature = 'app:fix-guest-context';
+
     protected $description = 'Fix Guest Active Contexts for Seeder data';
 
     public function handle()
@@ -18,10 +19,14 @@ class FixGuestContext extends Command
         $count = 0;
 
         foreach ($schedules as $schedule) {
-            if (!$schedule->tenant_user_id) continue;
-            
+            if (! $schedule->tenant_user_id) {
+                continue;
+            }
+
             $user = User::find($schedule->tenant_user_id);
-            if (!$user) continue;
+            if (! $user) {
+                continue;
+            }
 
             GuestActiveContext::updateOrCreate(
                 ['user_id' => $user->id],

@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Modules\Auth\Models\User;
 use Modules\Guest\Enums\GuestBillStatus;
 use Modules\Guest\Enums\GuestRelationship;
 use Modules\Guest\Models\Guest;
@@ -18,20 +17,20 @@ beforeEach(function () {
 function buatGuestBill(string $status = 'unpaid'): GuestBill
 {
     $guest = Guest::create([
-        'name'         => 'Tamu Admin Test',
-        'check_in_at'  => now()->subDays(3),
+        'name' => 'Tamu Admin Test',
+        'check_in_at' => now()->subDays(3),
         'check_out_at' => now(),
         'relationship' => GuestRelationship::FRIEND,
-        'total_days'   => 3,
+        'total_days' => 3,
         'billable_days' => 1,
         'charge_amount' => 25000,
     ]);
 
     return GuestBill::create([
-        'guest_id'    => $guest->id,
+        'guest_id' => $guest->id,
         'bill_number' => 'GB-ADMIN-'.uniqid(),
-        'amount'      => 25000,
-        'status'      => $status,
+        'amount' => 25000,
+        'status' => $status,
     ]);
 }
 

@@ -3,14 +3,14 @@
 namespace Tests\Feature\ModuleIsolation;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Auth\Models\User;
 use Nwidart\Modules\Facades\Module;
 use Tests\TestCase;
 use Tests\Traits\ManagesModuleIsolation;
-use Modules\Auth\Models\User;
 
 class RoomIsolationTest extends TestCase
 {
-    use RefreshDatabase, ManagesModuleIsolation;
+    use ManagesModuleIsolation, RefreshDatabase;
 
     protected function setUp(): void
     {
@@ -29,7 +29,7 @@ class RoomIsolationTest extends TestCase
         $this->assertFalse(Module::isEnabled('Room'));
 
         $admin = User::factory()->create();
-        
+
         $response = $this->actingAs($admin)->getJson('/api/rooms');
         $response->assertStatus(404);
     }

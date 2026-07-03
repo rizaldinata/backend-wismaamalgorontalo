@@ -2,10 +2,10 @@
 
 namespace Modules\Schedule\Providers;
 
+use App\Contracts\ActiveTenantCheckerInterface;
 use Illuminate\Console\Scheduling\Schedule as ConsoleSchedule;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
-use App\Contracts\ActiveTenantCheckerInterface;
 use Modules\Schedule\Repositories\Contracts\ScheduleRepositoryInterface;
 use Modules\Schedule\Repositories\Eloquent\ScheduleRepository;
 use Modules\Schedule\Services\ScheduleActiveTenantChecker;
