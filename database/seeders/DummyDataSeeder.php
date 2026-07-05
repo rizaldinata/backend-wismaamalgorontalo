@@ -500,6 +500,15 @@ class DummyDataSeeder extends Seeder
                     'paid_at' => $gData['paid_at'] ?? null,
                 ]);
             }
+
+            // Create notification for guest registration
+            \Modules\Notification\Models\NotificationLog::create([
+                'type' => \Modules\Notification\Enums\NotificationType::GUEST_REGISTERED->value,
+                'target_phone' => 'admin',
+                'message_body' => "Tamu terdaftar: {$guest->name} (Penghuni: {$sched->tenant_name}).",
+                'status' => \Modules\Notification\Enums\NotificationStatus::SENT->value,
+                'is_read' => false,
+            ]);
         }
 
         $this->command->info('Dummy data seeder completed successfully!');

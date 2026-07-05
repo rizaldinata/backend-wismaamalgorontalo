@@ -2,6 +2,7 @@
 
 namespace Modules\Guest\Services;
 
+use App\Services\ImageService;
 use Illuminate\Database\Eloquent\Collection;
 use Modules\Guest\Models\Guest;
 use Modules\Guest\Models\GuestActiveContext;
@@ -16,6 +17,7 @@ class GuestService
     public function __construct(
         private readonly GuestRepositoryInterface $guestRepository,
         private readonly GuestBillingService $billingService,
+        private readonly ImageService $imageService,
     ) {}
 
     private function logNotification(NotificationType $type, string $message): void
@@ -99,6 +101,12 @@ class GuestService
         $guestNames = [];
 
         foreach ($data['guests'] as $guestData) {
+            // Handle identity image upload if present
+            $identityImagePath = null;
+            if (isset($guestData['identity_image']) && $guestData['identity_image'] instanceof \Illuminate\Http\UploadedFile) {
+                $identityImagePath = $this->imageService->uploadAndCompress($guestData['identity_image'], 'guest-identity');
+            }
+
             $guest = $this->guestRepository->create([
                 'lease_id' => $context->lease_id,
                 'user_id' => $context->user_id,
@@ -110,6 +118,7 @@ class GuestService
                 'check_in_at' => $data['check_in_at'],
                 'check_out_at' => $data['check_out_at'],
                 'relationship' => $guestData['relationship'],
+                'identity_image_path' => $identityImagePath,
                 'total_days' => $billing['total_days'],
                 'billable_days' => $billing['billable_days'],
                 'charge_amount' => $billing['charge_amount'],

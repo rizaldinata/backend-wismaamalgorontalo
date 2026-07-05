@@ -16,9 +16,11 @@ class GuestResource extends JsonResource
             'check_out_at' => $this->check_out_at?->toDateTimeString(),
             'relationship' => $this->relationship?->value,
             'relationship_label' => $this->relationship?->label(),
+            'identity_image_url' => $this->identity_image_url,
             'total_days' => $this->total_days,
             'billable_days' => $this->billable_days,
             'charge_amount' => (float) $this->charge_amount,
+            'stay_completed_notified_at' => $this->stay_completed_notified_at,
             'bill' => $this->bill ? new GuestBillResource($this->bill) : null,
             'created_at' => $this->created_at?->toDateTimeString(),
         ];

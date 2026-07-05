@@ -29,6 +29,7 @@ class GuestRepository implements GuestRepositoryInterface
     {
         $perPage = (int) ($filters['per_page'] ?? 10);
         $search = $filters['search'] ?? null;
+        $status = $filters['status'] ?? null;
 
         $query = Guest::with(['bill'])
             ->orderByDesc('check_in_at');
@@ -36,13 +37,14 @@ class GuestRepository implements GuestRepositoryInterface
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                    ->orWhereHas('schedule.tenant', function ($u) use ($search) {
-                        $u->where('name', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('schedule.room', function ($r) use ($search) {
-                        $r->where('number', 'like', "%{$search}%");
-                    });
+                    ->orWhere('tenant_name', 'like', "%{$search}%");
             });
+        }
+
+        if ($status === 'active') {
+            $query->whereNull('stay_completed_notified_at');
+        } elseif ($status === 'completed') {
+            $query->whereNotNull('stay_completed_notified_at');
         }
 
         return $query->paginate($perPage);

@@ -40,6 +40,7 @@ class GuestBillRepository implements GuestBillRepositoryInterface
     {
         $perPage = (int) ($filters['per_page'] ?? 10);
         $search = $filters['search'] ?? null;
+        $status = $filters['status'] ?? null;
 
         $query = GuestBill::with(['guest'])->orderByDesc('created_at');
 
@@ -48,6 +49,10 @@ class GuestBillRepository implements GuestBillRepositoryInterface
                 $gq->where('name', 'like', "%{$search}%")
                     ->orWhere('tenant_name', 'like', "%{$search}%");
             });
+        }
+
+        if ($status) {
+            $query->where('status', $status);
         }
 
         return $query->paginate($perPage);

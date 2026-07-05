@@ -22,6 +22,7 @@ class Guest extends Model
         'check_out_at',
         'stay_completed_notified_at',
         'relationship',
+        'identity_image_path',
         'total_days',
         'billable_days',
         'charge_amount',
@@ -42,6 +43,15 @@ class Guest extends Model
     public function bills()
     {
         return $this->hasMany(GuestBill::class);
+    }
+
+    public function getIdentityImageUrlAttribute(): ?string
+    {
+        if (! $this->identity_image_path) {
+            return null;
+        }
+
+        return url('/storage/'.$this->identity_image_path);
     }
 
     // Removed cross-module eloquent relationship (schedule)

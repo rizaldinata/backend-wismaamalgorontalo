@@ -16,6 +16,7 @@ class StoreAdminGuestRequest extends FormRequest
             'guests' => 'required|array|min:1|max:3',
             'guests.*.name' => 'required|string|max:255',
             'guests.*.relationship' => "required|string|in:{$relationships}",
+            'guests.*.identity_image' => 'required|file|mimes:jpg,jpeg,png|max:5120',
             'check_in_at' => 'required|date',
             'check_out_at' => 'required|date|after:check_in_at',
         ];
